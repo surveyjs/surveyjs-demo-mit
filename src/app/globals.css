@@ -292,18 +292,20 @@ html[data-demo-highlight] [data-survey-root] [data-survey-outline-label]:hover {
 }
 
 /* The toolbar sits over the page and should read as an overlay, not as part of
-   the mock site — it dims until it is wanted. */
+   the mock site. It is fully visible by default: on a phone there is no way to
+   reveal a dimmed control, and a reviewer who cannot find the toolbar cannot
+   use the demo. Only a mouse — which can hover it back to full strength — gets
+   the quiet version. */
 .demo-dock {
-  opacity: 0.55;
+  opacity: 1;
   transition: opacity 150ms ease, transform 150ms ease;
 }
-.demo-dock:hover,
-.demo-dock:focus-within {
-  opacity: 1;
-}
-/* Nothing hovers on a touch screen, so there it stays at full strength. */
-@media (hover: none) {
+@media (hover: hover) and (pointer: fine) {
   .demo-dock {
+    opacity: 0.55;
+  }
+  .demo-dock:hover,
+  .demo-dock:focus-within {
     opacity: 1;
   }
 }
