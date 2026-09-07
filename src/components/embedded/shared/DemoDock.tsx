@@ -90,13 +90,19 @@ export function DemoDock({
   useEffect(() => setMounted(true), []);
 
   const isDark = resolvedTheme === "dark";
-  const divider = <span className="bg-border mx-0.5 h-5 w-px shrink-0" aria-hidden />;
-  const activeUser = users.find((option) => option.id === activeUserId) ?? users[0];
+  const divider = (
+    <span className="bg-border mx-0.5 h-5 w-px shrink-0" aria-hidden />
+  );
+  const activeUser =
+    users.find((option) => option.id === activeUserId) ?? users[0];
 
   return (
+    // One row, as wide as its contents: every label here can truncate, so a
+    // narrow window squeezes the longest of them rather than pushing a control
+    // off the screen.
     <div
       data-demo-dock=""
-      className="demo-dock bg-background/85 pointer-events-auto fixed bottom-4 left-1/2 z-[70] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 flex-nowrap items-center gap-1 overflow-x-auto rounded-full border px-2 py-1.5 shadow-lg backdrop-blur [scrollbar-width:none]"
+      className="demo-dock bg-background/85 pointer-events-auto fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-[70] flex max-w-[calc(100svw-2rem)] -translate-x-1/2 flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg backdrop-blur"
       role="toolbar"
       aria-label="Embedded demo tools"
     >
@@ -104,11 +110,11 @@ export function DemoDock({
           sidebar entries open them in a new tab. */}
       <a
         href={HOME}
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex shrink-0 items-center gap-1.5 rounded-full px-1.5 py-1 text-[11px] font-medium tracking-wide uppercase transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex min-w-0 items-center gap-1.5 rounded-full px-1.5 py-1 text-[11px] font-medium tracking-wide uppercase transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
         title="Back to the SurveyJS demos"
       >
         <LayersIcon className="size-3.5" />
-        <span className="hidden lg:inline">SurveyJS demos</span>
+        <span className="hidden truncate lg:inline">SurveyJS demos</span>
       </a>
 
       {divider}
@@ -118,14 +124,14 @@ export function DemoDock({
       <Button
         asChild
         size="sm"
-        className="demo-brand-bg text-primary-foreground shrink-0 gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
+        className="demo-brand-bg text-primary-foreground min-w-0 gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
       >
         <a
           href={configureHref}
           title="Open this form's JSON — the one page every form in the template is edited on"
         >
           <Code2Icon />
-          Configure JSON
+          <span className="truncate">Configure JSON</span>
         </a>
       </Button>
 
@@ -162,22 +168,24 @@ export function DemoDock({
             <Button
               variant="ghost"
               size="sm"
-              className="shrink-0 gap-1.5 rounded-full"
+              className="min-w-0 gap-1.5 rounded-full"
               title="Sign in as somebody else — the same form, a different person"
             >
               <UsersRoundIcon />
-              <span className="hidden max-w-36 truncate sm:inline">
+              <span className="hidden max-w-32 truncate sm:inline">
                 {usersLabel}: {activeUser?.name}
               </span>
               <ChevronDownIcon className="opacity-60" />
             </Button>
           </DropdownMenuTrigger>
-          {/* Above the toolbar itself (z-70): the bar wraps to two rows on a
-              narrow window, and a menu underneath it would be unclickable. */}
+          {/* Above the toolbar itself (z-70), which is fixed over the page. */}
           <DropdownMenuContent align="center" className="z-[80] w-56">
             <DropdownMenuLabel>{usersLabel}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={activeUserId} onValueChange={onSelectUser}>
+            <DropdownMenuRadioGroup
+              value={activeUserId}
+              onValueChange={onSelectUser}
+            >
               {users.map((option) => (
                 <DropdownMenuRadioItem key={option.id} value={option.id}>
                   {option.name}
@@ -189,24 +197,26 @@ export function DemoDock({
       )}
 
       <Button
-          variant={userOpen ? "secondary" : "ghost"}
-          size="sm"
-          className={mergeTailwindClasses("shrink-0 gap-1.5 rounded-full", userOpen && "shadow-inner")}
-          aria-pressed={userOpen}
-          aria-label={editLabel}
-          title="Change the signed-in user the form is rendered for — the editor is a SurveyJS form too"
-          onClick={onEditUser}
-        >
-          <UserRoundIcon />
-          <span className="hidden sm:inline">{editLabel}</span>
-          {edited && (
-            <span
-              className="bg-primary size-1.5 rounded-full opacity-70"
-              aria-label="edited"
-            />
-          )}
-        </Button>
-
+        variant={userOpen ? "secondary" : "ghost"}
+        size="sm"
+        className={mergeTailwindClasses(
+          "min-w-0 gap-1.5 rounded-full",
+          userOpen && "shadow-inner",
+        )}
+        aria-pressed={userOpen}
+        aria-label={editLabel}
+        title="Change the signed-in user the form is rendered for — the editor is a SurveyJS form too"
+        onClick={onEditUser}
+      >
+        <UserRoundIcon />
+        <span className="hidden truncate sm:inline">{editLabel}</span>
+        {edited && (
+          <span
+            className="bg-primary size-1.5 rounded-full opacity-70"
+            aria-label="edited"
+          />
+        )}
+      </Button>
 
       {/* Only where the host site has no control of its own: a colour scheme is
           the page's business, not the survey's. */}
@@ -218,7 +228,9 @@ export function DemoDock({
             size="icon-sm"
             className="shrink-0 rounded-full"
             title={
-              mounted ? `Switch to ${isDark ? "light" : "dark"} mode` : "Toggle colour scheme"
+              mounted
+                ? `Switch to ${isDark ? "light" : "dark"} mode`
+                : "Toggle colour scheme"
             }
             onClick={() => setTheme(isDark ? "light" : "dark")}
           >

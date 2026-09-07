@@ -301,6 +301,12 @@ html[data-demo-highlight] [data-survey-root] [data-survey-outline-label]:hover {
 .demo-dock:focus-within {
   opacity: 1;
 }
+/* Nothing hovers on a touch screen, so there it stays at full strength. */
+@media (hover: none) {
+  .demo-dock {
+    opacity: 1;
+  }
+}
 
 /* Blocks the encounter note draws with its own `html` questions. The note is a
    clinical document, so a banner and two levels of callout are part of it — and
