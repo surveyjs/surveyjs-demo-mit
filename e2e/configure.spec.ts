@@ -30,7 +30,7 @@ test("the editor opens on one form, with no chrome around it", async ({ page }) 
   // No sidebar, and no way to wander into another form from here.
   await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/claims");
-  await expect(page.getByText("Claims intake — survey JSON")).toBeVisible();
+  await expect(page.getByText("Claims intake — form JSON")).toBeVisible();
 
   await setDefinition(page, {
     title: "Edited here",

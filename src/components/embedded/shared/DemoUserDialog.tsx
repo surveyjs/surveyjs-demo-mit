@@ -41,8 +41,10 @@ function stayOpen(event: Event) {
  *    so the survey re-rendering as you type is visible rather than something you
  *    have to close a dialog to discover — and nothing outside it dismisses it.
  *
- * Underneath, the object actually handed to survey-core — answers in, context
- * out. It is read-only on purpose: the form above is the way to change it.
+ * Beside it, the object actually handed to survey-core — answers in, context
+ * out — so the translation is visible while it happens rather than after
+ * scrolling. It is read-only on purpose: the form on the left is the way to
+ * change it.
  */
 export function DemoUserDialog({
   open,
@@ -75,7 +77,7 @@ export function DemoUserDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent
-        className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl"
         onInteractOutside={stayOpen}
       >
         <DialogHeader className="border-b p-4 text-left">
@@ -86,21 +88,26 @@ export function DemoUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <EmbeddedSurvey
-            key={formKey}
-            json={json}
-            data={defaults}
-            onDataChange={onDataChange}
-          />
+        <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+          <div className="min-h-0 overflow-y-auto">
+            <EmbeddedSurvey
+              key={formKey}
+              json={json}
+              data={defaults}
+              onDataChange={onDataChange}
+            />
+          </div>
 
-          <section aria-label="Context passed to the survey" className="border-t p-4">
+          <section
+            aria-label="Context passed to the form"
+            className="bg-muted/30 flex min-h-0 flex-col border-t p-4 lg:border-t-0 lg:border-l"
+          >
             <p className="text-muted-foreground text-xs">
               Handed to survey-core as one variable,{" "}
               <code className="text-foreground text-[11px]">user</code> — the definition
               reads it as <code className="text-foreground text-[11px]">{"{user.…}"}</code>.
             </p>
-            <pre className="bg-muted/50 mt-2 max-h-64 overflow-auto rounded-lg border p-3 text-[11px] leading-relaxed">
+            <pre className="bg-background mt-2 min-h-0 flex-1 overflow-auto rounded-lg border p-3 text-[11px] leading-relaxed">
               {JSON.stringify(account, null, 2)}
             </pre>
           </section>

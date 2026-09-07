@@ -21,7 +21,7 @@ export function PageHeader({
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link href={configureHref}>
             <Code2Icon />
-            Configure Survey JSON
+            Configure Form JSON
           </Link>
         </Button>
       )}

@@ -224,7 +224,7 @@ export function RecordsView({
                       Edit
                     </Button>
                     <Button size="sm" variant="ghost" asChild>
-                      <a href={configureHref(schemaId)}>Configure Survey JSON</a>
+                      <a href={configureHref(schemaId)}>Configure Form JSON</a>
                     </Button>
                   </>
                 ) : (

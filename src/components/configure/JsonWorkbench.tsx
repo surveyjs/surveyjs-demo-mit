@@ -46,7 +46,7 @@ function parse(source: string): { json?: SurveyJSON; error?: string } {
   try {
     const parsed = JSON.parse(source);
     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-      return { error: "The survey definition must be a JSON object." };
+      return { error: "The form definition must be a JSON object." };
     }
     return { json: parsed as SurveyJSON };
   } catch (error) {
@@ -55,7 +55,7 @@ function parse(source: string): { json?: SurveyJSON; error?: string } {
 }
 
 /**
- * Survey JSON: the editor every form in the template opens in.
+ * Form JSON: the editor every form in the template opens in.
  *
  * The claim it exists to make is the plainest one the library has — **the form
  * is a JSON document.** The definition is on the left, with survey-core's own
@@ -217,7 +217,7 @@ function FormWorkbench({ form }: { form: FormEntry }) {
       <header className="flex shrink-0 flex-wrap items-center gap-3 border-b px-4 py-2.5 sm:px-6">
         <div className="min-w-0">
           <h1 className="truncate text-sm font-semibold tracking-tight">
-            {form.label} — survey JSON
+            {form.label} — form JSON
           </h1>
           <p className="text-muted-foreground truncate text-xs">
             The whole form is this document. Edits are kept in this browser only.

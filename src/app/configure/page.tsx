@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { JsonWorkbench } from "@/components/configure/JsonWorkbench";
 
 export const metadata: Metadata = {
-  title: "Survey JSON — SurveyJS Library + Next.js",
+  title: "Form JSON — SurveyJS Library + Next.js",
   description:
     "Edit any form in the template as JSON, watch the form follow, and open the page it actually lives in.",
 };

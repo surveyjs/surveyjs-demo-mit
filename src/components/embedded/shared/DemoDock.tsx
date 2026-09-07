@@ -96,7 +96,7 @@ export function DemoDock({
   return (
     <div
       data-demo-dock=""
-      className="demo-dock bg-background/85 pointer-events-auto fixed bottom-4 left-1/2 z-[70] flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border px-2 py-1.5 shadow-lg backdrop-blur [scrollbar-width:none]"
+      className="demo-dock bg-background/85 pointer-events-auto fixed bottom-4 left-1/2 z-[70] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 flex-nowrap items-center gap-1 overflow-x-auto rounded-full border px-2 py-1.5 shadow-lg backdrop-blur [scrollbar-width:none]"
       role="toolbar"
       aria-label="Embedded demo tools"
     >
@@ -108,7 +108,7 @@ export function DemoDock({
         title="Back to the SurveyJS demos"
       >
         <LayersIcon className="size-3.5" />
-        SurveyJS demos
+        <span className="hidden lg:inline">SurveyJS demos</span>
       </a>
 
       {divider}
@@ -137,7 +137,7 @@ export function DemoDock({
         onClick={onPrefill}
       >
         <WandSparklesIcon />
-        <span className="hidden sm:inline">Prefill</span>
+        <span className="hidden xl:inline">Prefill</span>
       </Button>
 
       <Button
@@ -148,7 +148,7 @@ export function DemoDock({
         onClick={onReset}
       >
         <RotateCcwIcon />
-        <span className="hidden sm:inline">Reset</span>
+        <span className="hidden xl:inline">Reset</span>
       </Button>
 
       {divider}
@@ -166,13 +166,15 @@ export function DemoDock({
               title="Sign in as somebody else — the same form, a different person"
             >
               <UsersRoundIcon />
-              <span className="hidden max-w-48 truncate sm:inline">
+              <span className="hidden max-w-36 truncate sm:inline">
                 {usersLabel}: {activeUser?.name}
               </span>
               <ChevronDownIcon className="opacity-60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-56">
+          {/* Above the toolbar itself (z-70): the bar wraps to two rows on a
+              narrow window, and a menu underneath it would be unclickable. */}
+          <DropdownMenuContent align="center" className="z-[80] w-56">
             <DropdownMenuLabel>{usersLabel}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={activeUserId} onValueChange={onSelectUser}>
