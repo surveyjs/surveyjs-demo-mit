@@ -158,6 +158,8 @@ Copy [.env.example](.env.example) to `.env` and fill in what you need — `.env`
 | `ANTHROPIC_API_KEY` | Enables `/api/extract` through Anthropic. Used when no OpenAI key is set. |
 | `EXTRACTOR_MODEL` | Overrides the model (defaults: `gpt-4o`, `claude-sonnet-5`). |
 
+Extraction needs one of the two provider keys, not both: `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. If both are set, OpenAI is the one used.
+
 With no LLM key the extraction endpoint answers 501 and the buttons on `/claims` and `/records` say so: the feature is wired, and it starts working the moment a key appears. The keys are read on the server only and never reach the browser.
 
 ## Tests
