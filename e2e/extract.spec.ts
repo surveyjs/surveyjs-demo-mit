@@ -15,6 +15,10 @@ test("the claims page offers extraction from a document", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Try the sample CMS-1500" })).toBeVisible();
 
   // The sample ships with the template rather than being fetched from anywhere.
+  await expect(
+    page.getByRole("link", { name: /Download the sample CMS-1500/ }),
+  ).toHaveAttribute("href", "/samples/cms-1500-filled.pdf");
+
   const sample = await page.request.get("/samples/cms-1500-filled.pdf");
   expect(sample.status()).toBe(200);
 });

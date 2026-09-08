@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Loader2Icon, ScanTextIcon } from "lucide-react";
+import { DownloadIcon, Loader2Icon, ScanTextIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SurveyData } from "@/schemas";
 
@@ -122,6 +122,22 @@ export function ExtractFromDocument({
 
         <Button variant="ghost" size="sm" disabled={busy} onClick={useSample}>
           Try the sample CMS-1500
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground"
+          asChild
+        >
+          <a
+            href={SAMPLE_URL}
+            download
+            title="Download the sample CMS-1500 (PDF)"
+            aria-label="Download the sample CMS-1500 (PDF)"
+          >
+            <DownloadIcon />
+          </a>
         </Button>
       </div>
 
