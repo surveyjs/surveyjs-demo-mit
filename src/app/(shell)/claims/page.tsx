@@ -1,6 +1,6 @@
 import { getNavItem, getSchemaDefinition, medicalFormSample } from "@/schemas";
 import { PageHeader } from "@/components/PageHeader";
-import { SurveyForm } from "@/components/SurveyForm";
+import { ClaimsIntake } from "@/components/claims/ClaimsIntake";
 
 const nav = getNavItem("claims");
 
@@ -12,7 +12,7 @@ export default function ClaimsPage() {
         description={nav.description}
         configureHref={`/configure?form=${nav.schemaId}`}
       />
-      <SurveyForm
+      <ClaimsIntake
         schema={getSchemaDefinition(nav.schemaId).json}
         schemaId={nav.schemaId}
         completedMessage="Thank you. Your intake form has been submitted."

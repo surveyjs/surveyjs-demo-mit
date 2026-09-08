@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { PlusIcon } from "lucide-react";
 import type { Model } from "survey-core";
 import type { SurveyData, SurveyJSON, SurveyResult } from "@/schemas";
 import { deleteResult, saveResult } from "@/storage/survey-results";
 import { configureHref } from "@/lib/routes";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { SurveyForm } from "@/components/SurveyForm";
+import { ExtractFromDocument } from "@/components/claims/ExtractFromDocument";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -27,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type EditorMode = "edit" | "view";
+type EditorMode = "create" | "edit" | "view";
 
 interface Editor {
   readonly mode: EditorMode;
@@ -58,6 +60,17 @@ function claimantName(data: SurveyData): string {
   return [data.firstName, data.lastName].filter(Boolean).join(" ") || "—";
 }
 
+/** The next free number in the `CLM-<year>-<n>` format the seed records use. */
+function nextClaimId(records: readonly SurveyResult[]): string {
+  const prefix = `CLM-${new Date().getFullYear()}-`;
+  const highest = records.reduce((max, record) => {
+    if (!record.id.startsWith(prefix)) return max;
+    const number = Number(record.id.slice(prefix.length));
+    return Number.isFinite(number) && number > max ? number : max;
+  }, 0);
+  return `${prefix}${String(highest + 1).padStart(4, "0")}`;
+}
+
 export function RecordsView({
   schema,
   schemaId,
@@ -82,13 +95,51 @@ export function RecordsView({
     [],
   );
 
+  const addNew = useCallback(() => {
+    const id = nextClaimId(records);
+    open("create", { id, data: { claimNumber: id, status: "draft" } });
+  }, [open, records]);
+
+  // Abandoning a new record falls back to the list, the way deleting the open
+  // one does.
+  const cancelNew = useCallback(() => {
+    setEditor((prev) => {
+      const first = records[0];
+      return first
+        ? { mode: "view", record: first, key: (prev?.key ?? 0) + 1 }
+        : null;
+    });
+  }, [records]);
+
+  // A record being read is not editable, so extracting into it opens it for
+  // editing with the answers already merged in; an open editor keeps whatever
+  // has been typed and is topped up instead.
+  const applyExtracted = useCallback(
+    (extracted: SurveyData) => {
+      if (!editor) return;
+      if (editor.mode === "view") {
+        open("edit", {
+          ...editor.record,
+          data: { ...editor.record.data, ...extracted },
+        });
+      } else {
+        model?.mergeData(extracted);
+      }
+    },
+    [editor, model, open],
+  );
+
   const handleComplete = useCallback(
     async (data: SurveyData) => {
       if (!editor) return;
       const id = editor.record.id;
       const saved = await saveResult(id, { ...data, claimNumber: id });
 
-      setRecords((prev) => prev.map((r) => (r.id === id ? saved : r)));
+      setRecords((prev) =>
+        prev.some((r) => r.id === id)
+          ? prev.map((r) => (r.id === id ? saved : r))
+          : [...prev, saved],
+      );
       setEditor((prev) => ({
         mode: "view",
         record: saved,
@@ -115,99 +166,110 @@ export function RecordsView({
     setDeleteTarget(null);
   }, [deleteTarget, records]);
 
-  const editorTitle = useMemo(
-    () =>
-      editor ? `${editor.mode === "edit" ? "Edit" : "View"} ${editor.record.id}` : "",
-    [editor],
-  );
+  const editorTitle = useMemo(() => {
+    if (!editor) return "";
+    if (editor.mode === "create") return `New claim ${editor.record.id}`;
+    return `${editor.mode === "edit" ? "Edit" : "View"} ${editor.record.id}`;
+  }, [editor]);
 
   return (
     <>
       <div className="grid items-start gap-6 lg:grid-cols-2">
-        <Card className="overflow-hidden py-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Claim #</TableHead>
-                <TableHead>Claimant</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.length === 0 && (
+        <div>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-base font-semibold">
+              {records.length} claim{records.length === 1 ? "" : "s"}
+            </h2>
+            <Button size="sm" className="gap-2" onClick={addNew}>
+              <PlusIcon />
+              Add new
+            </Button>
+          </div>
+          <Card className="overflow-hidden py-0">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-muted-foreground py-10 text-center"
-                  >
-                    No records left.
-                  </TableCell>
+                  <TableHead>Claim #</TableHead>
+                  <TableHead>Claimant</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-              {records.map((record) => {
-                const active = editor?.record?.id === record.id;
-                return (
-                  <TableRow
-                    key={record.id}
-                    data-state={active ? "selected" : undefined}
-                    className="cursor-pointer"
-                    onClick={() => open("view", record)}
-                  >
-                    <TableCell className="font-mono">{record.id}</TableCell>
-                    <TableCell>{claimantName(record.data)}</TableCell>
-                    <TableCell className="capitalize">
-                      {String(record.data.claimType ?? "—")}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={mergeTailwindClasses(
-                          "capitalize",
-                          STATUS_BADGE[String(record.data.status)],
-                        )}
-                      >
-                        {statusLabel(record.data.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {typeof record.data.amountClaimed === "number"
-                        ? currency.format(record.data.amountClaimed)
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            open("edit", record);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setDeleteTarget(record);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {records.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="text-muted-foreground py-10 text-center"
+                    >
+                      No records left.
                     </TableCell>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </Card>
+                )}
+                {records.map((record) => {
+                  const active = editor?.record?.id === record.id;
+                  return (
+                    <TableRow
+                      key={record.id}
+                      data-state={active ? "selected" : undefined}
+                      className="cursor-pointer"
+                      onClick={() => open("view", record)}
+                    >
+                      <TableCell className="font-mono">{record.id}</TableCell>
+                      <TableCell>{claimantName(record.data)}</TableCell>
+                      <TableCell className="capitalize">
+                        {String(record.data.claimType ?? "—")}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={mergeTailwindClasses(
+                            "capitalize",
+                            STATUS_BADGE[String(record.data.status)],
+                          )}
+                        >
+                          {statusLabel(record.data.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {typeof record.data.amountClaimed === "number"
+                          ? currency.format(record.data.amountClaimed)
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              open("edit", record);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setDeleteTarget(record);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
+        </div>
 
         {editor && (
           <div className="lg:sticky lg:top-20">
@@ -228,12 +290,20 @@ export function RecordsView({
                     </Button>
                   </>
                 ) : (
-                  <Button size="sm" onClick={() => model?.completeLastPage()}>
-                    Save changes
-                  </Button>
+                  <>
+                    {editor.mode === "create" && (
+                      <Button size="sm" variant="ghost" onClick={cancelNew}>
+                        Cancel
+                      </Button>
+                    )}
+                    <Button size="sm" onClick={() => model?.completeLastPage()}>
+                      {editor.mode === "create" ? "Save claim" : "Save changes"}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
+            <ExtractFromDocument formId={schemaId} onExtracted={applyExtracted} />
             <SurveyForm
               key={editor.key}
               schema={schema}
