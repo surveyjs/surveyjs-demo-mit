@@ -55,8 +55,10 @@ export const insuranceClaimSeed: SurveyResult[] = [
       unableToWorkFrom: "2026-04-13",
       unableToWorkTo: "2026-04-27",
       icdIndicator: "0",
-      diagnosisA: "M5451",
-      diagnosisB: "M9901",
+      diagnoses: [
+        { pointer: "A", code: "M54.51" },
+        { pointer: "B", code: "M99.01" },
+      ],
       priorAuthorization: "PA-2026-11940",
       serviceLines: [
         {
@@ -131,7 +133,7 @@ export const insuranceClaimSeed: SurveyResult[] = [
       currentIllnessDate: "2026-05-01",
       currentIllnessQual: "431",
       icdIndicator: "0",
-      diagnosisA: "K0221",
+      diagnoses: [{ pointer: "A", code: "K02.21" }],
       serviceLines: [
         {
           dateFrom: "2026-05-01",
@@ -198,7 +200,7 @@ export const insuranceClaimSeed: SurveyResult[] = [
       referringProviderQual: "DN",
       referringProviderNpi: "1932047781",
       icdIndicator: "0",
-      diagnosisA: "H2513",
+      diagnoses: [{ pointer: "A", code: "H25.13" }],
       serviceLines: [
         {
           dateFrom: "2026-06-15",

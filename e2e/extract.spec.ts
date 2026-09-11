@@ -89,5 +89,6 @@ test("a document adds a filled draft to the list and opens it", async ({ page })
   await expect(row).toBeVisible();
   await expect(row).toContainText("draft");
   await expect(page.getByRole("heading", { name: /Edit CLM-/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Save changes" })).toBeVisible();
+  // Twice: the record header and the form footer both say it now.
+  await expect(page.getByRole("button", { name: "Save changes" })).toHaveCount(2);
 });

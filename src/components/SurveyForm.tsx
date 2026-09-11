@@ -57,6 +57,7 @@ export function SurveyForm({
   completedMessage = "Thank you. Your response has been submitted.",
   prefillData,
   prefillLabel = "Prefill demo data",
+  completeText,
   onModelReady,
 }: {
   schema: SchemaInput;
@@ -75,6 +76,12 @@ export function SurveyForm({
   completedMessage?: string;
   prefillData?: SurveyData;
   prefillLabel?: string;
+  /**
+   * What the button that finishes the form says. Worth setting wherever the
+   * page has its own word for it - the records editor says Save changes above
+   * the form and should not say Complete below it.
+   */
+  completeText?: string;
   onModelReady?: (model: SurveyModel) => void;
 }) {
   const { definition, swapping } = useSavedDefinition(schema, schemaId);
@@ -84,6 +91,10 @@ export function SurveyForm({
     () => createSurveyModel(definition, { data, mode }),
     [definition, data, mode],
   );
+
+  useEffect(() => {
+    if (completeText) model.completeText = completeText;
+  }, [completeText, model]);
 
   usePrefillAction(model, prefillData, prefillLabel);
   const { completed, resume } = useSubmission(model, onComplete, schemaId);

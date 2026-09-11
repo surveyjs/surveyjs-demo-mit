@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { FileDownIcon } from "lucide-react";
 import type { Model } from "survey-core";
 import type { SurveyData, SurveyJSON, SurveyResult } from "@/schemas";
 import { deleteResult, saveResult } from "@/storage/survey-results";
+import { exportClaimToCms1500 } from "@/lib/cms1500-pdf";
 import { configureHref } from "@/lib/routes";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { SurveyForm } from "@/components/SurveyForm";
@@ -161,6 +163,14 @@ export function RecordsView({
     setDeleteTarget(null);
   }, [deleteTarget, records]);
 
+  // The claim, printed back onto the paper form it came from - not a picture of
+  // the questionnaire. It sits beside the record actions rather than inside the
+  // survey navigation, because what is exported is the record.
+  const saveAsPdf = useCallback(() => {
+    if (!model) return;
+    void exportClaimToCms1500(model.data as SurveyData);
+  }, [model]);
+
   const editorTitle = useMemo(() => {
     if (!editor) return "";
     return `${editor.mode === "edit" ? "Edit" : "View"} ${editor.record.id}`;
@@ -169,7 +179,7 @@ export function RecordsView({
   return (
     <>
       <div className="grid items-start gap-6 lg:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           <h2 className="mb-3 text-base font-semibold">
             {records.length} claim{records.length === 1 ? "" : "s"}
           </h2>
@@ -258,10 +268,20 @@ export function RecordsView({
         </div>
 
         {editor && (
-          <div ref={editorRef} className="lg:sticky lg:top-20">
+          <div ref={editorRef} className="min-w-0 lg:sticky lg:top-20">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="text-base font-semibold">{editorTitle}</h2>
               <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                  disabled={!model}
+                  onClick={saveAsPdf}
+                >
+                  <FileDownIcon />
+                  Save as PDF
+                </Button>
                 {editor.mode === "view" ? (
                   <>
                     <Button
@@ -269,10 +289,10 @@ export function RecordsView({
                       variant="outline"
                       onClick={() => open("edit", editor.record)}
                     >
-                      Edit
+                      Edit Claim Data
                     </Button>
                     <Button size="sm" variant="ghost" asChild>
-                      <a href={configureHref(schemaId)}>Change Form</a>
+                      <a href={configureHref(schemaId)}>Customize Claim Form</a>
                     </Button>
                   </>
                 ) : (
@@ -282,6 +302,11 @@ export function RecordsView({
                 )}
               </div>
             </div>
+            <p className="text-muted-foreground mb-3 text-xs">
+              <span className="font-medium">Save as PDF</span> prints this claim
+              onto the CMS-1500 (02/12) sheet itself, box for box - the same form
+              the answers are read from, not a picture of this questionnaire.
+            </p>
             <SurveyForm
               key={editor.key}
               schema={schema}
@@ -289,6 +314,7 @@ export function RecordsView({
               data={editor.record.data}
               mode={editor.mode === "view" ? "display" : "edit"}
               onComplete={editor.mode === "view" ? undefined : handleComplete}
+              completeText="Save changes"
               onModelReady={setModel}
             />
           </div>
