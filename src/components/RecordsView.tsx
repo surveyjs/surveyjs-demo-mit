@@ -1,14 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { PlusIcon } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Model } from "survey-core";
 import type { SurveyData, SurveyJSON, SurveyResult } from "@/schemas";
 import { deleteResult, saveResult } from "@/storage/survey-results";
 import { configureHref } from "@/lib/routes";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { SurveyForm } from "@/components/SurveyForm";
-import { ExtractFromDocument } from "@/components/claims/ExtractFromDocument";
+import { ExtractFromDocument } from "@/components/records/ExtractFromDocument";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type EditorMode = "create" | "edit" | "view";
+type EditorMode = "edit" | "view";
 
 interface Editor {
   readonly mode: EditorMode;
@@ -56,8 +55,10 @@ function statusLabel(status: unknown): string {
   return String(status ?? "").replace(/_/g, " ") || "—";
 }
 
-function claimantName(data: SurveyData): string {
-  return [data.firstName, data.lastName].filter(Boolean).join(" ") || "—";
+function patientName(data: SurveyData): string {
+  return (
+    [data.patientFirstName, data.patientLastName].filter(Boolean).join(" ") || "—"
+  );
 }
 
 /** The next free number in the `CLM-<year>-<n>` format the seed records use. */
@@ -88,6 +89,7 @@ export function RecordsView({
   });
   const [deleteTarget, setDeleteTarget] = useState<SurveyResult | null>(null);
   const [model, setModel] = useState<Model | null>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   const open = useCallback(
     (mode: EditorMode, record: SurveyResult) =>
@@ -95,38 +97,31 @@ export function RecordsView({
     [],
   );
 
-  const addNew = useCallback(() => {
-    const id = nextClaimId(records);
-    open("create", { id, data: { claimNumber: id, status: "draft" } });
-  }, [open, records]);
-
-  // Abandoning a new record falls back to the list, the way deleting the open
-  // one does.
-  const cancelNew = useCallback(() => {
-    setEditor((prev) => {
-      const first = records[0];
-      return first
-        ? { mode: "view", record: first, key: (prev?.key ?? 0) + 1 }
-        : null;
-    });
-  }, [records]);
-
-  // A record being read is not editable, so extracting into it opens it for
-  // editing with the answers already merged in; an open editor keeps whatever
-  // has been typed and is topped up instead.
+  // A document becomes a claim in one gesture: the answers are stored as a draft
+  // straight away, so the row is in the list and open for correction rather than
+  // waiting behind a Save. The boxes the model found empty come back as null,
+  // and those are dropped rather than written over the record's own defaults.
   const applyExtracted = useCallback(
-    (extracted: SurveyData) => {
-      if (!editor) return;
-      if (editor.mode === "view") {
-        open("edit", {
-          ...editor.record,
-          data: { ...editor.record.data, ...extracted },
-        });
-      } else {
-        model?.mergeData(extracted);
-      }
+    async (extracted: SurveyData) => {
+      const answers = Object.fromEntries(
+        Object.entries(extracted).filter(
+          ([, value]) => value !== null && value !== undefined && value !== "",
+        ),
+      );
+      const id = nextClaimId(records);
+      const saved = await saveResult(id, {
+        ...answers,
+        claimNumber: id,
+        status: "draft",
+      });
+
+      setRecords((prev) => [...prev, saved]);
+      open("edit", saved);
+      requestAnimationFrame(() =>
+        editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
     },
-    [editor, model, open],
+    [open, records],
   );
 
   const handleComplete = useCallback(
@@ -168,7 +163,6 @@ export function RecordsView({
 
   const editorTitle = useMemo(() => {
     if (!editor) return "";
-    if (editor.mode === "create") return `New claim ${editor.record.id}`;
     return `${editor.mode === "edit" ? "Edit" : "View"} ${editor.record.id}`;
   }, [editor]);
 
@@ -176,24 +170,17 @@ export function RecordsView({
     <>
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <div>
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-base font-semibold">
-              {records.length} claim{records.length === 1 ? "" : "s"}
-            </h2>
-            <Button size="sm" className="gap-2" onClick={addNew}>
-              <PlusIcon />
-              Add new
-            </Button>
-          </div>
+          <h2 className="mb-3 text-base font-semibold">
+            {records.length} claim{records.length === 1 ? "" : "s"}
+          </h2>
           <Card className="overflow-hidden py-0">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Claim #</TableHead>
-                  <TableHead>Claimant</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>Patient</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Total charge</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -201,7 +188,7 @@ export function RecordsView({
                 {records.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={5}
                       className="text-muted-foreground py-10 text-center"
                     >
                       No records left.
@@ -218,10 +205,7 @@ export function RecordsView({
                       onClick={() => open("view", record)}
                     >
                       <TableCell className="font-mono">{record.id}</TableCell>
-                      <TableCell>{claimantName(record.data)}</TableCell>
-                      <TableCell className="capitalize">
-                        {String(record.data.claimType ?? "—")}
-                      </TableCell>
+                      <TableCell>{patientName(record.data)}</TableCell>
                       <TableCell>
                         <Badge
                           variant="secondary"
@@ -234,8 +218,8 @@ export function RecordsView({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        {typeof record.data.amountClaimed === "number"
-                          ? currency.format(record.data.amountClaimed)
+                        {typeof record.data.totalCharge === "number"
+                          ? currency.format(record.data.totalCharge)
                           : "—"}
                       </TableCell>
                       <TableCell className="text-right">
@@ -269,10 +253,12 @@ export function RecordsView({
               </TableBody>
             </Table>
           </Card>
+
+          <ExtractFromDocument formId={schemaId} onExtracted={applyExtracted} />
         </div>
 
         {editor && (
-          <div className="lg:sticky lg:top-20">
+          <div ref={editorRef} className="lg:sticky lg:top-20">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="text-base font-semibold">{editorTitle}</h2>
               <div className="flex gap-2">
@@ -286,24 +272,16 @@ export function RecordsView({
                       Edit
                     </Button>
                     <Button size="sm" variant="ghost" asChild>
-                      <a href={configureHref(schemaId)}>Configure Form JSON</a>
+                      <a href={configureHref(schemaId)}>Change Form</a>
                     </Button>
                   </>
                 ) : (
-                  <>
-                    {editor.mode === "create" && (
-                      <Button size="sm" variant="ghost" onClick={cancelNew}>
-                        Cancel
-                      </Button>
-                    )}
-                    <Button size="sm" onClick={() => model?.completeLastPage()}>
-                      {editor.mode === "create" ? "Save claim" : "Save changes"}
-                    </Button>
-                  </>
+                  <Button size="sm" onClick={() => model?.completeLastPage()}>
+                    Save changes
+                  </Button>
                 )}
               </div>
             </div>
-            <ExtractFromDocument formId={schemaId} onExtracted={applyExtracted} />
             <SurveyForm
               key={editor.key}
               schema={schema}
@@ -327,7 +305,7 @@ export function RecordsView({
             <DialogDescription>
               This permanently removes{" "}
               <span className="font-mono">{deleteTarget?.id}</span>
-              {deleteTarget ? ` (${claimantName(deleteTarget.data)})` : ""}. This
+              {deleteTarget ? ` (${patientName(deleteTarget.data)})` : ""}. This
               cannot be undone.
             </DialogDescription>
           </DialogHeader>

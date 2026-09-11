@@ -41,8 +41,9 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
 - **JSON-driven forms.** Every form is a plain JSON definition; the app never hardcodes fields. Definitions live in [src/schemas/](src/schemas/).
 - **A renderer-agnostic model factory.** [createSurveyModel](src/schemas/createSurveyModel.ts) builds a configured `survey-core` model from a definition, and knows nothing about React — the same call works with any SurveyJS UI package.
 - **Theming with shadcn/ui.** The SurveyJS shadcn adapter (`survey-core/themes/adapters/shadcn-base-nova.css`) maps the form onto the same design tokens the rest of the app uses, so light/dark mode and radius/color changes apply to both at once. App-local tweaks go into [src/styles/](src/styles/).
-- **Create, edit and read-only modes.** [src/components/RecordsView.tsx](src/components/RecordsView.tsx) lists stored records, opens a blank one on *Add new*, and reuses the same definition to display or edit an existing record.
-- **A way in from paper.** `/claims`, and a record added or edited on `/records`, can be filled from a scanned form, a photo or a PDF: [`/api/extract`](src/app/api/extract/route.ts) hands the document *and this form’s schema* to the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), and the answers are merged into the survey on screen for a person to check — with the real validation and the real conditional logic. A filled CMS-1500 ships in [public/samples](public/samples/) to try it in one click. The key is server-side only; see [Environment](#environment).
+- **Create, edit and read-only modes.** [src/components/RecordsView.tsx](src/components/RecordsView.tsx) lists stored records, adds one filled from a document, and reuses the same definition to display or edit an existing record.
+- **A way in from paper.** A claim on `/records` can be filled from a document instead of typed: [`/api/extract`](src/app/api/extract/route.ts) hands the file *and this form’s own JSON* to the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), and the answers are stored as a draft claim and opened on screen for a person to check — with the real validation and the real conditional logic. Two documents ship in [public/samples](public/samples/) and sit under the list as thumbnails: the **same** CMS-1500, once as a digital PDF and once as a scan, so the mapping can be seen on both kinds of input in one click. Any other CMS-1500 can be uploaded beside them. The key is server-side only; see [Environment](#environment).
+- **The survey is the extraction schema.** [insurance-claim.ts](src/schemas/insurance-claim.ts) is the CMS-1500 (02/12) box by box, and every question carries an `aiHint` — the per-field note the extractor appends to the prompt and no visitor ever sees. That is where the form’s quirks are written down: which side of its label a checkbox sits on, that box 14 is not the date of birth, that money is printed as dollars and cents in two columns, that the two boxes with identical wording hold different insurers. Tuning those lines, rather than any code, is how extraction is made to land field for field.
 - **One editor for every form.** [`/configure`](src/components/configure/JsonWorkbench.tsx) makes the plainest claim the library has — the form *is* a JSON document: a Monaco editor with survey-core’s own linter under it on the left, the form it produces on the right, following it as you type. It carries no chrome of its own — `?form=` says which form is being edited, and a reviewer arrives from that form and leaves back to it — and the primary button saves and opens the page the form actually lives in, which for the embedded demos is somebody else’s website. Edits are kept in `localStorage`, so the server keeps rendering the canonical definition and the prerendered HTML stays intact.
   - The linter is told the one variable the host sets at runtime (`knownVariables: ["user"]`), which is why a personalized definition reads as clean rather than as forty unknown references. Every definition that ships passes it, and an e2e test keeps it that way.
 - **Surveys embedded in somebody else’s site.** Three demos under [`/embedded`](src/app/embedded/), each rendered without the admin chrome (see the `(shell)` route group), each in its own brand colour, and each opened in a new tab from the sidebar. One host site, one form, sitting inline in the page the way a real embed does.
@@ -95,7 +96,7 @@ One matching change in the pages: the editor currently takes `getSchemaDefinitio
 | `/` | Redirects to `/claims`. |
 | `/claims` | Patient intake / medical-insurance form — a paged wizard with a progress stepper, nested panels, matrix and dynamic-matrix questions, expressions and conditional visibility. |
 | `/checkout` | Multi-step checkout wizard — table of contents, required-field validation, input masks, panels gated by `visibleIf`, and a review page built from earlier answers via `{question}` piping. |
-| `/records` | Table of insurance-claim records; add one, view one read-only or edit it, and fill a new or edited record from a scanned document. The claim form mixes text, masked input, dropdown, radiogroup, checkbox, date, number, file upload and conditional panels. |
+| `/records` | Table of CMS-1500 claim records; view one read-only, edit it, or add one already filled in from a sample document under the list. The claim form is the paper form box by box: masked input, dropdowns, radio groups, dates, numbers, a six-row service table and conditional panels. |
 | `/embedded/feedback` | Embedded demo — a mock product site whose hero hosts a satisfaction survey, rendered for the signed-in account. |
 | `/embedded/chart` | Embedded demo — a clinician’s workspace that is nothing but the survey: eight pages, matrices with totals and detail rows, calculated scores, file and camera capture, a signed attestation. |
 | `/embedded/clinic` | Embedded demo — a US clinic site whose appointment request arrives filled in from the patient’s chart, estimates the copay and flags a needed referral. |
@@ -132,7 +133,7 @@ src/
     AdminShell.tsx, Sidebar.tsx, ThemeSwitcher.tsx
     configure/                  The one editor: JSON + linter, and the live form
       forms.ts                  Every form in the template, in one list
-    claims/                     The claims form, plus extraction from paper
+    records/                    Extraction from paper: the sample documents and the upload
     lint/                       survey-core’s linter as a status bar
     embedded/                   One folder per demo route, plus what they share
       shared/                   The toolbar, the user popup, the survey wrapper, the demo accounts
@@ -160,7 +161,7 @@ Copy [.env.example](.env.example) to `.env` and fill in what you need — `.env`
 
 Extraction needs one of the two provider keys, not both: `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. If both are set, OpenAI is the one used.
 
-With no LLM key the extraction endpoint answers 501 and the buttons on `/claims` and `/records` say so: the feature is wired, and it starts working the moment a key appears. The keys are read on the server only and never reach the browser.
+With no LLM key the extraction endpoint answers 501 and the buttons on `/records` say so: the feature is wired, and it starts working the moment a key appears. The keys are read on the server only and never reach the browser.
 
 ## Tests
 

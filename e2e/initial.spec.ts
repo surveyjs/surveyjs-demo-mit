@@ -80,7 +80,7 @@ test("opening another chart changes the note's shape", async ({ page }) => {
 
 test("/records renders the table and the SurveyJS editor", async ({ page }) => {
   await page.goto("/records");
-  await expect(page.getByRole("table")).toBeVisible();
+  await expect(page.getByRole("table").first()).toBeVisible();
   await page.getByRole("button", { name: "Edit" }).first().click();
   await expect(page.locator(".sd-root-modern").first()).toBeVisible();
 });
