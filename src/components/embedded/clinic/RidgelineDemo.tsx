@@ -57,11 +57,20 @@ export function RidgelineDemo({ survey }: { survey: DemoSurvey }) {
     roster: CLINIC_PATIENTS,
   });
 
+  const { trackAnswers } = demo;
   const [data, setData] = useState<SurveyData>({});
   const [submitted, setSubmitted] = useState(false);
 
-  // Stable, so it never re-subscribes the survey's event handlers.
-  const handleDataChange = useCallback((next: SurveyData) => setData(next), []);
+  // Stable, so it never re-subscribes the survey's event handlers. The page
+  // prices itself from the answers, and the toolbar's PDF button, in editions
+  // that ship one, needs them too.
+  const handleDataChange = useCallback(
+    (next: SurveyData) => {
+      setData(next);
+      trackAnswers(next);
+    },
+    [trackAnswers],
+  );
 
   const summary = useMemo(() => visitSummaryFor(data), [data]);
 

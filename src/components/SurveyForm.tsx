@@ -8,8 +8,10 @@ import {
   createSurveyModel,
   type SchemaInput,
   type SurveyData,
+  type SurveyJSON,
   type SurveyMode,
 } from "@/schemas";
+import { features } from "@/features";
 import { loadSurveyJson } from "@/storage/survey-json";
 import { submitResult } from "@/storage/survey-results";
 import { FormCompleted } from "./FormCompleted";
@@ -41,6 +43,8 @@ import "@/styles/survey-overrides-base-nova.css";
  *    form;
  *  - {@link usePrefillAction} — the "Prefill demo data" button in the survey's
  *    own navigation bar, for filling a long form in front of an audience;
+ *  - {@link usePdfAction} — "Save as PDF" beside it, when the edition provides a
+ *    PDF export, which gets the same definition and the answers on screen;
  *  - {@link useSubmission} — what happens on completion: hand the answers to the
  *    caller, or POST them through the storage seam.
  *
@@ -57,6 +61,7 @@ export function SurveyForm({
   completedMessage = "Thank you. Your response has been submitted.",
   prefillData,
   prefillLabel = "Prefill demo data",
+  pdfInNavigation = true,
   completeText,
   onModelReady,
 }: {
@@ -76,6 +81,12 @@ export function SurveyForm({
   completedMessage?: string;
   prefillData?: SurveyData;
   prefillLabel?: string;
+  /**
+   * "Save as PDF" in the survey's own navigation bar, when the edition provides
+   * a PDF export. The records page turns it off and keeps the form's navigation
+   * to its own actions.
+   */
+  pdfInNavigation?: boolean;
   /**
    * What the button that finishes the form says. Worth setting wherever the
    * page has its own word for it - the records editor says Save changes above
@@ -97,6 +108,7 @@ export function SurveyForm({
   }, [completeText, model]);
 
   usePrefillAction(model, prefillData, prefillLabel);
+  usePdfAction(model, schemaId, pdfInNavigation);
   const { completed, resume } = useSubmission(model, onComplete, schemaId);
 
   useEffect(() => {
@@ -223,6 +235,43 @@ function usePrefillAction(
       model.navigationBar.removeActionById(id);
     };
   }, [model, prefillData, prefillLabel]);
+}
+
+/**
+ * "Save as PDF", next to Prefill in the survey's own navigation bar — only when
+ * the edition provides a PDF export (`features.exportPdf`). Without one, nothing
+ * is added.
+ *
+ * There is no separate print layout and no export mapping: `model.toJSON()` is
+ * the definition currently on screen — the shipped one, or the copy a visitor
+ * edited on `/configure` — and `model.data` is what they have answered so far,
+ * so the document is the form, filled in as far as it has been filled in.
+ */
+function usePdfAction(
+  model: SurveyModel,
+  schemaId: string | undefined,
+  enabled: boolean,
+): void {
+  useEffect(() => {
+    const exportPdf = features.exportPdf;
+    if (!enabled || !exportPdf) return;
+    const id = "sv-export-pdf";
+
+    model.addNavigationItem({
+      id,
+      title: "Save as PDF",
+      action: () => {
+        void exportPdf(model.toJSON() as SurveyJSON, {
+          label: model.title || schemaId || "form",
+          data: model.data,
+        });
+      },
+    });
+
+    return () => {
+      model.navigationBar.removeActionById(id);
+    };
+  }, [enabled, model, schemaId]);
 }
 
 /**

@@ -84,6 +84,7 @@ export function ChartDemo({ survey }: { survey: DemoSurvey }) {
               json={demo.json}
               data={demo.seed}
               variables={demo.variables}
+              onDataChange={demo.trackAnswers}
             />
           </SurveyCard>
         </div>

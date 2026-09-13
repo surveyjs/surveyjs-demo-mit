@@ -1,6 +1,7 @@
 import { checkoutSample, getNavItem, getSchemaDefinition } from "@/schemas";
 import { PageHeader } from "@/components/PageHeader";
 import { SurveyForm } from "@/components/SurveyForm";
+import { features } from "@/features";
 
 const nav = getNavItem("checkout");
 
@@ -11,6 +12,7 @@ export default function CheckoutPage() {
         title={nav.label}
         description={nav.description}
         configureHref={`/configure?form=${nav.schemaId}`}
+        analyticsHref={features.analyticsHref?.(nav.schemaId)}
       />
       <SurveyForm
         schema={getSchemaDefinition(nav.schemaId).json}

@@ -314,6 +314,7 @@ export function RecordsView({
               data={editor.record.data}
               mode={editor.mode === "view" ? "display" : "edit"}
               onComplete={editor.mode === "view" ? undefined : handleComplete}
+              pdfInNavigation={false}
               completeText="Save changes"
               onModelReady={setModel}
             />
