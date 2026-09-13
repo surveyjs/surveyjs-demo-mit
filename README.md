@@ -4,29 +4,29 @@ This example shows how to use Next.js along with the [SurveyJS Form Library](htt
 
 ## Deploy your own
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsurveyjs%2Fsurveyjs-nextjs-mit)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsurveyjs%2Fsurveyjs-nextjs-demo-mit)
 
 ## How to use
 
 Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
 
 ```bash
-npx create-next-app --example "https://github.com/surveyjs/surveyjs-nextjs-mit" surveyjs-nextjs-app
+npx create-next-app --example "https://github.com/surveyjs/surveyjs-nextjs-demo-mit" surveyjs-nextjs-app
 ```
 
 ```bash
-yarn create next-app --example "https://github.com/surveyjs/surveyjs-nextjs-mit" surveyjs-nextjs-app
+yarn create next-app --example "https://github.com/surveyjs/surveyjs-nextjs-demo-mit" surveyjs-nextjs-app
 ```
 
 ```bash
-pnpm create next-app --example "https://github.com/surveyjs/surveyjs-nextjs-mit" surveyjs-nextjs-app
+pnpm create next-app --example "https://github.com/surveyjs/surveyjs-nextjs-demo-mit" surveyjs-nextjs-app
 ```
 
 Or clone the repository directly:
 
 ```bash
-git clone https://github.com/surveyjs/surveyjs-nextjs-mit.git
-cd surveyjs-nextjs-mit
+git clone https://github.com/surveyjs/surveyjs-nextjs-demo-mit.git
+cd surveyjs-nextjs-demo-mit
 npm i
 npm run dev
 ```
@@ -49,7 +49,7 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
   - The linter is told the one variable the host sets at runtime (`knownVariables: ["user"]`), which is why a personalized definition reads as clean rather than as forty unknown references. Every definition that ships passes it, and an e2e test keeps it that way.
 - **Surveys embedded in somebody else’s site.** Three demos under [`/embedded`](src/app/embedded/), each rendered without the admin chrome (see the `(shell)` route group), each in its own brand colour, and each opened in a new tab from the sidebar. One host site, one form, sitting inline in the page the way a real embed does.
 
-  They share one toolbar, and it is deliberately down to two claims. **The form is JSON:** *Configure JSON* opens this form’s definition on `/configure`, and what is saved there is what these pages render — the round trip a buyer is asking about, rather than a second editor bolted onto the host site. **The form is rendered for a person:** *Login as* switches between the three preset users each demo ships with, and *Edit the user* opens the signed-in account in a popup — and that editor is itself a SurveyJS survey, with the object it produces shown as JSON underneath it, so the library is editing its own input and there is no bespoke form code anywhere. Every demo passes that object to survey-core as one variable, so the definition reads `{user.firstName}` — in titles, in `defaultValueExpression` to arrive pre-answered, and in `visibleIf` to add or drop whole pages. Sign in as somebody else and the greeting, the values *and* the number of steps change. And the form is outlined wherever it lands — the dashed ring is always on, so there is no argument about which part of the page SurveyJS drew and which part is the host site. See [demo-accounts.ts](src/components/embedded/shared/demo-accounts.ts); the shared machinery is [useDemo](src/components/embedded/shared/useDemo.ts), so the next demo is a page component and a route.
+  They share one toolbar, and it is deliberately down to two claims. **The form is JSON:** *Configure Form JSON* opens this form’s definition on `/configure`, and what is saved there is what these pages render — the round trip a buyer is asking about, rather than a second editor bolted onto the host site. **The form is rendered for a person:** *Login as* switches between the three preset users each demo ships with, and *Edit the user* opens the signed-in account in a popup — and that editor is itself a SurveyJS survey, with the object it produces shown as JSON underneath it, so the library is editing its own input and there is no bespoke form code anywhere. Every demo passes that object to survey-core as one variable, so the definition reads `{user.firstName}` — in titles, in `defaultValueExpression` to arrive pre-answered, and in `visibleIf` to add or drop whole pages. Sign in as somebody else and the greeting, the values *and* the number of steps change. And the form is outlined wherever it lands — the dashed ring is always on, so there is no argument about which part of the page SurveyJS drew and which part is the host site. See [demo-accounts.ts](src/components/embedded/shared/demo-accounts.ts); the shared machinery is [useDemo](src/components/embedded/shared/useDemo.ts), so the next demo is a page component and a route.
   - `/embedded/feedback` — a mock product marketing site whose hero holds a satisfaction survey, addressed to the workspace member who is signed in. It greets them by name, works out how long they have been a customer from `monthsActive` rather than asking, gives a paying customer a question about plan fit and a three-week-old account a whole onboarding page instead, quotes their open support ticket by subject, names their CSM if they have one, and never asks for an email address it already has.
   - `/embedded/chart` — the staff side of that same clinic, and the answer to *our real forms are nothing like that*. The whole screen is one survey: eight pages with survey-core’s own table of contents and progress bar, a problem list as a dynamic matrix with expandable detail rows and duplicate detection, a medication matrix that totals daily dose and morphine-milligram equivalents in its total row, surgical history as a tabbed dynamic panel with a file upload per operation, a focused-exam grid whose **rows are generated** from the systems flagged abnormal (`rowsVisibleIf`), BMI / mean arterial pressure / a PHQ-2 score / a cardiovascular risk band in `expression` questions and `calculatedValues`, three triggers, camera capture, a signature-pad attestation and a review step before the note is filed. [ChartDemo.tsx](src/components/embedded/chart/ChartDemo.tsx) is a header bar and nothing else — that is the point: none of the above is React. And the note is still rendered *for* somebody: open a different chart in the toolbar and the banner, the age, the clinician, the problem and medication lists and the new-patient page all follow the patient.
   - `/embedded/clinic` — a mock US primary-care site, built to the conventions a patient reads without noticing: the utility bar, a provider directory with credentials, in-network plans, posted self-pay prices, the statutory notices. Its appointment request answers the question patients actually ask — [visitSummaryFor](src/schemas/clinic-info.ts) derives the copay from the plan and the visit type, flags an HMO referral, and builds the what-to-bring list; submitting scrolls to the clinician who will see them. And because a patient portal knows more about you than any other login you have, it is the sharpest of the three on personalisation: the office, the clinician, the plan, the name and the date of birth all arrive filled in, the identity fields stay locked until the patient says something has changed, the insurance-card fields are not there at all while a card is on file, “is this about something we already treat you for?” offers *that patient’s* conditions and the refill question *that patient’s* medications — both assembled choice by choice from the chart — and a first-time visitor gets an extra page nobody else sees.
