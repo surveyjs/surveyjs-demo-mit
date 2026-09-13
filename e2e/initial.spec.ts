@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { features } from "../src/features";
 
 const surveyRoutes = [
   "/claims",
@@ -85,11 +86,11 @@ test("/records renders the table and the SurveyJS editor", async ({ page }) => {
   await expect(page.locator(".sd-root-modern").first()).toBeVisible();
 });
 
-test("an edited JSON is kept in the browser and survives a reload", async ({
+test("a saved definition is what the pages render, and the server stays canonical", async ({
   page,
 }) => {
-  // Three full page loads plus a heavy dynamic import; against `next dev`, where
-  // each route compiles on first request, the default budget is too tight.
+  // Full page loads plus the editor's heavy dynamic import; against `next dev`,
+  // where each route compiles on first request, the default budget is too tight.
   test.slow();
 
   // The saved definition is applied after hydration, so this is exactly where a
@@ -101,50 +102,48 @@ test("an edited JSON is kept in the browser and survives a reload", async ({
     }
   });
 
-  await page.goto("/configure?form=medical-form");
-  // Monaco is a heavy dynamic import; under parallel workers it needs longer
-  // than the default expect timeout.
-  await expect(page.locator(".monaco-editor").first()).toBeVisible({
-    timeout: 30_000,
+  // What the editor writes when somebody saves this form — the storage seam is
+  // the contract, so the round trip can be asserted without driving whichever
+  // editor the edition ships (configure.spec.ts drives the JSON one).
+  //
+  // Written once, not with `addInitScript`: an init script runs on every
+  // navigation and would put the edit back after Reset below has removed it.
+  await page.goto("/claims");
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "sjs-demo-schema:medical-form",
+      JSON.stringify({
+        title: "Edited by the e2e test",
+        elements: [{ type: "text", name: "q1", title: "A brand new question" }],
+      }),
+    );
   });
 
-  // Replace the whole document with a minimal survey, then save.
-  await page.evaluate((source) => {
-    const monaco = (window as unknown as { monaco: typeof import("monaco-editor") })
-      .monaco;
-    monaco.editor.getModels()[0].setValue(source);
-  }, JSON.stringify({
-    title: "Edited by the e2e test",
-    elements: [{ type: "text", name: "q1", title: "A brand new question" }],
-  }, null, 2));
-
-  // The live preview picking up the edit proves the page is hydrated and the
-  // editor state has propagated — without this the Save click can land on a
-  // button that has no handler attached yet.
-  await expect(page.getByText("A brand new question").first()).toBeVisible({
-    timeout: 15_000,
-  });
-
-  await page.getByRole("button", { name: /Save and quit/ }).click();
-  await expect(page).toHaveURL(/\/claims$/);
+  await page.goto("/claims");
   await expect(page.getByText("A brand new question")).toBeVisible();
 
   // The definition lives in localStorage, so a full reload keeps it — while the
-  // HTML the server sent stays canonical (see the SEO assertion below).
+  // HTML the server sent stays canonical, which is what search engines get.
   const response = await page.reload();
   const serverHtml = await response!.text();
   expect(serverHtml).not.toContain("A brand new question");
   expect(serverHtml).toContain("Patient Intake");
   await expect(page.getByText("A brand new question")).toBeVisible();
 
+  // And the editor's Reset puts the shipped definition back. Reset is disabled
+  // in the server markup and only enables once the saved definition has been
+  // read, which happens after hydration — hence waiting for the editor first.
   await page.goto("/configure?form=medical-form");
-  // Reset is disabled in the server markup and only enables once the saved
-  // definition has been read, which happens after hydration.
-  await expect(page.locator(".monaco-editor").first()).toBeVisible({
-    timeout: 30_000,
+  await expect(page.locator(features.designer.readySelector).first()).toBeVisible({
+    timeout: 45_000,
   });
   await page.getByRole("button", { name: "Reset" }).click();
   await page.goto("/claims");
+  // Asserted on the seam itself: the text check below would also pass in the
+  // moment before a saved definition swaps in, so on its own it proves nothing.
+  expect(
+    await page.evaluate(() => localStorage.getItem("sjs-demo-schema:medical-form")),
+  ).toBeNull();
   await expect(page.getByText("A brand new question")).toHaveCount(0);
   await expect(page.getByText("Patient Intake").first()).toBeVisible();
 
@@ -270,13 +269,13 @@ test("/embedded/feedback renders the same definition differently per user", asyn
   await expect(page.locator("header").first()).toContainText("John Rivera");
 });
 
-test("the demo toolbar links to the one JSON editor", async ({ page }) => {
+test("the demo toolbar links to the one editor", async ({ page }) => {
   await page.goto("/embedded/feedback");
   const dock = page.getByRole("toolbar", { name: "Embedded demo tools" });
 
   // No editor in the host page: every form in the template is edited on one
   // page, and this link opens it on this form.
-  await expect(dock.getByRole("link", { name: "Configure JSON" })).toHaveAttribute(
+  await expect(dock.getByRole("link", { name: features.designer.label })).toHaveAttribute(
     "href",
     "/configure?form=customer-satisfaction",
   );

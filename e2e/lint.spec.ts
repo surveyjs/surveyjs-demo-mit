@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { features } from "../src/features";
+
+test.skip(features.edition !== "mit", "the JSON workbench is the MIT edition's editor");
 
 const CONFIGURE = "/configure?form=medical-form";
 

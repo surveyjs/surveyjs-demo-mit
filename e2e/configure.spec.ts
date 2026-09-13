@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { features } from "../src/features";
+
+test.skip(features.edition !== "mit", "the JSON workbench is the MIT edition's editor");
 
 /**
  * `/configure` is the editor every form opens in: the definition on the left,
