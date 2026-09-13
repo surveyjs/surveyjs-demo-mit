@@ -156,6 +156,7 @@ Copy [.env.example](.env.example) to `.env` and fill in what you need — `.env`
 
 | Variable | What it does |
 | --- | --- |
+| `SURVEYJS_KEY` | SurveyJS license key. Applied to the SurveyJS library by [surveyjs-license.ts](src/lib/surveyjs-license.ts) when it is set. |
 | `OPENAI_API_KEY` | Enables `/api/extract` through OpenAI. |
 | `ANTHROPIC_API_KEY` | Enables `/api/extract` through Anthropic. Used when no OpenAI key is set. |
 | `EXTRACTOR_MODEL` | Overrides the model (defaults: `gpt-4o`, `claude-sonnet-5`). |
