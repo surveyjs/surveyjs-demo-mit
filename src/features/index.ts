@@ -14,8 +14,10 @@
  *  - a function an edition adds (`exportPdf`, say) loads its libraries with a
  *    dynamic `import()` when it is called, never at the top of the file.
  *
- * Here both optional actions are left undefined, so the buttons for them do
- * not render at all.
+ * It holds the edition's name and pill, its repository, where the other edition
+ * is hosted (for the top bar's switch link), which editor opens a form, and the
+ * optional commercial actions. Here both optional actions are left undefined, so
+ * the buttons for them do not render at all.
  */
 import type { Features } from "./types";
 
@@ -24,10 +26,10 @@ export type { Edition, Features } from "./types";
 export const features: Features = {
   edition: "mit",
   brand: {
-    title: "SurveyJS Library + Next.js Template",
-    badge: "MIT",
+    editionLabel: "MIT",
     sourceUrl: "https://github.com/surveyjs/surveyjs-demo-mit",
-    otherEdition: { label: "Full edition", href: "https://github.com/surveyjs/surveyjs-demo" },
+    // The full edition's host; the switch link appends the current pathname.
+    otherEdition: { label: "Full edition", baseUrl: "https://app.demos.surveyjs.io" },
   },
   designer: {
     label: "Configure Form JSON",

@@ -9,10 +9,10 @@ This repository is MIT-licensed and depends on `survey-core` and `survey-react-u
 | Path | What lives there |
 |---|---|
 | `src/app` | Routes. The `(shell)` group is the admin chrome (`/claims`, `/checkout`, `/records`); `/embedded/*` is deliberately outside it; `/configure` is the form editor; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition. |
-| `src/components` | React. `AdminShell` and `Sidebar` are the chrome, `SurveyForm` and `RecordsView` the two ways a survey is rendered, `configure/` the editor, `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
+| `src/components` | React. `AdminShell`, `TopBar` and `Sidebar` are the chrome, `how-built/` the state behind the top bar's "How this page is built" toggle (the panel is still a stub), `SurveyForm` and `RecordsView` the two ways a survey is rendered, `configure/` the editor, `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
 | `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, test cases under `tests/`, the `createSurveyModel` factory, the nav table, and the registry that maps a schema id to a definition. Depends on `survey-core` only — no UI framework here. |
 | `src/features` | The edition config: which editor, brand and optional commercial actions this edition has. See **Extension points**. |
-| `src/lib` | Helpers with no React: route builders, the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
+| `src/lib` | Helpers with no React: route builders (`routes.ts`, including the other-edition link and a page's source file), the demo's name and site links (`site.ts`), the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
 | `src/storage` | The two seams to your storage. See below. |
 | `src/styles` | App-local CSS on top of the theme adapter. |
 | `e2e` | Playwright. `initial.spec.ts` walks every route, the others cover the editor, the linter (its front end and `/api/lint`) and the extractor. |
@@ -34,9 +34,9 @@ Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts
 
 ## Adding a page
 
-1. Add an entry to `navItems` in `src/schemas/navigation.ts`, with the `schemaId` it renders. The sidebar is built from that list.
+1. Add an entry to `navItems` in `src/schemas/navigation.ts`, with the `schemaId` it renders and its `layout`: `"shell"` for a page inside the admin chrome, `"embedded"` for one that pretends to be somebody else's site. The sidebar is built from that list, and the top bar's "Source of this page" link finds the page's file from it.
 2. Create `src/app/(shell)/<route>/page.tsx`. Read the nav entry with `getNavItem`, the definition with `getSchemaDefinition`, then render `PageHeader` and `SurveyForm`. The three existing pages are each about fifteen lines; copy one.
-3. A page that must not wear the admin chrome goes outside the `(shell)` group, as `/embedded/*` does.
+3. An `"embedded"` page must not wear the admin chrome, so it goes outside the `(shell)` group, as `/embedded/*` does; the sidebar opens it in a new tab. `layout` only describes the page — the folder is what Next.js obeys — and `e2e/top-bar.spec.ts` fails when the two disagree.
 4. Add the route to `e2e/initial.spec.ts`, which asserts that the survey markup is in the HTML the server sent.
 
 ## Extension points
@@ -53,9 +53,9 @@ The config holds:
 | Field | What it drives | Here |
 |---|---|---|
 | `edition` | `"mit"` or `"full"`; `data-edition` on the top bar, and which e2e specs run | `"mit"` |
-| `brand.title`, `brand.badge` | The top bar's title and the badge beside it | `SurveyJS Library + Next.js Template`, `MIT` |
-| `brand.sourceUrl` | The top bar's Source button, and the source links on `/configure` | this repository |
-| `brand.otherEdition` | The cross-link to the other edition in the top bar | the full edition |
+| `brand.editionLabel` | The edition pill beside the demo's name in the top bar | `MIT` |
+| `brand.sourceUrl` | The top bar's "Source of this page" link, and the source links on `/configure` | this repository |
+| `brand.otherEdition` | `label` and `baseUrl` of the top bar's switch link, which opens the same pathname on the other edition's host | `Full edition`, `https://app.demos.surveyjs.io` |
 | `designer.label`, `designer.hint`, `designer.icon` | Text, tooltip and icon (`json` or `designer`, mapped to a lucide icon inside the component) of every button that opens a form in its editor | `Configure Form JSON`, `json` |
 | `designer.readySelector` | What Playwright waits for once `/configure` has loaded its editor | `.monaco-editor` |
 | `exportPdf?(json, { label, data })` | "Save as PDF" in the survey's navigation bar and "Save to PDF" in the demo toolbar | undefined — no button renders |
@@ -65,7 +65,7 @@ The config holds:
 
 What reads it:
 
-- `src/components/AdminShell.tsx` — title, badge, Source, the cross-link, `data-edition`
+- `src/components/TopBar.tsx` — the edition pill, the switch link, "Source of this page", `data-edition`. The demo's name and the site links are the same in every edition, so they live in `src/lib/site.ts`, not here.
 - `src/components/PageHeader.tsx` — the editor button, and the analytics button when a page passes `analyticsHref`
 - `src/app/(shell)/claims/page.tsx`, `checkout/page.tsx`, `records/page.tsx` — pass `analyticsHref={features.analyticsHref?.(nav.schemaId)}`
 - `src/components/SurveyForm.tsx` — `usePdfAction`, switched off per form with `pdfInNavigation={false}` (as `RecordsView` does)
@@ -75,7 +75,7 @@ What reads it:
 - `e2e/warm-dev-routes.ts` — adds the analytics route only when `analyticsHref` is defined
 - `e2e/initial.spec.ts` — the editor link's name and the editor's ready selector; `e2e/configure.spec.ts` and `e2e/lint.spec.ts` skip themselves unless `edition` is `"mit"`
 
-`src/lib/routes.ts` keeps `configureHref` only; the analytics link belongs to the config.
+`src/lib/routes.ts` holds `configureHref`, `otherEditionHref` and `pageSourcePath`; the analytics link belongs to the config.
 
 **`src/app/configure/page.tsx` is the one route an edition replaces outright.** Here it renders the JSON workbench; the full edition renders Survey Creator, with its own page metadata. Selecting the component through the config would drag the route's metadata into it for no gain.
 
