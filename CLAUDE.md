@@ -8,11 +8,11 @@ This repository is MIT-licensed and depends on `survey-core` and `survey-react-u
 
 | Path | What lives there |
 |---|---|
-| `src/app` | Routes. The `(shell)` group is the admin chrome (`/leads`, `/claims`, `/starter`, `/definition`); `/embedded/*` is deliberately outside it; `/configure` is the per-form editor every form's editor button opens; legacy paths redirect in `next.config.mjs`; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition. |
+| `src/app` | Routes. The `(shell)` group is the admin chrome (`/leads`, `/claims`, `/starter`, `/definition`); `/embedded/*` is deliberately outside it, and so is `/`, which forwards to `/leads`; `/configure` is the per-form editor every form's editor button opens; legacy paths redirect in `next.config.mjs`; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition; `robots.ts` serves `/robots.txt`. |
 | `src/components` | React. `AdminShell`, `TopBar` and `Sidebar` are the chrome, `how-built/` the state behind the top bar's "How this page is built" toggle (the panel is still a stub), `SurveyForm` and `ClaimsView` the two ways a survey is rendered, `NotImplemented` the panel of a page not built yet, `configure/` the editor (also rendered inside the shell on `/definition`), `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
 | `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, test cases under `tests/`, the `createSurveyModel` factory, the nav table, and the registry that maps a schema id to a definition. Depends on `survey-core` only — no UI framework here. |
 | `src/features` | The edition config: which editor, brand and optional commercial actions this edition has. See **Extension points**. |
-| `src/lib` | Helpers with no React: route builders (`routes.ts`, including the other-edition link and a page's source file), the demo's name and site links (`site.ts`), the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
+| `src/lib` | Helpers with no React: route builders (`routes.ts`, including the other-edition link and a page's source file), the demo's name and site links (`site.ts`), page titles and social tags (`metadata.ts`), the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
 | `src/storage` | The two seams to your storage. See below. |
 | `src/styles` | App-local CSS on top of the theme adapter. |
 | `e2e` | Playwright. `initial.spec.ts` walks every route, the others cover the editor, the linter (its front end and `/api/lint`) and the extractor. |
@@ -35,7 +35,7 @@ Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts
 ## Adding a page
 
 1. Add a row to one of the groups in `navGroups` in `src/schemas/navigation.ts`, and its icon to `ICONS` in `Sidebar.tsx`. A **page** (`NavPage`) has a `path`, a `layout` and, if it renders one form, the `schemaId`: `"shell"` for a page inside the admin chrome, `"embedded"` for one that pretends to be somebody else's site. A **link** (`NavLink`) to another site has an `href` instead, kept in `src/lib/site.ts`. The sidebar renders every group from that list, and the top bar's "Source of this page" link finds a page's file from `navPages`. A row opens in a new tab, and shows ↗, exactly when `opensInNewTab` says so — a link or an embedded page; never special-case a row in the component.
-2. Create `src/app/(shell)/<route>/page.tsx`. For a form, read the nav entry with `getFormNavItem`, the definition with `getSchemaDefinition`, then render `PageHeader` and `SurveyForm`; `starter/page.tsx` is about fifteen lines, so copy it. A page that is not built yet renders `NotImplemented` with the row's label and description, as `leads/page.tsx` does.
+2. Create `src/app/(shell)/<route>/page.tsx`. For a form, read the nav entry with `getFormNavItem`, the definition with `getSchemaDefinition`, then render `PageHeader` and `SurveyForm`; `starter/page.tsx` is about fifteen lines, so copy it. A page that is not built yet renders `NotImplemented` with the row's label and description, as `leads/page.tsx` does. Every page exports `metadata = pageMetadata(nav.id)`; give it a title and description in `PAGE_COPY` in `src/lib/metadata.ts`, or it falls back to the sidebar label and description.
 3. An `"embedded"` page must not wear the admin chrome, so it goes outside the `(shell)` group, as `/embedded/*` does. `layout` only describes the page — the folder is what Next.js obeys — and `e2e/top-bar.spec.ts` fails when the two disagree.
 4. Add the route to `e2e/initial.spec.ts`, which asserts that the survey markup is in the HTML the server sent, and the row to the expected list in `e2e/sidebar.spec.ts`.
 5. Renaming a route? Add the old path to `redirects()` in `next.config.mjs`, and to the `legacy redirects` block of `e2e/sidebar.spec.ts`.
@@ -73,14 +73,34 @@ What reads it:
 - `src/components/embedded/shared/useDemo.ts` — `trackAnswers`, and `onExportPdf` / `analyticsHref` in `dockProps`
 - `src/components/embedded/shared/DemoDock.tsx` — the editor link, and the PDF and Analytics buttons when those props are set
 - `src/components/configure/forms.ts` — `SOURCE_ROOT`, from `brand.sourceUrl`
+- `src/lib/metadata.ts` — `edition`, which picks the title suffix and the copy that differs per edition. See **Page metadata**.
 - `e2e/warm-dev-routes.ts` — adds the analytics route only when `analyticsHref` is defined
 - `e2e/initial.spec.ts` — the editor link's name and the editor's ready selector; `e2e/configure.spec.ts` and `e2e/lint.spec.ts` skip themselves unless `edition` is `"mit"`
 
 `src/lib/routes.ts` holds `configureHref`, `otherEditionHref` and `pageSourcePath`; the analytics link belongs to the config.
 
-**`src/app/configure/page.tsx` is the one route an edition replaces outright.** Here it renders the JSON workbench; the full edition renders Survey Creator, with its own page metadata. Selecting the component through the config would drag the route's metadata into it for no gain.
+**`src/app/configure/page.tsx` is the one route an edition replaces outright.** Here it renders the JSON workbench; the full edition renders Survey Creator. Both build their metadata with the shared `formToolMetadata`, so the copy is not duplicated. Selecting the component through the config would drag the route's metadata into it for no gain.
 
 To add a feature that needs a commercial package: add an optional field to `types.ts`, leave it undefined in `index.ts`, and make the call site render nothing without it, with a comment saying what an edition plugs in. Keep `npm run lint`, `npm run build` and `node scripts/check-mit-pure.mjs` green.
+
+## Page metadata
+
+All of it is in `src/lib/metadata.ts`, which is shared code. Route files only call it.
+
+- **Where it is set.** The root layout exports `siteMetadata`, which holds the title template, `metadataBase`, `robots` and a fallback for pages with no metadata of their own (the 404). A sidebar page exports `pageMetadata(navId)`. `/` exports `rootMetadata`. `/configure`, and `/analytics` in the full edition, use `generateMetadata` with `formToolMetadata`, which titles the page after the chosen form's page: "Starter — the smallest page — Customize".
+- **Editions.** The copy is written once. `features.edition` picks the title suffix, `· SurveyJS in your app` or `· SurveyJS in your app (MIT)`, and any text that has a `{ mit, full }` pair. A description that names a commercial product needs an `mit` variant that does not.
+- **Social tags.** `openGraph` and `twitter` mirror the rendered title and description on every page, because a child segment replaces them rather than merging them. No OG image exists, so `twitter:card` is `summary`.
+- **The root is a 200, not a redirect.** `src/app/page.tsx` forwards with a zero-second meta refresh. A 307 would make every link preview show Leads.
+- **Metadata in the head.** `htmlLimitedBots: /.*/` in `next.config.mjs` puts metadata in the `<head>` for every client. Without it, Next.js streams metadata into the body on the per-request routes (`/configure`).
+
+### Canonicals and indexing: an open decision
+
+Both hosts serve the same routes. Every page is canonical to itself on `NEXT_PUBLIC_CANONICAL_URL`, which defaults to `NEXT_PUBLIC_SITE_URL`. `NEXT_PUBLIC_INDEXABLE=false` adds `noindex, follow` and a `robots.txt` that disallows crawling. Nothing sets it to `false` today.
+
+**The site owner has not decided between two options.** The code supports both, and choosing one is a deployment setting, not a code change:
+
+1. **Both editions indexed** (current). Each host is canonical to itself. The descriptions differ meaningfully, and "SurveyJS MIT" is a real query.
+2. **Full wins every query.** On the MIT host, set `NEXT_PUBLIC_CANONICAL_URL=https://app.demos.surveyjs.io`. Its canonicals and `og:url` then point at the full edition's equivalents. `/configure` differs between the two, the JSON editor here and Creator there, and would still point across.
 
 ## Validation
 
@@ -121,7 +141,9 @@ There is deliberately no `package-lock.json`. Every SurveyJS package is pinned t
 
 ## Environment
 
-Copy `.env.example` to `.env.local`. It documents four variables, in two groups.
+Copy `.env.example` to `.env.local`. It documents seven variables, in three groups.
+
+**Page metadata, both editions.** `NEXT_PUBLIC_SITE_URL` is this host. Set it on every deployment: canonicals and `og:url` are built from it, and without it they say `http://localhost:3000`. `NEXT_PUBLIC_CANONICAL_URL` and `NEXT_PUBLIC_INDEXABLE` are optional; see **Page metadata**. All three are inlined at build time, so a change needs a rebuild. The edition is not among them: it is `features.edition`, a constant, so a build cannot call itself the other edition.
 
 **Server-side, for `/api/extract`, in both editions.** `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` — set one, not both — enables the route that reads answers off an uploaded document; whichever is present picks the provider. `EXTRACTOR_MODEL` optionally overrides the model; without it the route uses its per-provider default (see `src/app/api/extract/route.ts`). Leave it commented out rather than empty: an empty string survives the route's `??` fallback and asks the provider for a model named `""`. With neither key set the route answers 501 and the button on `/claims` says so. None of these reach the browser.
 

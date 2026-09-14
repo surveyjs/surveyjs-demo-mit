@@ -1,12 +1,24 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { JsonWorkbench } from "@/components/configure/JsonWorkbench";
+import { getFormEntry } from "@/components/configure/forms";
+import { configureHref } from "@/lib/routes";
+import { formToolMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Form JSON — SurveyJS Library + Next.js",
-  description:
-    "Edit any form in the template as JSON, watch the form follow, and open the page it actually lives in.",
-};
+/**
+ * Titled after the page the chosen form lives on, "<page title> — Customize".
+ * Reading `searchParams` renders this route per request; `htmlLimitedBots` in
+ * `next.config.mjs` keeps its metadata in the `<head>` all the same.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ form?: string | string[] }>;
+}): Promise<Metadata> {
+  const { form } = await searchParams;
+  const entry = getFormEntry(typeof form === "string" ? form : undefined);
+  return formToolMetadata(entry.href, "Customize", configureHref(entry.id));
+}
 
 /**
  * The one editor in the template, for every form in it.
