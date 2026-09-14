@@ -8,14 +8,14 @@ This repository is MIT-licensed and depends on `survey-core` and `survey-react-u
 
 | Path | What lives there |
 |---|---|
-| `src/app` | Routes. The `(shell)` group is the admin chrome (`/claims`, `/checkout`, `/records`); `/embedded/*` is deliberately outside it; `/configure` is the form editor; `/api/extract` reads answers off a document. |
+| `src/app` | Routes. The `(shell)` group is the admin chrome (`/claims`, `/checkout`, `/records`); `/embedded/*` is deliberately outside it; `/configure` is the form editor; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition. |
 | `src/components` | React. `AdminShell` and `Sidebar` are the chrome, `SurveyForm` and `RecordsView` the two ways a survey is rendered, `configure/` the editor, `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
-| `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, the `createSurveyModel` factory, the nav table, and the registry that maps a schema id to a definition. Depends on `survey-core` only — no UI framework here. |
+| `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, test cases under `tests/`, the `createSurveyModel` factory, the nav table, and the registry that maps a schema id to a definition. Depends on `survey-core` only — no UI framework here. |
 | `src/features` | The edition config: which editor, brand and optional commercial actions this edition has. See **Extension points**. |
 | `src/lib` | Helpers with no React: route builders, the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
 | `src/storage` | The two seams to your storage. See below. |
 | `src/styles` | App-local CSS on top of the theme adapter. |
-| `e2e` | Playwright. `initial.spec.ts` walks every route, the others cover the editor, the linter and the extractor. |
+| `e2e` | Playwright. `initial.spec.ts` walks every route, the others cover the editor, the linter (its front end and `/api/lint`) and the extractor. |
 | `scripts` | `check-mit-pure.mjs`, which fails if a commercial SurveyJS package is referenced. |
 
 ## Storage is mocked, in two files and nowhere else
@@ -80,6 +80,29 @@ What reads it:
 **`src/app/configure/page.tsx` is the one route an edition replaces outright.** Here it renders the JSON workbench; the full edition renders Survey Creator, with its own page metadata. Selecting the component through the config would drag the route's metadata into it for no gain.
 
 To add a feature that needs a commercial package: add an optional field to `types.ts`, leave it undefined in `index.ts`, and make the call site render nothing without it, with a comment saying what an edition plugs in. Keep `npm run lint`, `npm run build` and `node scripts/check-mit-pure.mjs` green.
+
+## Validation
+
+There is one lint engine, two front ends and one server route. The rules that flag a broken expression while somebody edits a form are the rules that reject it at the API.
+
+- **The engine is `survey-core/linter`**, a subpath export of `survey-core` and MIT-licensed. `lintSurvey(json)` and `getRules()` are headless, with no DOM and no renderer.
+- **One entry point: `lintSurveyJson` in `src/lib/lint/lint-survey.ts`.** It is a framework-free wrapper that both front ends and the route call. Call `lintSurvey` directly nowhere else, or the editor and the server can disagree.
+- **Template suppressions.** `templateSuppressions(json)` silences two things this template writes on purpose, each at its own path, through the linter's own `suppress` option: `aiHint` (read from the raw JSON by `/api/extract`, never registered as a property), and an `autocomplete` with an HTML `shipping`/`billing` section token whose field name is valid. A misspelled one is still reported. Add to it only for something deliberate, never to make a real finding go away.
+- **On the client, this edition** draws `src/components/lint/StaticAnalysisBar.tsx` under the Monaco editor on `/configure`. `src/lib/lint/monaco-adapter.ts` maps a finding's JSON path to a line.
+- **On the server, `/api/lint`** (`src/app/api/lint/route.ts`) runs the same call. It is `POST { json }` → `{ ok, findings }`, where `ok` means no finding at all. That is the same test that makes the status bar say "all checks passed". `src/storage/survey-json.ts` shows a real `saveSurveyJson` calling it before storing. `e2e/lint-api.spec.ts` covers it and runs in both editions.
+- **`src/lib/lint/try-breaking-it.ts`** makes a finding appear on demand. It is pure JSON mutation with no imports. The editor's "Try breaking it" buttons use it, and so does the API spec.
+- **The full edition** gets the same rules inside Survey Creator's built-in UI, and the same `/api/lint` route, which is shared code. The Monaco front end is copied there but not used.
+
+The route lints with no options. The editor tells the linter about the runtime variable `user` for the personalized forms, and the route does not, so a personalized definition that passes in the editor reports unknown `{user.…}` references at `/api/lint`. Variable context is out of scope until Survey Core's variable presets arrive.
+
+### Testing
+
+`survey-core/tester` is the linter's sibling. It is headless too, and it runs behaviour tests against a real `SurveyModel`: answer this, then expect that to be visible or hold that value. It was published in `survey-core` 3.0.4, which `latest` now installs. **Nothing here is wired up yet**: no script, route or spec calls it, and adding one is its own task.
+
+- Cases live beside the schemas, one file per schema, as `src/schemas/tests/<schema-id>.tests.json`. There is one so far, `checkout.tests.json`. See `src/schemas/tests/README.md`.
+- One call runs a suite, with the definition passed separately from the cases:
+  `await runSurveyTests(getSchemaDefinition("checkout").json, checkoutTests)`.
+- The format is specified in the SurveyJS library source, `packages/survey-core/src/tester/README.md`. Read it before editing a case file. Do not guess the grammar.
 
 ## Commands
 

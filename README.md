@@ -47,6 +47,7 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
 - **The survey is the extraction schema.** [insurance-claim.ts](src/schemas/insurance-claim.ts) is the CMS-1500 (02/12) box by box, and every question carries an `aiHint` — the per-field note the extractor appends to the prompt and no visitor ever sees. That is where the form’s quirks are written down: which side of its label a checkbox sits on, that box 14 is not the date of birth, that money is printed as dollars and cents in two columns, that the two boxes with identical wording hold different insurers. Tuning those lines, rather than any code, is how extraction is made to land field for field.
 - **One editor for every form.** [`/configure`](src/components/configure/JsonWorkbench.tsx) makes the plainest claim the library has — the form *is* a JSON document: a Monaco editor with survey-core’s own linter under it on the left, the form it produces on the right, following it as you type. It carries no chrome of its own — `?form=` says which form is being edited, and a reviewer arrives from that form and leaves back to it — and the primary button saves and opens the page the form actually lives in, which for the embedded demos is somebody else’s website. Edits are kept in `localStorage`, so the server keeps rendering the canonical definition and the prerendered HTML stays intact.
   - The linter is told the one variable the host sets at runtime (`knownVariables: ["user"]`), which is why a personalized definition reads as clean rather than as forty unknown references. Every definition that ships passes it, and an e2e test keeps it that way.
+  - One lint engine and two front ends: this edition draws `survey-core/linter` findings as a status bar under Monaco, and the [full edition](https://github.com/surveyjs/surveyjs-nextjs-demo) shows the same rules inside Survey Creator's own UI. On the server, both run [`/api/lint`](src/app/api/lint/route.ts), the same code with the same rules, so a definition the editor flags is also rejected by the API.
 - **Surveys embedded in somebody else’s site.** Three demos under [`/embedded`](src/app/embedded/), each rendered without the admin chrome (see the `(shell)` route group), each in its own brand colour, and each opened in a new tab from the sidebar. One host site, one form, sitting inline in the page the way a real embed does.
 
   They share one toolbar, and it is deliberately down to two claims. **The form is JSON:** *Configure Form JSON* opens this form’s definition on `/configure`, and what is saved there is what these pages render — the round trip a buyer is asking about, rather than a second editor bolted onto the host site. **The form is rendered for a person:** *Login as* switches between the three preset users each demo ships with, and *Edit the user* opens the signed-in account in a popup — and that editor is itself a SurveyJS survey, with the object it produces shown as JSON underneath it, so the library is editing its own input and there is no bespoke form code anywhere. Every demo passes that object to survey-core as one variable, so the definition reads `{user.firstName}` — in titles, in `defaultValueExpression` to arrive pre-answered, and in `visibleIf` to add or drop whole pages. Sign in as somebody else and the greeting, the values *and* the number of steps change. And the form is outlined wherever it lands — the dashed ring is always on, so there is no argument about which part of the page SurveyJS drew and which part is the host site. See [demo-accounts.ts](src/components/embedded/shared/demo-accounts.ts); the shared machinery is [useDemo](src/components/embedded/shared/useDemo.ts), so the next demo is a page component and a route.
@@ -103,6 +104,7 @@ One matching change in the pages: the editor currently takes `getSchemaDefinitio
 | `/embedded/clinic` | Embedded demo — a US clinic site whose appointment request arrives filled in from the patient’s chart, estimates the copay and flags a needed referral. |
 | `/configure?form=…` | The editor for one form: JSON plus linter on the left, the form it produces on the right. No sidebar. |
 | `/api/extract` | POST a document plus a `formId`; answers come back keyed by question name. Needs an LLM key. |
+| `/api/lint` | POST `{ json }`, a survey definition; `{ ok, findings }` comes back from the same linter the editor runs. |
 | `/claims/configure`, `/checkout/configure`, `/records/configure` | Redirect to `/configure`, where that form is now edited. |
 
 ## Project structure
@@ -126,6 +128,7 @@ src/
     clinic-info.ts              The clinic’s directory, plans, and the derived visit summary
     patient-record.ts           The patient chart the clinic demo renders its form for
     data/                       Demo response data / seed records
+    tests/                      Test cases for survey-core/tester, not run yet (see its README)
     navigation.ts               Route ↔ schema mapping used by the sidebar
   components/
     SurveyForm.tsx              Renders a model with survey-react-ui
@@ -174,6 +177,14 @@ npm run e2e:ci    # against a production build
 npm run e2e:dev   # against `next dev`, where React reports more warnings
 npm run e2e:ui    # interactive runner
 ```
+
+## Editions
+
+This is the **MIT edition**. It depends on `survey-core` and `survey-react-ui` only.
+
+The [full edition](https://github.com/surveyjs/surveyjs-nextjs-demo) is the same application plus three commercial SurveyJS products: Survey Creator on `/configure`, PDF Generator and Dashboard. Its shared code is copied from this repository.
+
+Commercial features attach through the edition config in [src/features/index.ts](src/features/index.ts). Every hook there is undefined or a no-op in this edition, so no component here branches on which edition it is in.
 
 ## License
 
