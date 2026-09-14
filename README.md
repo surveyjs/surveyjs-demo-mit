@@ -41,7 +41,8 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
 - **JSON-driven forms.** Every form is a plain JSON definition; the app never hardcodes fields. Definitions live in [src/schemas/](src/schemas/).
 - **A renderer-agnostic model factory.** [createSurveyModel](src/schemas/createSurveyModel.ts) builds a configured `survey-core` model from a definition, and knows nothing about React — the same call works with any SurveyJS UI package.
 - **Theming with shadcn/ui.** The SurveyJS shadcn adapter (`survey-core/themes/adapters/shadcn-base-nova.css`) maps the form onto the same design tokens the rest of the app uses, so light/dark mode and radius/color changes apply to both at once. App-local tweaks go into [src/styles/](src/styles/).
-- **Create, edit and read-only modes.** [src/components/ClaimsView.tsx](src/components/ClaimsView.tsx) lists stored records, adds one filled from a document, and reuses the same definition to display or edit an existing record.
+- **Create, edit and read-only modes.** [RecordsView](src/components/records/RecordsView.tsx) is the shared records page: a list of stored records and one definition that views, edits and adds them, with a record switcher in the header, a discard prompt for unsaved changes, and a storage seam that keeps the list's columns apart from the whole response. [ClaimsView](src/components/ClaimsView.tsx) is `/claims` on top of it, adding a claim filled from a document.
+- **How this page is built.** The top bar's toggle opens a panel that says what goes into the form on the page, which variable references the definition holds (read off the JSON itself), and what comes out. Its content is [how-built.ts](src/lib/how-built.ts).
 - **The claim onto the real form.** A questionnaire is the wrong document for a claim, so `/claims` exports the other direction: [exportClaimToCms1500](src/lib/cms1500-pdf.ts) prints the record onto the CMS-1500 (02/12) sheet itself, box for box, over the blank in [public/samples](public/samples/) with pdf-lib. The same JSON is read from paper by the extractor and printed back onto it — the mapping table is one object of coordinates, next to the answers it places.
 - **A way in from paper.** A claim on `/claims` can be filled from a document instead of typed: [`/api/extract`](src/app/api/extract/route.ts) hands the file *and this form’s own JSON* to the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), and the answers are stored as a draft claim and opened on screen for a person to check — with the real validation and the real conditional logic. Two documents ship in [public/samples](public/samples/) and sit under the list as thumbnails: the **same** CMS-1500, once as a digital PDF and once as a scan, so the mapping can be seen on both kinds of input in one click. Any other CMS-1500 can be uploaded beside them. The key is server-side only; see [Environment](#environment).
 - **The survey is the extraction schema.** [insurance-claim.ts](src/schemas/insurance-claim.ts) is the CMS-1500 (02/12) box by box, and every question carries an `aiHint` — the per-field note the extractor appends to the prompt and no visitor ever sees. That is where the form’s quirks are written down: which side of its label a checkbox sits on, that box 14 is not the date of birth, that money is printed as dollars and cents in two columns, that the two boxes with identical wording hold different insurers. Tuning those lines, rather than any code, is how extraction is made to land field for field.
@@ -54,26 +55,27 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
   - `/embedded/feedback` — a mock product marketing site whose hero holds a satisfaction survey, addressed to the workspace member who is signed in. It greets them by name, works out how long they have been a customer from `monthsActive` rather than asking, gives a paying customer a question about plan fit and a three-week-old account a whole onboarding page instead, quotes their open support ticket by subject, names their CSM if they have one, and never asks for an email address it already has.
   - `/embedded/chart` — the staff side of that same clinic, and the answer to *our real forms are nothing like that*. The whole screen is one survey: eight pages with survey-core’s own table of contents and progress bar, a problem list as a dynamic matrix with expandable detail rows and duplicate detection, a medication matrix that totals daily dose and morphine-milligram equivalents in its total row, surgical history as a tabbed dynamic panel with a file upload per operation, a focused-exam grid whose **rows are generated** from the systems flagged abnormal (`rowsVisibleIf`), BMI / mean arterial pressure / a PHQ-2 score / a cardiovascular risk band in `expression` questions and `calculatedValues`, three triggers, camera capture, a signature-pad attestation and a review step before the note is filed. [ChartDemo.tsx](src/components/embedded/chart/ChartDemo.tsx) is a header bar and nothing else — that is the point: none of the above is React. And the note is still rendered *for* somebody: open a different chart in the toolbar and the banner, the age, the clinician, the problem and medication lists and the new-patient page all follow the patient.
   - `/embedded/clinic` — a mock US primary-care site, built to the conventions a patient reads without noticing: the utility bar, a provider directory with credentials, in-network plans, posted self-pay prices, the statutory notices. Its appointment request answers the question patients actually ask — [visitSummaryFor](src/schemas/clinic-info.ts) derives the copay from the plan and the visit type, flags an HMO referral, and builds the what-to-bring list; submitting scrolls to the clinician who will see them. And because a patient portal knows more about you than any other login you have, it is the sharpest of the three on personalisation: the office, the clinician, the plan, the name and the date of birth all arrive filled in, the identity fields stay locked until the patient says something has changed, the insurance-card fields are not there at all while a card is on file, “is this about something we already treat you for?” offers *that patient’s* conditions and the refill question *that patient’s* medications — both assembled choice by choice from the chart — and a first-time visitor gets an extra page nobody else sees.
-- **One place to swap in your own storage.** Every read and write goes through two files in [src/storage/](src/storage/), and nothing else in the app knows where the data lives — see [Storage](#storage-localstorage-here-your-database-in-production).
+- **One place to swap in your own storage.** Every read and write goes through three files in [src/storage/](src/storage/), and nothing else in the app knows where the data lives — see [Storage](#storage-localstorage-here-your-database-in-production).
 
 ## Storage: `localStorage` here, your database in production
 
-Everything this template stores goes through **two files in [src/storage/](src/storage/)**. Nothing else in `src/` reads or writes stored data.
+Everything this template stores goes through **three files in [src/storage/](src/storage/)**. Nothing else in `src/` reads or writes stored data.
 
 | File | What it stores | How the demo does it |
 | --- | --- | --- |
 | [survey-json.ts](src/storage/survey-json.ts) | Survey definitions edited on `/configure` | `localStorage`, so each visitor's experiments stay in their own browser and the server keeps rendering the definition that ships with the template |
-| [survey-results.ts](src/storage/survey-results.ts) | Submitted answers and the claim records | An in-memory array — an edit is gone as soon as you reload. Nothing is persisted, on purpose: a template should not look like it stores someone's data when it does not |
+| [survey-results.ts](src/storage/survey-results.ts) | Submitted answers and the records pages' records | In memory, per collection — an edit is gone as soon as you reload. Nothing is persisted, on purpose: a template should not look like it stores someone's data when it does not. A record is kept as the whole response (the document) plus the list's columns, derived from it on every save |
+| [session.ts](src/storage/session.ts) | Who a page is rendered for | A fixed list per page, so a reviewer can switch between users; no page has any yet. In your app, `getSession()` |
 
-Every function in both files is `async`, so replacing the bodies with calls to your API changes no call site anywhere else.
+Every function in these files is `async`, so replacing the bodies with calls to your API changes no call site anywhere else.
 
 ### Moving to your own server and database
 
-1. **Two tables:** `survey_schemas (id, json, updated_at)` and `claims (id, data, updated_at)`. Seed them from `src/schemas/` (see below).
-2. **Route handlers** under `src/app/api/` — `GET`/`PUT`/`DELETE /api/schemas/[id]`, and `GET`/`POST /api/claims` plus `PUT`/`DELETE /api/claims/[id]`. Validate the incoming JSON and authorize the caller here: the schema editor is effectively an admin surface, and it is only safe unauthenticated today because nothing leaves the browser.
+1. **Two tables:** `survey_schemas (id, json, updated_at)` and `claims (id, data, claim_number, patient_name, status, total_charge, updated_at)` — the document, plus the columns the list reads. Seed them from `src/schemas/` (see below).
+2. **Route handlers** under `src/app/api/` — `GET`/`PUT`/`DELETE /api/schemas/[id]`, and `GET /api/claims` (columns only) plus `GET`/`PUT`/`DELETE /api/claims/[id]` (the document). Validate the incoming JSON and authorize the caller here: the schema editor is effectively an admin surface, and it is only safe unauthenticated today because nothing leaves the browser.
 3. **Replace the three bodies in [survey-json.ts](src/storage/survey-json.ts)** — `loadSurveyJson`, `saveSurveyJson`, `resetSurveyJson` — with `fetch` calls. The file's header comment shows the shape.
-4. **Replace the four bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `saveResult`, `deleteResult`, `submitResult`.
-5. **Mind the one server-side reader.** `listResults()` is called from the `/claims` server component, so the table and the form are in the server HTML; a relative `fetch("/api/claims")` does not resolve there. Query the database directly in that branch, or use an absolute URL. The three mutations run on the client and can use relative URLs.
+4. **Replace the five bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `getResult`, `saveResult`, `deleteResult`, `submitResult`. Derive the columns on write with the collection's `toColumns`, or the database's own equivalent.
+5. **Mind the server-side readers.** `listResults` and the first `getResult` are called from the `/claims` server component, so the table and the form are in the server HTML; a relative `fetch("/api/claims")` does not resolve there. Query the database directly in that branch, or use an absolute URL. Opening another row and the mutations run on the client and can use relative URLs.
 
 ### What happens to `src/schemas/`
 
@@ -97,7 +99,7 @@ One matching change in the pages: the editor currently takes `getSchemaDefinitio
 | --- | --- |
 | `/` | Redirects to `/leads`. |
 | `/leads` | Placeholder: CRM records, one form to view, edit and add. Says plainly that it is not built yet, and lists what it will demonstrate. |
-| `/claims` | Table of CMS-1500 claim records; view one read-only, edit it, or add one already filled in from a sample document under the list. The claim form is the paper form box by box: masked input, dropdowns, radio groups, dates, numbers, a six-row service table and conditional panels. |
+| `/claims` | Table of CMS-1500 claim records, on the shared records page: pick one from the list or the header's switcher, view it read-only, edit it, start a new one, or add one already filled in from a sample document under the list. Save as PDF prints the open claim onto the CMS-1500 sheet. The claim form is the paper form box by box: masked input, dropdowns, radio groups, dates, numbers, a six-row service table and conditional panels. |
 | `/starter` | A checkout form and nothing else — table of contents, required-field validation, input masks, panels gated by `visibleIf`, and a review page built from earlier answers via `{question}` piping. |
 | `/definition?form=…` | Any form in the template as JSON, with the linter under it and the form it produces beside it, inside the admin shell. |
 | `/embedded/feedback` | Embedded demo — a mock product site whose hero hosts a satisfaction survey, rendered for the signed-in account. |
@@ -129,12 +131,16 @@ src/
     patient-record.ts           The patient chart the clinic demo renders its form for
     data/                       Demo response data / seed records
     tests/                      Test cases for survey-core/tester, not run yet (see its README)
+    records.ts                  Records pages as data: columns, toColumns, new-record defaults
+    collections/                One collection per records page (claims)
     navigation.ts               The sidebar groups: pages, links and the schema each page renders
   components/
     SurveyForm.tsx              Renders a model with survey-react-ui
     JsonEditor.tsx              Monaco wrapper (client-only)
-    ClaimsView.tsx              Claims table + add / view / edit a record
+    records/                    The shared records page: list, form, record and user switchers
+    ClaimsView.tsx              /claims on RecordsView, plus extraction and the CMS-1500 export
     NotImplemented.tsx          The panel of a page that is not built yet
+    how-built/                  The "How this page is built" toggle state and panel
     AdminShell.tsx, Sidebar.tsx, ThemeSwitcher.tsx
     configure/                  The one editor: JSON + linter, and the live form
       forms.ts                  Every form in the template, in one list
@@ -144,11 +150,13 @@ src/
       shared/                   The toolbar, the user popup, the survey wrapper, the demo accounts
       feedback/  clinic/  chart/
     ui/                         shadcn/ui primitives
-  storage/                      The only two files that touch stored data
+  storage/                      The only three files that touch stored data
     survey-json.ts              Survey definitions
-    survey-results.ts           Submitted answers and claim records
+    survey-results.ts           Submitted answers, and records as columns plus document
+    session.ts                  The users a page is rendered for
   lib/
-    utils.ts                    The shadcn class-merging helper
+    how-built.ts                What the "How this page is built" panel says, per page
+    utils.ts                    The shadcn class-merging helper, stableJson
   styles/                       App-local overrides on top of the SurveyJS adapter
 ```
 

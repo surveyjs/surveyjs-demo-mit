@@ -9,21 +9,22 @@ This repository is MIT-licensed and depends on `survey-core` and `survey-react-u
 | Path | What lives there |
 |---|---|
 | `src/app` | Routes. The `(shell)` group is the admin chrome (`/leads`, `/claims`, `/starter`, `/definition`); `/embedded/*` is deliberately outside it, and so is `/`, which forwards to `/leads`; `/configure` is the per-form editor every form's editor button opens; legacy paths redirect in `next.config.mjs`; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition; `robots.ts` serves `/robots.txt`. |
-| `src/components` | React. `AdminShell`, `TopBar` and `Sidebar` are the chrome, `how-built/` the state behind the top bar's "How this page is built" toggle (the panel is still a stub), `SurveyForm` and `ClaimsView` the two ways a survey is rendered, `NotImplemented` the panel of a page not built yet, `configure/` the editor (also rendered inside the shell on `/definition`), `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
-| `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, test cases under `tests/`, the `createSurveyModel` factory, the nav table, and the registry that maps a schema id to a definition. Depends on `survey-core` only — no UI framework here. |
+| `src/components` | React. `AdminShell`, `TopBar` and `Sidebar` are the chrome, `how-built/` the "How this page is built" toggle's state and the panel it opens, `SurveyForm` the one way a survey is rendered in the shell, `records/` the shared records page (`RecordsView`, and the header's record and user switchers), `ClaimsView` a thin wrapper over `RecordsView` that adds extraction and the CMS-1500 export, `NotImplemented` the panel of a page not built yet, `configure/` the editor (also rendered inside the shell on `/definition`), `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
+| `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, test cases under `tests/`, the `createSurveyModel` factory, the nav table, the registry that maps a schema id to a definition, and the records pages' collections (`records.ts`, one module per collection under `collections/`). Depends on `survey-core` only — no UI framework here. |
 | `src/features` | The edition config: which editor, brand and optional commercial actions this edition has. See **Extension points**. |
-| `src/lib` | Helpers with no React: route builders (`routes.ts`, including the other-edition link and a page's source file), the demo's name and site links (`site.ts`), page titles and social tags (`metadata.ts`), the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
-| `src/storage` | The two seams to your storage. See below. |
+| `src/lib` | Helpers with no React: route builders (`routes.ts`, including the other-edition link and a page's source file), the demo's name and site links (`site.ts`), page titles and social tags (`metadata.ts`), the "How this page is built" content (`how-built.ts`), the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
+| `src/storage` | The three seams to your storage. See below. |
 | `src/styles` | App-local CSS on top of the theme adapter. |
-| `e2e` | Playwright. `initial.spec.ts` walks every route, the others cover the editor, the linter (its front end and `/api/lint`) and the extractor. |
+| `e2e` | Playwright. `initial.spec.ts` walks every route, `records.spec.ts` covers the shared records page and the how-built panel on `/claims`, the others cover the editor, the linter (its front end and `/api/lint`) and the extractor. |
 | `scripts` | `check-mit-pure.mjs`, which fails if a commercial SurveyJS package is referenced. |
 
-## Storage is mocked, in two files and nowhere else
+## Storage is mocked, in three files and nowhere else
 
-Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts` (the form definitions) and `src/storage/survey-results.ts` (the answers people submit). Both are already `async`, so pointing them at a real API changes no call site.
+Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts` (the form definitions), `src/storage/survey-results.ts` (the answers people submit) and `src/storage/session.ts` (who the page is rendered for). All three are already `async`, so pointing them at a real API changes no call site.
 
 - **Definitions** are kept per browser in `localStorage`, under `sjs-demo-schema:<id>`. The server always renders the definition that ships with the template, so the prerendered HTML stays canonical and one visitor's experiment never reaches anybody else.
-- **Results** are an in-memory array seeded from `insuranceClaimSeed`. Nothing persists, on purpose: a template should not look like it is storing someone's data when it is not. `listResults` runs in a server component; the mutations run in the browser, the way they would hit your API.
+- **Results** are kept in memory per collection, created from each collection's seed. Nothing persists, on purpose: a template should not look like it is storing someone's data when it is not. A record is stored as **columns plus document**: `listResults(collectionId)` returns `{ id, columns }` only, `getResult(collectionId, id)` returns the whole response as `data`, and `saveResult` stores the document and derives the columns from it with the collection's `toColumns`, seed records included. `listResults`, and `getResult` for the first row, run in the records pages' server components; opening another row and the mutations run in the browser, the way they would hit your API.
+- **Session users** are `listSessionUsers(scope)`: the users a page may be rendered for, first one signed in, keyed by collection id. In your app it is `getSession()` and returns one. A page passes them to `RecordsView` as `users`, and the form gets the active one as the `user` variable. No scope has users yet.
 
 ## Adding a schema
 
@@ -39,6 +40,19 @@ Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts
 3. An `"embedded"` page must not wear the admin chrome, so it goes outside the `(shell)` group, as `/embedded/*` does. `layout` only describes the page — the folder is what Next.js obeys — and `e2e/top-bar.spec.ts` fails when the two disagree.
 4. Add the route to `e2e/initial.spec.ts`, which asserts that the survey markup is in the HTML the server sent, and the row to the expected list in `e2e/sidebar.spec.ts`.
 5. Renaming a route? Add the old path to `redirects()` in `next.config.mjs`, and to the `legacy redirects` block of `e2e/sidebar.spec.ts`.
+
+## Adding a records page
+
+A records page is a list of stored records and one form that views, edits and adds them. `/claims` is the example; copy it.
+
+1. **The schema**, as in **Adding a schema**.
+2. **The seed**, `src/schemas/data/<id>-seed.ts`: a `SurveyResult[]` of `{ id, data }`. Write documents only; the columns are derived.
+3. **The collection**, `src/schemas/collections/<id>.ts`, a `RecordCollection`: its storage `id`, `schemaId`, `noun`, the list `columns` (`id`, `text`, `badge` with tones, `money` with an optional `currencyKey`, `date`), `titleKey`, `toColumns(id, data)`, `newId(existing)`, `newRecord(id, user)` for the defaults of a new record, an optional `compare` for list order, and the `seed`. Defaults a new record takes from the signed-in user belong in `newRecord`, not in `defaultValueExpression`, so opening an existing record never re-derives an answer.
+4. **Register it** in `recordCollections` in `src/schemas/records.ts`.
+5. **Describe it** in `HOW_BUILT` in `src/lib/how-built.ts`: the data in, the data out, the variable names the panel lists references to, and the feature chips. A chip is `status: "shown"` or `"coming"`, and one only an edition has sets `edition`.
+6. **The page**, about fifteen lines: read `listResults(id)`, `getResult` for the first row and, if the page has users, `listSessionUsers(id)` on the server, and render `RecordsView` with them. `RecordsView` renders the page header too. `claims/page.tsx` and `ClaimsView.tsx` show the optional props: `exportPdf` to replace the generic PDF export, `listFooter` under the list, `formNote` under the form's heading.
+
+`RecordsView` subscribes to no SurveyJS event. It snapshots `model.data` when the form loads and asks before discarding a change. Switching user rebuilds the form with the answers on screen, saved or not. The header's Save validates every page before completing.
 
 ## Extension points
 
@@ -68,8 +82,9 @@ What reads it:
 
 - `src/components/TopBar.tsx` — the edition pill, the switch link, "Source of this page", `data-edition`. The demo's name and the site links are the same in every edition, so they live in `src/lib/site.ts`, not here.
 - `src/components/PageHeader.tsx` — the editor button, and the analytics button when a page passes `analyticsHref`
-- `src/app/(shell)/claims/page.tsx` and `starter/page.tsx` — pass `analyticsHref={features.analyticsHref?.(nav.schemaId)}`
-- `src/components/SurveyForm.tsx` — `usePdfAction`, switched off per form with `pdfInNavigation={false}` (as `ClaimsView` does)
+- `src/app/(shell)/starter/page.tsx` — passes `analyticsHref={features.analyticsHref?.(nav.schemaId)}`
+- `src/components/records/RecordsView.tsx` — `analyticsHref` for its page header, and `exportPdf` for the header's "Save as PDF" when the page passes no export of its own
+- `src/components/SurveyForm.tsx` — `usePdfAction`, switched off per form with `pdfInNavigation={false}`, as every records page does: there the PDF is the record's, in the header
 - `src/components/embedded/shared/useDemo.ts` — `trackAnswers`, and `onExportPdf` / `analyticsHref` in `dockProps`
 - `src/components/embedded/shared/DemoDock.tsx` — the editor link, and the PDF and Analytics buttons when those props are set
 - `src/components/configure/forms.ts` — `SOURCE_ROOT`, from `brand.sourceUrl`
