@@ -41,7 +41,7 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
 - **JSON-driven forms.** Every form is a plain JSON definition; the app never hardcodes fields. Definitions live in [src/schemas/](src/schemas/).
 - **A renderer-agnostic model factory.** [createSurveyModel](src/schemas/createSurveyModel.ts) builds a configured `survey-core` model from a definition, and knows nothing about React — the same call works with any SurveyJS UI package.
 - **Theming with shadcn/ui.** The SurveyJS shadcn adapter (`survey-core/themes/adapters/shadcn-base-nova.css`) maps the form onto the same design tokens the rest of the app uses, so light/dark mode and radius/color changes apply to both at once. App-local tweaks go into [src/styles/](src/styles/).
-- **Create, edit and read-only modes.** [RecordsView](src/components/records/RecordsView.tsx) is the shared records page: a list of stored records and one definition that views, edits and adds them, with a record switcher in the header, a discard prompt for unsaved changes, and a storage seam that keeps the list's columns apart from the whole response. [ClaimsView](src/components/ClaimsView.tsx) is `/claims` on top of it, adding a claim filled from a document.
+- **Create, edit and read-only modes.** [RecordsView](src/components/records/RecordsView.tsx) is the shared records page: a list of stored records and one definition that views, edits and adds them, with a discard prompt for unsaved changes, and a storage seam that keeps the list's columns apart from the whole response. [ClaimsView](src/components/ClaimsView.tsx) is `/claims` on top of it, adding a claim filled from a document.
 - **How this page is built.** The top bar's toggle opens a panel that says what goes into the form on the page, which variable references the definition holds (read off the JSON itself), and what comes out. Its content is [how-built.ts](src/lib/how-built.ts).
 - **The claim onto the real form.** A questionnaire is the wrong document for a claim, so `/claims` exports the other direction: [exportClaimToCms1500](src/lib/cms1500-pdf.ts) prints the record onto the CMS-1500 (02/12) sheet itself, box for box, over the blank in [public/samples](public/samples/) with pdf-lib. The same JSON is read from paper by the extractor and printed back onto it — the mapping table is one object of coordinates, next to the answers it places.
 - **A way in from paper.** A claim on `/claims` can be filled from a document instead of typed: [`/api/extract`](src/app/api/extract/route.ts) hands the file *and this form’s own JSON* to the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), and the answers are stored as a draft claim and opened on screen for a person to check — with the real validation and the real conditional logic. Two documents ship in [public/samples](public/samples/) and sit under the list as thumbnails: the **same** CMS-1500, once as a digital PDF and once as a scan, so the mapping can be seen on both kinds of input in one click. Any other CMS-1500 can be uploaded beside them. The key is server-side only; see [Environment](#environment).
@@ -98,8 +98,8 @@ One matching change in the pages: the editor currently takes `getSchemaDefinitio
 | Route | What it shows |
 | --- | --- |
 | `/` | Redirects to `/leads`. |
-| `/leads` | Placeholder: CRM records, one form to view, edit and add. Says plainly that it is not built yet, and lists what it will demonstrate. |
-| `/claims` | Table of CMS-1500 claim records, on the shared records page: pick one from the list or the header's switcher, view it read-only, edit it, start a new one, or add one already filled in from a sample document under the list. Save as PDF prints the open claim onto the CMS-1500 sheet. The claim form is the paper form box by box: masked input, dropdowns, radio groups, dates, numbers, a six-row service table and conditional panels. |
+| `/leads` | CRM opportunities on the shared records page: account and contacts (a dynamic panel with an economic-buyer rule), line items with totals and a weighted value, competitors, a security review and an activity log (dynamic matrices), and a qualification score. The signed-in user comes from the session: switch between a sales rep and a manager to see the budget amount appear and the over-20% discount rule lift. Every panel and row is stored with a stable id. |
+| `/claims` | Table of CMS-1500 claim records, on the shared records page: pick one from the list, view it read-only, edit it, start a new one, or add one already filled in from a sample document under the list. Save as PDF prints the open claim onto the CMS-1500 sheet. The claim form is the paper form box by box: masked input, dropdowns, radio groups, dates, numbers, a six-row service table and conditional panels. |
 | `/starter` | A checkout form and nothing else — table of contents, required-field validation, input masks, panels gated by `visibleIf`, and a review page built from earlier answers via `{question}` piping. |
 | `/definition?form=…` | Any form in the template as JSON, with the linter under it and the form it produces beside it, inside the admin shell. |
 | `/embedded/feedback` | Embedded demo — a mock product site whose hero hosts a satisfaction survey, rendered for the signed-in account. |
@@ -121,8 +121,9 @@ src/
   schemas/
     types.ts                    Shared types (survey-core only, no UI framework)
     createSurveyModel.ts        Model factory
-    checkout.ts                 The six form definitions
+    checkout.ts                 The seven form definitions
     insurance-claim.ts
+    leads.ts                    The CRM opportunity behind /leads
     plan-finder.ts
     customer-satisfaction.ts
     encounter-note.ts           The clinician’s note — the heaviest definition here
@@ -137,9 +138,9 @@ src/
   components/
     SurveyForm.tsx              Renders a model with survey-react-ui
     JsonEditor.tsx              Monaco wrapper (client-only)
-    records/                    The shared records page: list, form, record and user switchers
+    records/                    The shared records page: list, form, user switcher
     ClaimsView.tsx              /claims on RecordsView, plus extraction and the CMS-1500 export
-    NotImplemented.tsx          The panel of a page that is not built yet
+    NotImplemented.tsx          The panel of a page that is not built yet (no page uses it now)
     how-built/                  The "How this page is built" toggle state and panel
     AdminShell.tsx, Sidebar.tsx, ThemeSwitcher.tsx
     configure/                  The one editor: JSON + linter, and the live form
