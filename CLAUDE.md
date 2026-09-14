@@ -41,7 +41,7 @@ Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts
 
 ## Extension points
 
-The commercial SurveyJS products — the **form designer** (Survey Creator), **PDF export** (PDF Generator) and **analytics** (Dashboard) — are not part of this repository. They are added by a downstream edition, [surveyjs-nextjs-demo](https://github.com/surveyjs/surveyjs-nextjs-demo), that carries this same application plus those three packages. Every file here except the two named below is copied into that edition byte for byte, so a component never branches on which edition it is in by editing it — it reads the edition config.
+The commercial SurveyJS products — the **form designer** (Survey Creator), **PDF export** (PDF Generator) and **analytics** (Dashboard) — are not part of this repository. They are added by a downstream edition, [surveyjs-demo](https://github.com/surveyjs/surveyjs-demo), that carries this same application plus those three packages. Every file here except the two named below is copied into that edition byte for byte, so a component never branches on which edition it is in by editing it — it reads the edition config.
 
 The seam is `src/features`, in two files:
 

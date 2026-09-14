@@ -26,8 +26,8 @@ export const features: Features = {
   brand: {
     title: "SurveyJS Library + Next.js Template",
     badge: "MIT",
-    sourceUrl: "https://github.com/surveyjs/surveyjs-nextjs-demo-mit",
-    otherEdition: { label: "Full edition", href: "https://github.com/surveyjs/surveyjs-nextjs-demo" },
+    sourceUrl: "https://github.com/surveyjs/surveyjs-demo-mit",
+    otherEdition: { label: "Full edition", href: "https://github.com/surveyjs/surveyjs-demo" },
   },
   designer: {
     label: "Configure Form JSON",
