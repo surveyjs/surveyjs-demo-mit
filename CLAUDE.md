@@ -1,6 +1,6 @@
 # SurveyJS + Next.js template
 
-A Next.js App Router application that shows the [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview) inside a product rather than on its own: an admin shell with real pages, three demos of a survey embedded in somebody else's website, seven form definitions, and one editor for all of them. Forms are JSON, rendered on the server, themed with shadcn/ui through the SurveyJS theme adapter.
+A Next.js App Router application that shows the [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview) inside a product rather than on its own: an admin shell with real pages, three demos of a survey embedded in somebody else's website, six form definitions, and one editor for all of them. Forms are JSON, rendered on the server, themed with shadcn/ui through the SurveyJS theme adapter.
 
 This repository is MIT-licensed and depends on `survey-core` and `survey-react-ui` only. See **Extension points** below for how the commercial features attach.
 
@@ -8,8 +8,8 @@ This repository is MIT-licensed and depends on `survey-core` and `survey-react-u
 
 | Path | What lives there |
 |---|---|
-| `src/app` | Routes. The `(shell)` group is the admin chrome (`/claims`, `/checkout`, `/records`); `/embedded/*` is deliberately outside it; `/configure` is the form editor; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition. |
-| `src/components` | React. `AdminShell`, `TopBar` and `Sidebar` are the chrome, `how-built/` the state behind the top bar's "How this page is built" toggle (the panel is still a stub), `SurveyForm` and `RecordsView` the two ways a survey is rendered, `configure/` the editor, `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
+| `src/app` | Routes. The `(shell)` group is the admin chrome (`/leads`, `/claims`, `/starter`, `/definition`); `/embedded/*` is deliberately outside it; `/configure` is the per-form editor every form's editor button opens; legacy paths redirect in `next.config.mjs`; `/api/extract` reads answers off a document; `/api/lint` runs static analysis on a definition. |
+| `src/components` | React. `AdminShell`, `TopBar` and `Sidebar` are the chrome, `how-built/` the state behind the top bar's "How this page is built" toggle (the panel is still a stub), `SurveyForm` and `ClaimsView` the two ways a survey is rendered, `NotImplemented` the panel of a page not built yet, `configure/` the editor (also rendered inside the shell on `/definition`), `embedded/` the three host sites and their shared toolbar, `ui/` the shadcn primitives. |
 | `src/schemas` | The form definitions and everything about them: one file per form, seed answers under `data/`, test cases under `tests/`, the `createSurveyModel` factory, the nav table, and the registry that maps a schema id to a definition. Depends on `survey-core` only — no UI framework here. |
 | `src/features` | The edition config: which editor, brand and optional commercial actions this edition has. See **Extension points**. |
 | `src/lib` | Helpers with no React: route builders (`routes.ts`, including the other-edition link and a page's source file), the demo's name and site links (`site.ts`), the CMS-1500 printer, the survey-core linter adapter, the license-key loader. |
@@ -34,10 +34,11 @@ Nothing in `src/` reads or writes stored data except `src/storage/survey-json.ts
 
 ## Adding a page
 
-1. Add an entry to `navItems` in `src/schemas/navigation.ts`, with the `schemaId` it renders and its `layout`: `"shell"` for a page inside the admin chrome, `"embedded"` for one that pretends to be somebody else's site. The sidebar is built from that list, and the top bar's "Source of this page" link finds the page's file from it.
-2. Create `src/app/(shell)/<route>/page.tsx`. Read the nav entry with `getNavItem`, the definition with `getSchemaDefinition`, then render `PageHeader` and `SurveyForm`. The three existing pages are each about fifteen lines; copy one.
-3. An `"embedded"` page must not wear the admin chrome, so it goes outside the `(shell)` group, as `/embedded/*` does; the sidebar opens it in a new tab. `layout` only describes the page — the folder is what Next.js obeys — and `e2e/top-bar.spec.ts` fails when the two disagree.
-4. Add the route to `e2e/initial.spec.ts`, which asserts that the survey markup is in the HTML the server sent.
+1. Add a row to one of the groups in `navGroups` in `src/schemas/navigation.ts`, and its icon to `ICONS` in `Sidebar.tsx`. A **page** (`NavPage`) has a `path`, a `layout` and, if it renders one form, the `schemaId`: `"shell"` for a page inside the admin chrome, `"embedded"` for one that pretends to be somebody else's site. A **link** (`NavLink`) to another site has an `href` instead, kept in `src/lib/site.ts`. The sidebar renders every group from that list, and the top bar's "Source of this page" link finds a page's file from `navPages`. A row opens in a new tab, and shows ↗, exactly when `opensInNewTab` says so — a link or an embedded page; never special-case a row in the component.
+2. Create `src/app/(shell)/<route>/page.tsx`. For a form, read the nav entry with `getFormNavItem`, the definition with `getSchemaDefinition`, then render `PageHeader` and `SurveyForm`; `starter/page.tsx` is about fifteen lines, so copy it. A page that is not built yet renders `NotImplemented` with the row's label and description, as `leads/page.tsx` does.
+3. An `"embedded"` page must not wear the admin chrome, so it goes outside the `(shell)` group, as `/embedded/*` does. `layout` only describes the page — the folder is what Next.js obeys — and `e2e/top-bar.spec.ts` fails when the two disagree.
+4. Add the route to `e2e/initial.spec.ts`, which asserts that the survey markup is in the HTML the server sent, and the row to the expected list in `e2e/sidebar.spec.ts`.
+5. Renaming a route? Add the old path to `redirects()` in `next.config.mjs`, and to the `legacy redirects` block of `e2e/sidebar.spec.ts`.
 
 ## Extension points
 
@@ -67,8 +68,8 @@ What reads it:
 
 - `src/components/TopBar.tsx` — the edition pill, the switch link, "Source of this page", `data-edition`. The demo's name and the site links are the same in every edition, so they live in `src/lib/site.ts`, not here.
 - `src/components/PageHeader.tsx` — the editor button, and the analytics button when a page passes `analyticsHref`
-- `src/app/(shell)/claims/page.tsx`, `checkout/page.tsx`, `records/page.tsx` — pass `analyticsHref={features.analyticsHref?.(nav.schemaId)}`
-- `src/components/SurveyForm.tsx` — `usePdfAction`, switched off per form with `pdfInNavigation={false}` (as `RecordsView` does)
+- `src/app/(shell)/claims/page.tsx` and `starter/page.tsx` — pass `analyticsHref={features.analyticsHref?.(nav.schemaId)}`
+- `src/components/SurveyForm.tsx` — `usePdfAction`, switched off per form with `pdfInNavigation={false}` (as `ClaimsView` does)
 - `src/components/embedded/shared/useDemo.ts` — `trackAnswers`, and `onExportPdf` / `analyticsHref` in `dockProps`
 - `src/components/embedded/shared/DemoDock.tsx` — the editor link, and the PDF and Analytics buttons when those props are set
 - `src/components/configure/forms.ts` — `SOURCE_ROOT`, from `brand.sourceUrl`
@@ -122,6 +123,6 @@ There is deliberately no `package-lock.json`. Every SurveyJS package is pinned t
 
 Copy `.env.example` to `.env.local`. It documents four variables, in two groups.
 
-**Server-side, for `/api/extract`, in both editions.** `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` — set one, not both — enables the route that reads answers off an uploaded document; whichever is present picks the provider. `EXTRACTOR_MODEL` optionally overrides the model; without it the route uses its per-provider default (see `src/app/api/extract/route.ts`). Leave it commented out rather than empty: an empty string survives the route's `??` fallback and asks the provider for a model named `""`. With neither key set the route answers 501 and the button on `/records` says so. None of these reach the browser.
+**Server-side, for `/api/extract`, in both editions.** `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` — set one, not both — enables the route that reads answers off an uploaded document; whichever is present picks the provider. `EXTRACTOR_MODEL` optionally overrides the model; without it the route uses its per-provider default (see `src/app/api/extract/route.ts`). Leave it commented out rather than empty: an empty string survives the route's `??` fallback and asks the provider for a model named `""`. With neither key set the route answers 501 and the button on `/claims` says so. None of these reach the browser.
 
 **`SURVEYJS_KEY` — the SurveyJS license key.** When it is set, `src/lib/surveyjs-license.ts` applies it with `slk` from `survey-core`; unset or blank, nothing is applied. `SurveyForm` and `EmbeddedSurvey` import that file for its side effect, so the key is applied on every page that renders a form, on the server and in the browser; any other module that renders SurveyJS (the full edition's Creator, Dashboard and PDF export) imports it the same way. It reaches the browser, forwarded by the `env` block in `next.config.mjs` rather than by a `NEXT_PUBLIC_` prefix, so the two must be renamed together. `slk` is exported by `survey-core` itself, so the code is MIT-clean, and the two editions differ by a key rather than by code.
