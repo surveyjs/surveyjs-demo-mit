@@ -1,28 +1,12 @@
-# SurveyJS + Next.js example
+# SurveyJS in your app — MIT edition
 
-This example shows how to use Next.js along with the [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview): complex forms are defined as JSON, rendered on the server by the App Router, and styled with [shadcn/ui](https://ui.shadcn.com) through the SurveyJS theme adapter.
+A working application with SurveyJS forms inside it, built only with MIT-licensed packages. Not a form gallery: every page is a situation a product team recognises — records your staff edit, a survey embedded in somebody else's site, a clinician's workspace that is nothing but a form, paper job sheets turned into data by AI.
 
-## Deploy your own
+Clone it and start your own project from it. Nothing here needs a licence key.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsurveyjs%2Fsurveyjs-demo-mit)
+**[Run the demo](https://mit.demos.surveyjs.io)** · [Full edition](https://demos.surveyjs.io) (adds Survey Creator, PDF Generator and Dashboard) · [What you can build](https://surveyjs.io/use-cases) · [Server integration](https://surveyjs.io/backend-integration/examples)
 
-## How to use
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
-
-```bash
-npx create-next-app --example "https://github.com/surveyjs/surveyjs-demo-mit" surveyjs-nextjs-app
-```
-
-```bash
-yarn create next-app --example "https://github.com/surveyjs/surveyjs-demo-mit" surveyjs-nextjs-app
-```
-
-```bash
-pnpm create next-app --example "https://github.com/surveyjs/surveyjs-demo-mit" surveyjs-nextjs-app
-```
-
-Or clone the repository directly:
+## Quick start
 
 ```bash
 git clone https://github.com/surveyjs/surveyjs-demo-mit.git
@@ -31,155 +15,123 @@ npm i
 npm run dev
 ```
 
-Open http://localhost:3000/ in your browser.
+Open http://localhost:3000. Or bootstrap it as a Next.js example:
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+```bash
+npx create-next-app --example "https://github.com/surveyjs/surveyjs-demo-mit" my-app
+```
 
-## What this example covers
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsurveyjs%2Fsurveyjs-demo-mit)
 
-- **Server-side rendering.** A survey is rendered into the HTML the server sends, so the form is in the document before any JavaScript runs — no DOM stub or other workaround required.
-- **JSON-driven forms.** Every form is a plain JSON definition; the app never hardcodes fields. Definitions live in [src/schemas/](src/schemas/).
-- **A renderer-agnostic model factory.** [createSurveyModel](src/schemas/createSurveyModel.ts) builds a configured `survey-core` model from a definition, and knows nothing about React — the same call works with any SurveyJS UI package.
-- **Theming with shadcn/ui.** The SurveyJS shadcn adapter (`survey-core/themes/adapters/shadcn-base-nova.css`) maps the form onto the same design tokens the rest of the app uses, so light/dark mode and radius/color changes apply to both at once. App-local tweaks go into [src/styles/](src/styles/).
-- **Create, edit and read-only modes.** [RecordsView](src/components/records/RecordsView.tsx) is the shared records page: a list of stored records and one definition that views, edits and adds them, with a discard prompt for unsaved changes, and a storage seam that keeps the list's columns apart from the whole response. [ClaimsView](src/components/ClaimsView.tsx) is `/claims` on top of it, adding a claim filled from a document.
-- **How this page is built.** The top bar's toggle opens a panel that says what goes into the form on the page, which variable references the definition holds (read off the JSON itself), and what comes out. Its content is [how-built.ts](src/lib/how-built.ts).
-- **The claim onto the real form.** A questionnaire is the wrong document for a claim, so `/claims` exports the other direction: [exportClaimToCms1500](src/lib/cms1500-pdf.ts) prints the record onto the CMS-1500 (02/12) sheet itself, box for box, over the blank in [public/samples](public/samples/) with pdf-lib. The same JSON is read from paper by the extractor and printed back onto it — the mapping table is one object of coordinates, next to the answers it places.
-- **A way in from paper.** A claim on `/claims` can be filled from a document instead of typed: [`/api/extract`](src/app/api/extract/route.ts) hands the file *and this form’s own JSON* to the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), and the answers are stored as a draft claim and opened on screen for a person to check — with the real validation and the real conditional logic. Two documents ship in [public/samples](public/samples/) and sit under the list as thumbnails: the **same** CMS-1500, once as a digital PDF and once as a scan, so the mapping can be seen on both kinds of input in one click. Any other CMS-1500 can be uploaded beside them. The key is server-side only; see [Environment](#environment).
-- **The survey is the extraction schema.** [insurance-claim.ts](src/schemas/insurance-claim.ts) is the CMS-1500 (02/12) box by box, and every question carries an `aiHint` — the per-field note the extractor appends to the prompt and no visitor ever sees. That is where the form’s quirks are written down: which side of its label a checkbox sits on, that box 14 is not the date of birth, that money is printed as dollars and cents in two columns, that the two boxes with identical wording hold different insurers. Tuning those lines, rather than any code, is how extraction is made to land field for field.
-- **One editor for every form.** [`/configure`](src/components/configure/JsonWorkbench.tsx) makes the plainest claim the library has — the form *is* a JSON document: a Monaco editor with survey-core’s own linter under it on the left, the form it produces on the right, following it as you type. It carries no chrome of its own — `?form=` says which form is being edited, and a reviewer arrives from that form and leaves back to it — and the primary button saves and opens the page the form actually lives in, which for the embedded demos is somebody else’s website. Edits are kept in `localStorage`, so the server keeps rendering the canonical definition and the prerendered HTML stays intact.
-  - The linter is told the one variable the host sets at runtime (`knownVariables: ["user"]`), which is why a personalized definition reads as clean rather than as forty unknown references. Every definition that ships passes it, and an e2e test keeps it that way.
-  - One lint engine and two front ends: this edition draws `survey-core/linter` findings as a status bar under Monaco, and the [full edition](https://github.com/surveyjs/surveyjs-demo) shows the same rules inside Survey Creator's own UI. On the server, both run [`/api/lint`](src/app/api/lint/route.ts), the same code with the same rules, so a definition the editor flags is also rejected by the API.
-- **Surveys embedded in somebody else’s site.** Three demos under [`/embedded`](src/app/embedded/), each rendered without the admin chrome (see the `(shell)` route group), each in its own brand colour, and each opened in a new tab from the sidebar. One host site, one form, sitting inline in the page the way a real embed does.
-
-  They share one toolbar, and it is deliberately down to two claims. **The form is JSON:** *Configure Form JSON* opens this form’s definition on `/configure`, and what is saved there is what these pages render — the round trip a buyer is asking about, rather than a second editor bolted onto the host site. **The form is rendered for a person:** *Login as* switches between the three preset users each demo ships with, and *Edit the user* opens the signed-in account in a popup — and that editor is itself a SurveyJS survey, with the object it produces shown as JSON underneath it, so the library is editing its own input and there is no bespoke form code anywhere. Every demo passes that object to survey-core as one variable, so the definition reads `{user.firstName}` — in titles, in `defaultValueExpression` to arrive pre-answered, and in `visibleIf` to add or drop whole pages. Sign in as somebody else and the greeting, the values *and* the number of steps change. And the form is outlined wherever it lands — the dashed ring is always on, so there is no argument about which part of the page SurveyJS drew and which part is the host site. See [demo-accounts.ts](src/components/embedded/shared/demo-accounts.ts); the shared machinery is [useDemo](src/components/embedded/shared/useDemo.ts), so the next demo is a page component and a route.
-  - `/embedded/feedback` — a mock product marketing site whose hero holds a satisfaction survey, addressed to the workspace member who is signed in. It greets them by name, works out how long they have been a customer from `monthsActive` rather than asking, gives a paying customer a question about plan fit and a three-week-old account a whole onboarding page instead, quotes their open support ticket by subject, names their CSM if they have one, and never asks for an email address it already has.
-  - `/embedded/chart` — the staff side of that same clinic, and the answer to *our real forms are nothing like that*. The whole screen is one survey: eight pages with survey-core’s own table of contents and progress bar, a problem list as a dynamic matrix with expandable detail rows and duplicate detection, a medication matrix that totals daily dose and morphine-milligram equivalents in its total row, surgical history as a tabbed dynamic panel with a file upload per operation, a focused-exam grid whose **rows are generated** from the systems flagged abnormal (`rowsVisibleIf`), BMI / mean arterial pressure / a PHQ-2 score / a cardiovascular risk band in `expression` questions and `calculatedValues`, three triggers, camera capture, a signature-pad attestation and a review step before the note is filed. [ChartDemo.tsx](src/components/embedded/chart/ChartDemo.tsx) is a header bar and nothing else — that is the point: none of the above is React. And the note is still rendered *for* somebody: open a different chart in the toolbar and the banner, the age, the clinician, the problem and medication lists and the new-patient page all follow the patient.
-  - `/embedded/clinic` — a mock US primary-care site, built to the conventions a patient reads without noticing: the utility bar, a provider directory with credentials, in-network plans, posted self-pay prices, the statutory notices. Its appointment request answers the question patients actually ask — [visitSummaryFor](src/schemas/clinic-info.ts) derives the copay from the plan and the visit type, flags an HMO referral, and builds the what-to-bring list; submitting scrolls to the clinician who will see them. And because a patient portal knows more about you than any other login you have, it is the sharpest of the three on personalisation: the office, the clinician, the plan, the name and the date of birth all arrive filled in, the identity fields stay locked until the patient says something has changed, the insurance-card fields are not there at all while a card is on file, “is this about something we already treat you for?” offers *that patient’s* conditions and the refill question *that patient’s* medications — both assembled choice by choice from the chart — and a first-time visitor gets an extra page nobody else sees.
-- **One place to swap in your own storage.** Every read and write goes through three files in [src/storage/](src/storage/), and nothing else in the app knows where the data lives — see [Storage](#storage-localstorage-here-your-database-in-production).
-
-## Storage: `localStorage` here, your database in production
-
-Everything this template stores goes through **three files in [src/storage/](src/storage/)**. Nothing else in `src/` reads or writes stored data.
-
-| File | What it stores | How the demo does it |
-| --- | --- | --- |
-| [survey-json.ts](src/storage/survey-json.ts) | Survey definitions edited on `/configure` | `localStorage`, so each visitor's experiments stay in their own browser and the server keeps rendering the definition that ships with the template |
-| [survey-results.ts](src/storage/survey-results.ts) | Submitted answers and the records pages' records | In memory, per collection — an edit is gone as soon as you reload. Nothing is persisted, on purpose: a template should not look like it stores someone's data when it does not. A record is kept as the whole response (the document) plus the list's columns, derived from it on every save |
-| [session.ts](src/storage/session.ts) | Who a page is rendered for | A fixed list per page, so a reviewer can switch between users; no page has any yet. In your app, `getSession()` |
-
-Every function in these files is `async`, so replacing the bodies with calls to your API changes no call site anywhere else.
-
-### Moving to your own server and database
-
-1. **Two tables:** `survey_schemas (id, json, updated_at)` and `claims (id, data, claim_number, patient_name, status, total_charge, updated_at)` — the document, plus the columns the list reads. Seed them from `src/schemas/` (see below).
-2. **Route handlers** under `src/app/api/` — `GET`/`PUT`/`DELETE /api/schemas/[id]`, and `GET /api/claims` (columns only) plus `GET`/`PUT`/`DELETE /api/claims/[id]` (the document). Validate the incoming JSON and authorize the caller here: the schema editor is effectively an admin surface, and it is only safe unauthenticated today because nothing leaves the browser.
-3. **Replace the three bodies in [survey-json.ts](src/storage/survey-json.ts)** — `loadSurveyJson`, `saveSurveyJson`, `resetSurveyJson` — with `fetch` calls. The file's header comment shows the shape.
-4. **Replace the five bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `getResult`, `saveResult`, `deleteResult`, `submitResult`. Derive the columns on write with the collection's `toColumns`, or the database's own equivalent.
-5. **Mind the server-side readers.** `listResults` and the first `getResult` are called from the `/claims` server component, so the table and the form are in the server HTML; a relative `fetch("/api/claims")` does not resolve there. Query the database directly in that branch, or use an absolute URL. Opening another row and the mutations run on the client and can use relative URLs.
-
-### What happens to `src/schemas/`
-
-The folder holds four different kinds of thing, and only the first moves into the database:
-
-| | |
-| --- | --- |
-| `checkout.ts`, `insurance-claim.ts`, `plan-finder.ts`, `customer-satisfaction.ts`, `encounter-note.ts`, `clinic-visit.ts` | **Move to the database** — one row each in `survey_schemas`. Keep the files as the seed, and as the fallback `loadSurveyJson` returns to when a row is missing. |
-| `data/insurance-claim-seed.ts` | **Moves to the database** — rows in `claims`. |
-| `data/checkout-seed.ts`, `data/plan-finder-seed.ts`, `data/customer-satisfaction-seed.ts`, `data/encounter-note-seed.ts`, `data/clinic-visit-seed.ts` | Demo data behind the "Prefill demo data" button. Delete them. |
-| `clinic-info.ts` | The demo clinic’s own directory, plans and derived visit summary, not a survey definition. Delete it with the demos, or replace it with whatever your real catalogue is. |
-| `types.ts`, `createSurveyModel.ts` | **Stay as they are.** Types and the model factory have nothing to do with storage. |
-| `index.ts` | Stays, smaller. `getSchemaDefinition` becomes the fallback path rather than the source of truth, since definitions now come from `loadSurveyJson`. |
-| `navigation.ts` | **Stays** if your set of forms is fixed. If users create forms at runtime, this moves to the database too and the routes become a single dynamic `/[formId]`. |
-
-One matching change in the pages: the editor currently takes `getSchemaDefinition(id).json` from [forms.ts](src/components/configure/forms.ts), and the form pages pass it as `schema`. Both become `(await loadSurveyJson(id)) ?? getSchemaDefinition(id).json`.
+Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.com) through the SurveyJS theme adapter — but the adapter is one import, and the same definitions run on any SurveyJS UI package.
 
 ## Pages
 
 | Route | What it shows |
 | --- | --- |
-| `/` | Redirects to `/leads`. |
-| `/leads` | CRM opportunities on the shared records page: account and contacts (a dynamic panel with an economic-buyer rule), line items with totals and a weighted value, competitors, a security review and an activity log (dynamic matrices), and a qualification score. The signed-in user comes from the session: switch between a sales rep and a manager to see the budget amount appear and the over-20% discount rule lift. Every panel and row is stored with a stable id. |
-| `/claims` | Table of CMS-1500 claim records, on the shared records page: pick one from the list, view it read-only, edit it, start a new one, or add one already filled in from a sample document under the list. Save as PDF prints the open claim onto the CMS-1500 sheet. The claim form is the paper form box by box: masked input, dropdowns, radio groups, dates, numbers, a six-row service table and conditional panels. |
-| `/starter` | A checkout form and nothing else — table of contents, required-field validation, input masks, panels gated by `visibleIf`, and a review page built from earlier answers via `{question}` piping. |
-| `/definition?form=…` | Any form in the template as JSON, with the linter under it and the form it produces beside it, inside the admin shell. |
-| `/embedded/feedback` | Embedded demo — a mock product site whose hero hosts a satisfaction survey, rendered for the signed-in account. |
-| `/embedded/chart` | Embedded demo — a clinician’s workspace that is nothing but the survey: eight pages, matrices with totals and detail rows, calculated scores, file and camera capture, a signed attestation. |
-| `/embedded/clinic` | Embedded demo — a US clinic site whose appointment request arrives filled in from the patient’s chart, estimates the copay and flags a needed referral. |
-| `/configure?form=…` | The editor for one form, opened from each form's editor button: JSON plus linter on the left, the form it produces on the right. No sidebar. |
-| `/api/extract` | POST a document plus a `formId`; answers come back keyed by question name. Needs an LLM key. |
-| `/api/lint` | POST `{ json }`, a survey definition; `{ ok, findings }` comes back from the same linter the editor runs. |
-| Legacy redirects | `/records` → `/claims`, `/checkout` → `/starter`, `/checkout/configure` → `/configure?form=checkout`, `/records/configure` and `/claims/configure` → `/configure?form=insurance-claim`. Temporary (307), in `next.config.mjs`. |
+| `/leads` | A CRM opportunity record: contacts as a dynamic panel, line items and a security-review checklist as dynamic matrices, totals and a qualification score as expressions. One form views, edits and creates; saving writes both your columns and the full response. |
+| `/work-orders` | Field service job sheets. Upload a scan or a photo of a filled sheet and the extractor returns a draft record to check on screen; saving prints the answers back onto the company's own job sheet, box by box. |
+| `/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
+| `/encounter-note` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
+| `/appointment` | A mock clinic site whose appointment request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. English and Spanish from one definition. |
+| `/starter` | A multi-step checkout form and nothing else. The smallest page here, and the place to start reading. |
+| `/definition` | The form as a JSON document: a Monaco editor with survey-core's linter under it on the left, the form it produces on the right, following you as you type. `?form=…` chooses which form. |
+| `/api/extract` | POST a document and a `formId`; answers come back keyed by question name. Needs an LLM key — see [Environment](#environment). |
+
+The embedded pages (`/feedback`, `/encounter-note`, `/appointment`) render without the admin chrome, each in its own brand, and each outlines what SurveyJS drew with a dashed ring so there is no argument about which part of the page is the library. They share one toolbar: *Login as* switches between the preset users a demo ships with, and *Edit the user* opens that account in a popup — an editor that is itself a SurveyJS survey, so the library edits its own input. Each demo passes the account to survey-core as one variable, so the definition reads `{user.firstName}` in titles, in `defaultValueExpression` and in `visibleIf`.
+
+## What to look at first
+
+- **Forms are JSON, never React.** Definitions live in [src/schemas/](src/schemas/); no page hardcodes a field. [createSurveyModel](src/schemas/createSurveyModel.ts) turns a definition into a configured `survey-core` model and knows nothing about React.
+- **One variable does the personalisation.** The host passes the signed-in user (or the patient chart, or the record) as a variable; the definition reads it. Sign in as somebody else and the greeting, the prefilled values and the number of pages all change, with no branching in the application code.
+- **Paper in, paper out.** `/work-orders` reads a filled sheet with the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), handing it the file *and the form's own JSON*; each question carries an `aiHint`, the per-field note appended to the prompt that no visitor sees. Tuning those lines, not code, is how extraction is made to land field for field. The other direction prints the record onto the company's blank with pdf-lib, the mapping being one object of coordinates next to the answers it places.
+- **The linter runs everywhere.** `/definition` shows survey-core's static analysis under the editor, told the one variable the host sets at runtime (`knownVariables: ["user"]`). Every definition that ships passes it, and an e2e test keeps it that way.
+- **Two files touch stored data.** See below.
+
+## Storage: `localStorage` here, your database in production
+
+Everything this app stores goes through **two files in [src/storage/](src/storage/)**. Nothing else in `src/` reads or writes stored data.
+
+| File | What it stores | How the demo does it |
+| --- | --- | --- |
+| [survey-json.ts](src/storage/survey-json.ts) | Definitions edited on `/definition` | `localStorage`, so a visitor's experiments stay in their own browser and the server keeps rendering the definition that ships |
+| [survey-results.ts](src/storage/survey-results.ts) | Submitted answers, lead and work-order records | An in-memory array — an edit is gone on reload. Nothing is persisted, on purpose: a template should not look like it stores someone's data when it does not |
+
+Every function in both files is `async`, so replacing the bodies with calls to your API changes no call site.
+
+### Moving to your own server and database
+
+1. **Tables:** `survey_schemas (id, json, updated_at)` plus one per record type — `leads (id, data, updated_at)`, `work_orders (id, data, updated_at)`. Seed them from `src/schemas/`.
+2. **Route handlers** under `src/app/api/` for each: `GET`/`PUT`/`DELETE /api/schemas/[id]`, `GET`/`POST /api/leads`, `PUT`/`DELETE /api/leads/[id]`, and the same for work orders. Validate the incoming JSON and authorize the caller here: the definition editor is an admin surface, and it is only safe unauthenticated today because nothing leaves the browser.
+3. **Replace the bodies in [survey-json.ts](src/storage/survey-json.ts)** — `loadSurveyJson`, `saveSurveyJson`, `resetSurveyJson` — with `fetch` calls. The file header shows the shape.
+4. **Replace the bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `saveResult`, `deleteResult`, `submitResult`.
+5. **Mind the server-side reader.** `listResults()` is called from a server component so the table and the form are in the server HTML; a relative `fetch("/api/leads")` does not resolve there. Query the database directly in that branch, or use an absolute URL. The mutations run on the client and can use relative URLs.
+
+[Server integration](https://surveyjs.io/backend-integration/examples) shows the same endpoints for Node.js, ASP.NET Core, PHP and Python.
+
+### What happens to `src/schemas/`
+
+| | |
+| --- | --- |
+| The form definitions | **Move to the database** — one row each in `survey_schemas`. Keep the files as the seed and as the fallback `loadSurveyJson` returns when a row is missing. |
+| `data/*-seed.ts` records | **Move to the database** for the record types; the rest is demo data behind "Prefill demo data" — delete it. |
+| `clinic-info.ts`, `patient-record.ts` | The demo clinic's directory, plans and chart — not survey definitions. Delete them with the demos or replace them with your own catalogue. |
+| `types.ts`, `createSurveyModel.ts` | **Stay as they are.** Types and the model factory have nothing to do with storage. |
+| `index.ts` | Stays, smaller. `getSchemaDefinition` becomes the fallback rather than the source of truth. |
+| `navigation.ts` | **Stays** if your set of forms is fixed. If users create forms at runtime, this moves to the database too and the routes become a single dynamic `/[formId]`. |
+
+## Extension points
+
+Commercial SurveyJS components — Survey Creator, PDF Generator, Dashboard — are not in this repository and not in its dependency tree. They plug in through [src/features/](src/features/), which ships no-op defaults here: when a hook returns nothing, the button it belongs to is not rendered.
+
+That is also how the [Full edition](https://github.com/surveyjs/surveyjs-demo) is built. It is a downstream of this repository: the same code, merged, plus its own implementations of these hooks. If you want the designer in your own copy, implement the same hooks against your licence.
 
 ## Project structure
 
 ```
 src/
   app/
-    (shell)/                    Pages inside the admin chrome, one folder per route
-    embedded/                   The embedded demos — no admin chrome at all
-      feedback/  chart/  clinic/
+    (shell)/                    Pages inside the admin chrome
+      leads/  work-orders/  starter/  definition/
+    embedded/                   The embedded demos — no admin chrome
+      feedback/  encounter-note/  appointment/
+    api/extract/                Document → answers
   schemas/
     types.ts                    Shared types (survey-core only, no UI framework)
     createSurveyModel.ts        Model factory
-    checkout.ts                 The seven form definitions
-    insurance-claim.ts
-    leads.ts                    The CRM opportunity behind /leads
-    plan-finder.ts
-    customer-satisfaction.ts
-    encounter-note.ts           The clinician’s note — the heaviest definition here
-    clinic-visit.ts
-    clinic-info.ts              The clinic’s directory, plans, and the derived visit summary
-    patient-record.ts           The patient chart the clinic demo renders its form for
-    data/                       Demo response data / seed records
-    tests/                      Test cases for survey-core/tester, not run yet (see its README)
-    records.ts                  Records pages as data: columns, toColumns, new-record defaults
-    collections/                One collection per records page (claims)
-    navigation.ts               The sidebar groups: pages, links and the schema each page renders
+    *.ts                        The form definitions
+    clinic-info.ts              The demo clinic's directory, plans, derived visit summary
+    patient-record.ts           The chart the appointment demo renders its form for
+    data/                       Seed records and demo response data
+    navigation.ts               Route ↔ schema mapping used by the sidebar
   components/
     SurveyForm.tsx              Renders a model with survey-react-ui
     JsonEditor.tsx              Monaco wrapper (client-only)
-    records/                    The shared records page: list, form, user switcher
-    ClaimsView.tsx              /claims on RecordsView, plus extraction and the CMS-1500 export
-    NotImplemented.tsx          The panel of a page that is not built yet (no page uses it now)
-    how-built/                  The "How this page is built" toggle state and panel
-    AdminShell.tsx, Sidebar.tsx, ThemeSwitcher.tsx
-    configure/                  The one editor: JSON + linter, and the live form
-      forms.ts                  Every form in the template, in one list
-    claims/                     Extraction from paper: the sample documents and the upload
-    lint/                       survey-core’s linter as a status bar
-    embedded/                   One folder per demo route, plus what they share
-      shared/                   The toolbar, the user popup, the survey wrapper, the demo accounts
-      feedback/  clinic/  chart/
+    AdminShell.tsx, Sidebar.tsx, TopBar.tsx, ThemeSwitcher.tsx
+    definition/                 The editor: JSON + linter, and the live form
+    records/                    Extraction from paper: sample documents and upload
+    lint/                       survey-core's linter as a status bar
+    embedded/                   One folder per demo, plus what they share
     ui/                         shadcn/ui primitives
-  storage/                      The only three files that touch stored data
-    survey-json.ts              Survey definitions
-    survey-results.ts           Submitted answers, and records as columns plus document
-    session.ts                  The users a page is rendered for
-  lib/
-    how-built.ts                What the "How this page is built" panel says, per page
-    utils.ts                    The shadcn class-merging helper, stableJson
+  features/                     Extension points; no-op defaults in this edition
+  storage/                      The only two files that touch stored data
   styles/                       App-local overrides on top of the SurveyJS adapter
 ```
 
-To add a form, drop a JSON definition into `src/schemas/`, register it in [src/schemas/index.ts](src/schemas/index.ts), add an entry to [src/schemas/navigation.ts](src/schemas/navigation.ts) and one to [src/components/configure/forms.ts](src/components/configure/forms.ts) so the editor covers it, and create a page that passes it to `SurveyForm`.
+To add a form: drop a definition into `src/schemas/`, register it in [index.ts](src/schemas/index.ts) and [navigation.ts](src/schemas/navigation.ts), and create a page that passes it to `SurveyForm`.
 
 ## Environment
 
-Copy [.env.example](.env.example) to `.env` and fill in what you need — `.env` is git-ignored, so your keys stay out of the repository.
+Copy [.env.example](.env.example) to `.env` — `.env` is git-ignored, so your keys stay out of the repository.
 
 | Variable | What it does |
 | --- | --- |
-| `SURVEYJS_KEY` | SurveyJS license key. Applied to the SurveyJS library by [surveyjs-license.ts](src/lib/surveyjs-license.ts) when it is set. |
 | `OPENAI_API_KEY` | Enables `/api/extract` through OpenAI. |
 | `ANTHROPIC_API_KEY` | Enables `/api/extract` through Anthropic. Used when no OpenAI key is set. |
 | `EXTRACTOR_MODEL` | Overrides the model (defaults: `gpt-4o`, `claude-sonnet-5`). |
-| `NEXT_PUBLIC_SITE_URL` | This deployment's URL. Canonical links and Open Graph URLs are built from it. |
-| `NEXT_PUBLIC_CANONICAL_URL` | Optional. The host canonical links point at, when it is not this one. |
-| `NEXT_PUBLIC_INDEXABLE` | `false` adds `noindex` to every page and disallows crawling in `robots.txt`. |
+| `NEXT_PUBLIC_SITE_URL` | Base URL used for canonical and Open Graph tags. |
 
-Extraction needs one of the two provider keys, not both: `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. If both are set, OpenAI is the one used.
-
-With no LLM key the extraction endpoint answers 501 and the buttons on `/claims` say so: the feature is wired, and it starts working the moment a key appears. The keys are read on the server only and never reach the browser.
+Extraction needs one provider key, not both; if both are set, OpenAI is used. With no key the endpoint answers 501 and the buttons say so: the feature is wired and starts working the moment a key appears. Keys are read on the server only and never reach the browser.
 
 ## Tests
 
@@ -191,14 +143,6 @@ npm run e2e:dev   # against `next dev`, where React reports more warnings
 npm run e2e:ui    # interactive runner
 ```
 
-## Editions
-
-This is the **MIT edition**. It depends on `survey-core` and `survey-react-ui` only.
-
-The [full edition](https://github.com/surveyjs/surveyjs-demo) is the same application plus three commercial SurveyJS products: Survey Creator on `/configure`, PDF Generator and Dashboard. Its shared code is copied from this repository.
-
-Commercial features attach through the edition config in [src/features/index.ts](src/features/index.ts). Every hook there is undefined or a no-op in this edition, so no component here branches on which edition it is in.
-
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). The SurveyJS packages used here — `survey-core`, `survey-react-ui` and the AI Form Response Extractor — are MIT-licensed too.
