@@ -2,9 +2,29 @@
 
 import type { RecordRow, StoredRecord } from "@/schemas";
 import { features } from "@/features";
-import { RecordsView } from "@/components/records/RecordsView";
+import { RecordsView, type DocumentImport } from "@/components/records/RecordsView";
 import { ExtractFromDocument } from "@/components/extract/ExtractFromDocument";
 import { workOrderSampleDocuments } from "@/components/extract/sample-documents";
+
+/**
+ * Adding a work order from paper. The header's "Add from document" opens the
+ * panel in the form column's place, at `/work-orders/from-document`; a finished
+ * reading opens the new draft at its own URL.
+ */
+const fromDocument: DocumentImport = {
+  label: "Add from document",
+  segment: "from-document",
+  render: ({ createFrom, onBusyChange }) => (
+    <ExtractFromDocument
+      formId="work-order"
+      noun="work order"
+      documentName="job sheet"
+      samples={workOrderSampleDocuments}
+      onExtracted={createFrom}
+      onBusyChange={onBusyChange}
+    />
+  ),
+};
 
 /**
  * `/work-orders`: the shared records page, plus the way in from paper, and in
@@ -13,14 +33,19 @@ import { workOrderSampleDocuments } from "@/components/extract/sample-documents"
 export function WorkOrdersView({
   title,
   description,
+  basePath,
   initialRows,
   initialRecord,
+  initialImport,
 }: {
   title: string;
   description: string;
+  basePath: string;
   /** Read on the server by the page, so the first paint is complete. */
   initialRows: readonly RecordRow[];
   initialRecord: StoredRecord | undefined;
+  /** Set by `from-document/page.tsx`: the page opens on the import panel. */
+  initialImport?: boolean;
 }) {
   // The full edition plugs in the job sheet printer: the record, printed onto the
   // company's own sheet - not a picture of the questionnaire. Undefined here, so
@@ -32,20 +57,12 @@ export function WorkOrdersView({
       collectionId="workOrders"
       title={title}
       description={description}
+      basePath={basePath}
       initialRows={initialRows}
       initialRecord={initialRecord}
-      // The parts table is five columns wide; see `layout` on RecordsView.
-      layout="stacked"
+      initialImport={initialImport}
       exportPdf={exportPdf}
-      listFooter={({ createFrom }) => (
-        <ExtractFromDocument
-          formId="work-order"
-          noun="work order"
-          documentName="job sheet"
-          samples={workOrderSampleDocuments}
-          onExtracted={createFrom}
-        />
-      )}
+      documentImport={fromDocument}
       formNote={
         exportPdf && (
           <>

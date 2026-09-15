@@ -28,6 +28,8 @@ export interface HowBuiltFeature {
 
 export interface HowBuiltContent {
   readonly summary: string;
+  /** For a records page: what the list beside the form is, rendered small under `summary`. */
+  readonly listNote?: string;
   readonly dataIn: readonly HowBuiltItem[];
   readonly dataOut: readonly HowBuiltItem[];
   /** Variable names whose references the panel lists, e.g. ["user"]. Empty: the section says the form reads none. */
@@ -48,10 +50,15 @@ export const HOW_BUILT_TEXT = {
   coming: "coming",
 } as const;
 
+/** The same note on both records pages. */
+const RECORDS_LIST_NOTE =
+  "The list on the left is this application's own React component, not a SurveyJS one. An editable list view built on the SurveyJS matrix is planned; it is not in this demo.";
+
 export const HOW_BUILT: Partial<Record<NavId, HowBuiltContent>> = {
   leads: {
     summary:
-      "A CRM opportunity as one form: contacts in a dynamic panel, line items and totals in matrices, and rules that follow the signed-in user. The list shows seven columns derived from each record; the form edits the whole document.",
+      "A CRM opportunity as one form: contacts in a dynamic panel, line items and totals in matrices, and rules that follow the signed-in user. Seven columns are derived from each record, and the list shows three of them; the form edits the whole document.",
+    listNote: RECORDS_LIST_NOTE,
     dataIn: [
       {
         label: "The definition",
@@ -102,6 +109,7 @@ export const HOW_BUILT: Partial<Record<NavId, HowBuiltContent>> = {
   workOrders: {
     summary:
       "A field service job sheet as one form: a list of stored work orders, and one form that views, edits and adds them. A filled sheet becomes a draft record through AI extraction.",
+    listNote: RECORDS_LIST_NOTE,
     dataIn: [
       {
         label: "The definition",

@@ -65,7 +65,7 @@ Every function in both files is `async`, so replacing the bodies with calls to y
 2. **Route handlers** under `src/app/api/` for each: `GET`/`PUT`/`DELETE /api/schemas/[id]`, `GET`/`POST /api/leads`, `PUT`/`DELETE /api/leads/[id]`, and the same for work orders. Validate the incoming JSON and authorize the caller here: the definition editor is an admin surface, and it is only safe unauthenticated today because nothing leaves the browser.
 3. **Replace the bodies in [survey-json.ts](src/storage/survey-json.ts)** — `loadSurveyJson`, `saveSurveyJson`, `resetSurveyJson` — with `fetch` calls. The file header shows the shape.
 4. **Replace the bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `saveResult`, `deleteResult`, `submitResult`.
-5. **Mind the server-side reader.** `listResults()` is called from a server component so the table and the form are in the server HTML; a relative `fetch("/api/leads")` does not resolve there. Query the database directly in that branch, or use an absolute URL. The mutations run on the client and can use relative URLs.
+5. **Mind the server-side reader.** `listResults()` is called from a server component so the list and the form are in the server HTML; a relative `fetch("/api/leads")` does not resolve there. Query the database directly in that branch, or use an absolute URL. The mutations run on the client and can use relative URLs.
 
 [Server integration](https://surveyjs.io/backend-integration/examples) shows the same endpoints for Node.js, ASP.NET Core, PHP and Python.
 
