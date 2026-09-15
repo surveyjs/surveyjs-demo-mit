@@ -1,15 +1,16 @@
 "use client";
 
 import type { RecordRow, StoredRecord } from "@/schemas";
-import { exportClaimToCms1500 } from "@/lib/cms1500-pdf";
+import { exportWorkOrderToPdf } from "@/lib/work-order-pdf";
 import { RecordsView } from "@/components/records/RecordsView";
-import { ExtractFromDocument } from "@/components/claims/ExtractFromDocument";
+import { ExtractFromDocument } from "@/components/extract/ExtractFromDocument";
+import { workOrderSampleDocuments } from "@/components/extract/sample-documents";
 
 /**
- * `/claims`: the shared records page, plus the two things only a claim has — a
- * way in from paper, and a way back onto it.
+ * `/work-orders`: the shared records page, plus the two things only a job sheet
+ * has - a way in from paper, and a way back onto it.
  */
-export function ClaimsView({
+export function WorkOrdersView({
   title,
   description,
   initialRows,
@@ -23,22 +24,30 @@ export function ClaimsView({
 }) {
   return (
     <RecordsView
-      collectionId="claims"
+      collectionId="workOrders"
       title={title}
       description={description}
       initialRows={initialRows}
       initialRecord={initialRecord}
-      // The claim, printed back onto the paper form it came from - not a
-      // picture of the questionnaire.
-      exportPdf={(data) => exportClaimToCms1500(data)}
+      // The parts table is five columns wide; see `layout` on RecordsView.
+      layout="stacked"
+      // The record, printed onto the company's own job sheet - not a picture of
+      // the questionnaire.
+      exportPdf={(data) => exportWorkOrderToPdf(data)}
       listFooter={({ createFrom }) => (
-        <ExtractFromDocument formId="insurance-claim" onExtracted={createFrom} />
+        <ExtractFromDocument
+          formId="work-order"
+          noun="work order"
+          documentName="job sheet"
+          samples={workOrderSampleDocuments}
+          onExtracted={createFrom}
+        />
       )}
       formNote={
         <>
-          <span className="font-medium">Save as PDF</span> prints this claim onto the
-          CMS-1500 (02/12) sheet itself, box for box - the same form the answers are
-          read from, not a picture of this questionnaire.
+          <span className="font-medium">Save as PDF</span> prints this work order onto
+          the company&apos;s own job sheet, box by box - the same sheet a technician fills
+          in on site, not a picture of this questionnaire.
         </>
       }
     />
