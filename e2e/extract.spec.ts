@@ -34,7 +34,6 @@ test("the work orders page offers three sample documents and an upload", async (
   const files = new Set([
     ...workOrderSampleDocuments.flatMap((sample) => [sample.file, sample.preview, sample.full]),
     "/samples/work-order-0120-scan.jpg",
-    "/samples/work-order-blank.pdf",
   ]);
   for (const file of files) {
     expect((await page.request.get(file)).status(), file).toBe(200);

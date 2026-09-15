@@ -1,10 +1,8 @@
-import { readFile } from "node:fs/promises";
 import { test, expect, type Page } from "@playwright/test";
-import { PDFDocument } from "pdf-lib";
 import { features } from "../src/features";
 import { configureHref } from "../src/lib/routes";
 import { PAGE_ACTIONS } from "../src/lib/site";
-import { HOW_BUILT, HOW_BUILT_TEXT, findVariableReferences } from "../src/lib/how-built";
+import { HOW_BUILT, HOW_BUILT_TEXT, findVariableReferences, itemsInEdition } from "../src/lib/how-built";
 import { getRecordCollection, recordTitle } from "../src/schemas/records";
 import { getResult, listResults, saveResult } from "../src/storage/survey-results";
 
@@ -12,8 +10,8 @@ import { getResult, listResults, saveResult } from "../src/storage/survey-result
  * The shared records page, proved on `/work-orders`: the list and its columns,
  * the header actions, new / cancel / save, the unsaved-changes dialog, and the
  * "How this page is built" panel. Then what a work order adds: totals, the
- * signature rule, a record linked to its original, and the job sheet PDF. Every
- * label comes from the code under test.
+ * signature rule and a record linked to its original. Every label comes from the
+ * code under test. The job sheet PDF is the full edition's, and so is its spec.
  */
 
 const workOrders = getRecordCollection("workOrders");
@@ -109,7 +107,13 @@ test.describe("on /work-orders", () => {
     await page.goto("/work-orders");
     await expect(formHeading(page)).toHaveText(`View ${recordTitle(workOrders, rows[0])}`);
 
-    await expect(page.getByRole("button", { name: "Save as PDF" })).toBeVisible();
+    // The job sheet printer, where the edition plugs one in; nothing about it otherwise.
+    await expect(page.getByRole("button", { name: "Save as PDF" })).toHaveCount(
+      features.exportWorkOrderPdf ? 1 : 0,
+    );
+    await expect(page.getByText("prints this work order onto")).toHaveCount(
+      features.exportWorkOrderPdf ? 1 : 0,
+    );
     await expect(page.getByRole("link", { name: features.designer.label })).toHaveAttribute(
       "href",
       configureHref(workOrders.schemaId),
@@ -177,8 +181,10 @@ test.describe("on /work-orders", () => {
 
     const panel = page.getByRole("complementary", { name: PAGE_ACTIONS.howBuilt });
     await expect(panel).toBeVisible();
-    for (const item of [...HOW_BUILT.workOrders!.dataIn, ...HOW_BUILT.workOrders!.dataOut]) {
-      await expect(panel).toContainText(item.label);
+    const { dataIn, dataOut } = HOW_BUILT.workOrders!;
+    for (const item of [...dataIn, ...dataOut]) {
+      const listed = itemsInEdition([item], features.edition).length > 0;
+      await expect(panel.getByText(item.label, { exact: true })).toHaveCount(listed ? 1 : 0);
     }
     await expect(panel).toContainText(HOW_BUILT_TEXT.noVariables);
 
@@ -284,19 +290,4 @@ test.describe("a work order", () => {
     await expect(formHeading(page)).toHaveText("View WO-2026-0118");
     await expect(page.getByText("Source document", { exact: true })).toHaveCount(0);
   });
-
-  for (const [id, pages] of [["WO-2026-0118", 2], ["WO-2026-0121", 1]] as const) {
-    test(`Save as PDF prints ${id} onto the job sheet, ${pages} sheet${pages === 1 ? "" : "s"}`, async ({ page }) => {
-      await page.goto("/work-orders");
-      await listRow(page, id).getByRole("cell").first().click();
-      await expect(formHeading(page)).toHaveText(`View ${id}`);
-
-      const download = page.waitForEvent("download");
-      await page.getByRole("button", { name: "Save as PDF" }).click();
-      const file = await download;
-      expect(file.suggestedFilename()).toBe(`job-sheet-${id.toLowerCase()}.pdf`);
-      const doc = await PDFDocument.load(await readFile((await file.path())!));
-      expect(doc.getPageCount()).toBe(pages);
-    });
-  }
 });

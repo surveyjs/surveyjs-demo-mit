@@ -16,7 +16,7 @@
  *
  * It holds the edition's name and pill, its repository, where the other edition
  * is hosted (for the top bar's switch link), which editor opens a form, and the
- * optional commercial actions. Here both optional actions are left undefined, so
+ * optional commercial actions. Here every optional action is left undefined, so
  * the buttons for them do not render at all.
  */
 import type { Features } from "./types";

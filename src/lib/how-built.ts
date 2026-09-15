@@ -14,6 +14,8 @@ export interface HowBuiltItem {
   readonly detail: string;
   /** A repository path; the panel links it under `features.brand.sourceUrl`. */
   readonly source?: string;
+  /** Set for data only one edition has. The other edition does not list it. */
+  readonly edition?: Edition;
 }
 
 export interface HowBuiltFeature {
@@ -31,6 +33,11 @@ export interface HowBuiltContent {
   /** Variable names whose references the panel lists, e.g. ["user"]. Empty: the section says the form reads none. */
   readonly variables: readonly string[];
   readonly features: readonly HowBuiltFeature[];
+}
+
+/** The items this edition lists: the panel renders these, and the specs expect them. */
+export function itemsInEdition(items: readonly HowBuiltItem[], edition: Edition): HowBuiltItem[] {
+  return items.filter((item) => item.edition === undefined || item.edition === edition);
 }
 
 /** The panel's fixed wording, shared with the specs. */
@@ -94,7 +101,7 @@ export const HOW_BUILT: Partial<Record<NavId, HowBuiltContent>> = {
   },
   workOrders: {
     summary:
-      "A field service job sheet as one form: a list of stored work orders, and one form that views, edits and adds them. A filled sheet becomes a draft record through AI extraction, and a record prints back onto the company's own sheet.",
+      "A field service job sheet as one form: a list of stored work orders, and one form that views, edits and adds them. A filled sheet becomes a draft record through AI extraction.",
     dataIn: [
       {
         label: "The definition",
@@ -131,13 +138,14 @@ export const HOW_BUILT: Partial<Record<NavId, HowBuiltContent>> = {
       {
         label: "The job sheet PDF",
         detail: "Save as PDF prints the record box by box onto the company's blank, adding continuation sheets for as many parts as it has.",
-        source: "src/lib/work-order-pdf.ts",
+        source: "src/features/full/work-order-pdf.ts",
+        edition: "full",
       },
     ],
     variables: [],
     features: [
       { label: "AI extraction from a PDF, scan or photo", status: "shown" },
-      { label: "Job sheet PDF", status: "shown" },
+      { label: "Job sheet PDF", status: "shown", edition: "full" },
       { label: "One JSON definition, edited from the page header", status: "shown" },
       { label: "Choices from your API", status: "coming" },
       { label: "Per-field confidence in the review", status: "coming" },

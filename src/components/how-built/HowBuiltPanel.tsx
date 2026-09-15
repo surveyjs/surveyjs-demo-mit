@@ -12,6 +12,7 @@ import {
   HOW_BUILT,
   HOW_BUILT_TEXT,
   findVariableReferences,
+  itemsInEdition,
   type HowBuiltFeature,
   type HowBuiltItem,
 } from "@/lib/how-built";
@@ -29,7 +30,7 @@ function SectionTitle({ children }: { children: string }) {
 function Items({ items }: { items: readonly HowBuiltItem[] }) {
   return (
     <ul className="space-y-3">
-      {items.map((item) => (
+      {itemsInEdition(items, features.edition).map((item) => (
         <li key={item.label} className="text-sm">
           <p className="font-medium">{item.label}</p>
           <p className="text-muted-foreground mt-0.5">{item.detail}</p>

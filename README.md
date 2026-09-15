@@ -30,7 +30,7 @@ Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.co
 | Route | What it shows |
 | --- | --- |
 | `/leads` | A CRM opportunity record: contacts as a dynamic panel, line items and a security-review checklist as dynamic matrices, totals and a qualification score as expressions. One form views, edits and creates; saving writes both your columns and the full response. |
-| `/work-orders` | Field service job sheets. Add a PDF, a scan or a phone photo of a filled sheet and the extractor returns a draft record to check on screen, linked to the original it was read from; Save as PDF prints a record back onto the company's own job sheet, box by box, with continuation sheets for long parts lists. |
+| `/work-orders` | Field service job sheets. Add a PDF, a scan or a phone photo of a filled sheet and the extractor returns a draft record to check on screen, linked to the original it was read from. (The [full edition](https://demos.surveyjs.io) also prints a record back onto the company's own job sheet as a PDF.) |
 | `/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
 | `/encounter-note` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
 | `/appointment` | A mock clinic site whose appointment request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. English and Spanish from one definition. |
@@ -44,7 +44,7 @@ The embedded pages (`/feedback`, `/encounter-note`, `/appointment`) render witho
 
 - **Forms are JSON, never React.** Definitions live in [src/schemas/](src/schemas/); no page hardcodes a field. [createSurveyModel](src/schemas/createSurveyModel.ts) turns a definition into a configured `survey-core` model and knows nothing about React.
 - **One variable does the personalisation.** The host passes the signed-in user (or the patient chart, or the record) as a variable; the definition reads it. Sign in as somebody else and the greeting, the prefilled values and the number of pages all change, with no branching in the application code.
-- **Paper in, paper out.** `/work-orders` reads a filled sheet with the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), handing it the file *and the form's own JSON*; each question carries an `aiHint`, a registered property appended to the prompt that no visitor sees. Tuning those lines, not code, is how extraction is made to land field for field. The other direction prints the record onto the company's blank with pdf-lib, into boxes measured from the sheet's own HTML by `npm run assets:work-order`.
+- **Paper in.** `/work-orders` reads a filled sheet with the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), handing it the file *and the form's own JSON*; each question carries an `aiHint`, a registered property appended to the prompt that no visitor sees. Tuning those lines, not code, is how extraction is made to land field for field. The sample sheets are rendered from the sheet's own HTML by `npm run assets:work-order`.
 - **The linter runs everywhere.** `/definition` shows survey-core's static analysis under the editor, told the one variable the host sets at runtime (`knownVariables: ["user"]`). Every definition that ships passes it, and an e2e test keeps it that way.
 - **Two files touch stored data.** See below.
 
@@ -111,7 +111,7 @@ src/
     definition/                 The editor: JSON + linter, and the live form
     records/                    The shared records page: list, form, user switcher
     extract/                    Extraction from paper: sample documents and upload
-    WorkOrdersView.tsx          The records page plus extraction and the job sheet PDF
+    WorkOrdersView.tsx          The records page plus extraction from a document
     lint/                       survey-core's linter as a status bar
     embedded/                   One folder per demo, plus what they share
     ui/                         shadcn/ui primitives
