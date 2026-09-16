@@ -601,15 +601,24 @@ export function RecordsView({
         setOpen(null);
         return;
       }
+      // Until the next record arrives the deleted one is still on screen, so it
+      // counts as loading: Edit and Delete are off, and a second Delete cannot
+      // hit the same id. A row picked meanwhile wins.
+      const ticket = ++request.current;
+      setLoading(true);
       let record: StoredRecord | undefined;
       try {
         record = await getResult(collectionId, next.id);
       } catch (failure) {
+        if (ticket !== request.current) return;
+        setLoading(false);
         writeRoute(basePath, "replace");
         setOpen(null);
         setStorageError(messageOf(failure));
         return;
       }
+      if (ticket !== request.current) return;
+      setLoading(false);
       if (record) {
         writeRoute(recordHref(basePath, record.id), "replace");
         show("view", record);
