@@ -41,6 +41,9 @@ export default defineConfig({
     command: "npm run build && npm run start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
+    // The command builds before it serves, and the full edition's build alone can
+    // outlast Playwright's default 60 seconds.
+    timeout: 180_000,
     // Every value is set: `process.env` is only typed as possibly undefined.
     env: { ...process.env } as Record<string, string>,
   },
