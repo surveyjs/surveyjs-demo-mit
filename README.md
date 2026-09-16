@@ -21,8 +21,6 @@ Open http://localhost:3000. Or bootstrap it as a Next.js example:
 npx create-next-app --example "https://github.com/surveyjs/surveyjs-demo-mit" my-app
 ```
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsurveyjs%2Fsurveyjs-demo-mit)
-
 Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.com) through the SurveyJS theme adapter — but the adapter is one import, and the same definitions run on any SurveyJS UI package.
 
 ## Pages
@@ -46,26 +44,40 @@ The embedded pages (`/feedback`, `/encounter-note`, `/appointment`) render witho
 - **One variable does the personalisation.** The host passes the signed-in user (or the patient chart, or the record) as a variable; the definition reads it. Sign in as somebody else and the greeting, the prefilled values and the number of pages all change, with no branching in the application code.
 - **Paper in.** `/work-orders` reads a filled sheet with the MIT-licensed [AI Form Response Extractor](https://github.com/surveyjs/ai-form-response-extractor), handing it the file *and the form's own JSON*; each question carries an `aiHint`, a registered property appended to the prompt that no visitor sees. Tuning those lines, not code, is how extraction is made to land field for field. The sample sheets are rendered from the sheet's own HTML by `npm run assets:work-order`.
 - **The linter runs everywhere.** `/definition` shows survey-core's static analysis under the editor, told the one variable the host sets at runtime (`knownVariables: ["user"]`). Every definition that ships passes it, and an e2e test keeps it that way.
-- **Two files touch stored data.** See below.
+- **Your own sandbox, rendered by the server.** Every visitor's edits live in their own rows of one SQLite file, and the pages render what they stored. See below.
 
-## Storage: `localStorage` here, your database in production
+## Storage: a sandbox per visitor, your database in production
 
-Everything this app stores goes through **two files in [src/storage/](src/storage/)**. Nothing else in `src/` reads or writes stored data.
+Every visitor gets their own sandbox on the server, keyed by a random cookie: edit any form or record, upload a job sheet, reset it any time. The pages render what you stored. It is cleared on every release and after 14 idle days. Don't enter real personal data.
 
-| File | What it stores | How the demo does it |
-| --- | --- | --- |
-| [survey-json.ts](src/storage/survey-json.ts) | Definitions edited on `/definition` | `localStorage`, so a visitor's experiments stay in their own browser and the server keeps rendering the definition that ships |
-| [survey-results.ts](src/storage/survey-results.ts) | Submitted answers, lead and work-order records | An in-memory array — an edit is gone on reload. Nothing is persisted, on purpose: a template should not look like it stores someone's data when it does not |
+Everything this app stores goes through **three seam files in [src/storage/](src/storage/)**, plus the backend they share. Nothing else in `src/` reads or writes stored data.
 
-Every function in both files is `async`, so replacing the bodies with calls to your API changes no call site.
+| File | What it stores |
+| --- | --- |
+| [survey-json.ts](src/storage/survey-json.ts) | Form definitions, edited on `/definition` and `/configure` |
+| [survey-results.ts](src/storage/survey-results.ts) | Lead and work-order records, `/starter` submissions, and Reset demo data |
+| [documents.ts](src/storage/documents.ts) | The uploaded original a record was read from |
+| [backend/sqlite.ts](src/storage/backend/sqlite.ts) | The database: one file, through Node's built-in `node:sqlite` |
+
+`src/storage/backend/sqlite.ts` is the swap this section teaches, done against a real database; the files above call it on the server and reach it through `src/app/api/storage/` from the browser. Every function in the seams is `async`, so pointing them at your API instead changes no call site.
+
+How the demo's storage works:
+
+- **The template visitor.** The definitions and seed records that ship in `src/schemas/` are rows in the database too, under a reserved id, rewritten from the code at every start. A visitor who has stored nothing, a crawler included, reads those.
+- **A cookie from a handshake.** After load the page calls `POST /api/storage/session` once, which sets `demo_uid` when there is none and stores nothing. On a visitor's first write every template row is copied under their id, and from then on their rows are the truth, an emptied list included.
+- **Rendered on the server.** Every form page reads the visitor's definition and records while it renders, so a reload shows the edit with no loading state.
+- **Reset demo data** on `/leads` and `/work-orders` deletes the visitor's rows and issues a new id. The editor's Reset puts back one form's shipped definition.
+- **Read-only without cookies.** When the cookie does not stick, a banner says so, every write control is disabled, and the server refuses a write without a cookie rather than store it under an id nobody will present again.
+- **Caps.** 1 MB per form or record, 8 MB per document, 50 MB per visitor. Uploads are PDF, PNG, JPEG or WebP, decided by the bytes, and served back under `Content-Security-Policy: sandbox`.
+- **Idle visitors** are removed after `STORAGE_TTL_DAYS`: lazily, at most once an hour after a write, or on demand with `npm run storage:gc`.
 
 ### Moving to your own server and database
 
-1. **Tables:** `survey_schemas (id, json, updated_at)` plus one per record type — `leads (id, data, updated_at)`, `work_orders (id, data, updated_at)`. Seed them from `src/schemas/`.
-2. **Route handlers** under `src/app/api/` for each: `GET`/`PUT`/`DELETE /api/schemas/[id]`, `GET`/`POST /api/leads`, `PUT`/`DELETE /api/leads/[id]`, and the same for work orders. Validate the incoming JSON and authorize the caller here: the definition editor is an admin surface, and it is only safe unauthenticated today because nothing leaves the browser.
-3. **Replace the bodies in [survey-json.ts](src/storage/survey-json.ts)** — `loadSurveyJson`, `saveSurveyJson`, `resetSurveyJson` — with `fetch` calls. The file header shows the shape.
-4. **Replace the bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `saveResult`, `deleteResult`, `submitResult`.
-5. **Mind the server-side reader.** `listResults()` is called from a server component so the list and the form are in the server HTML; a relative `fetch("/api/leads")` does not resolve there. Query the database directly in that branch, or use an absolute URL. The mutations run on the client and can use relative URLs.
+1. **Tables:** `survey_schemas (id, json, updated_at)` plus one per record type — `leads (id, data, updated_at)`, `work_orders (id, data, updated_at)`. Seed them from `src/schemas/`. [sqlite.ts](src/storage/backend/sqlite.ts) shows the same shape, keyed by visitor rather than by tenant.
+2. **Route handlers** under `src/app/api/` for each: `GET`/`PUT`/`DELETE /api/schemas/[id]`, `GET`/`POST /api/leads`, `PUT`/`DELETE /api/leads/[id]`, and the same for work orders. Validate the incoming JSON and authorize the caller here: the definition editor is an admin surface, and it is only safe unauthenticated in this demo because every visitor edits nobody's data but their own. [src/app/api/storage/](src/app/api/storage/) is a working set to start from.
+3. **Replace the bodies in [survey-json.ts](src/storage/survey-json.ts)** — `loadSurveyJson`, `saveSurveyJson`, `resetSurveyJson`. The file header shows the `fetch` shape, and where a real save lints.
+4. **Replace the bodies in [survey-results.ts](src/storage/survey-results.ts)** — `listResults`, `getResult`, `saveResult`, `deleteResult`, `submitResult` — and `keepSourceDocument` in [documents.ts](src/storage/documents.ts), with object storage behind it.
+5. **Mind the server-side reader.** `listResults()` and `loadSurveyJson()` are called from server components so the list and the form are in the server HTML; a relative `fetch("/api/leads")` does not resolve there. Query the database directly in that branch, as the demo's seams do, or use an absolute URL. The mutations run on the client and can use relative URLs.
 
 [Server integration](https://surveyjs.io/backend-integration/examples) shows the same endpoints for Node.js, ASP.NET Core, PHP and Python.
 
@@ -73,12 +85,18 @@ Every function in both files is `async`, so replacing the bodies with calls to y
 
 | | |
 | --- | --- |
-| The form definitions | **Move to the database** — one row each in `survey_schemas`. Keep the files as the seed and as the fallback `loadSurveyJson` returns when a row is missing. |
+| The form definitions | **Move to the database** — one row each in `survey_schemas`. Keep the files as the seed and as the fallback the pages use when a row is missing. |
 | `data/*-seed.ts` records | **Move to the database** for the record types; the rest is demo data behind "Prefill demo data" — delete it. |
 | `clinic-info.ts`, `patient-record.ts` | The demo clinic's directory, plans and chart — not survey definitions. Delete them with the demos or replace them with your own catalogue. |
 | `types.ts`, `createSurveyModel.ts` | **Stay as they are.** Types and the model factory have nothing to do with storage. |
 | `index.ts` | Stays, smaller. `getSchemaDefinition` becomes the fallback rather than the source of truth. |
 | `navigation.ts` | **Stays** if your set of forms is fixed. If users create forms at runtime, this moves to the database too and the routes become a single dynamic `/[formId]`. |
+
+### Deployment
+
+This template runs in a docker container, on Node 24.16 or later. The database lives in that container's writable layer, and no volume is mounted over it, on purpose: **restarting the container keeps the data; creating a new container, from a new image or the same one, starts empty**. So a release is the reset button, and the template rows are rewritten from the shipped schemas at every start in any case. Mounting a volume at the database's directory brings long-lived data back, and with it the need to bump `SCHEMA_VERSION` in `sqlite.ts` whenever the tables change: a database at another version is dropped and recreated. Serverless hosts are not a target of this example.
+
+A later step is shared rooms, where several visitors edit one form together. The door is open and nothing more: `sqlite.ts` has no Next.js import, so a socket server on the same host can open the same file (WAL makes two processes safe), and `demo_uid` is a plain cookie any server on this host can read.
 
 ## Extension points
 
@@ -96,6 +114,7 @@ src/
     embedded/                   The embedded demos — no admin chrome
       feedback/  encounter-note/  appointment/
     api/extract/                Document → answers
+    api/storage/                The storage routes the browser calls: session, definitions, results, submissions, documents, reset
   schemas/
     types.ts                    Shared types (survey-core only, no UI framework)
     createSurveyModel.ts        Model factory
@@ -116,10 +135,11 @@ src/
     embedded/                   One folder per demo, plus what they share
     ui/                         shadcn/ui primitives
   features/                     Extension points; no-op defaults in this edition
-  storage/                      The only four files that touch stored data
+  storage/                      The only files that touch stored data: the seams, access.ts, and backend/
   archive/insurance-claim/      The CMS-1500 claim, kept but not wired (see its README)
 assets/work-order/              The job sheet's HTML, fonts, signatures and sample values
 scripts/render-work-order-assets.mjs  Renders the blank, the box table and the samples
+scripts/storage-gc.mjs          Removes idle visitors (npm run storage:gc)
   styles/                       App-local overrides on top of the SurveyJS adapter
 ```
 
@@ -135,8 +155,12 @@ Copy [.env.example](.env.example) to `.env` — `.env` is git-ignored, so your k
 | `ANTHROPIC_API_KEY` | Enables `/api/extract` through Anthropic. Used when no OpenAI key is set. |
 | `EXTRACTOR_MODEL` | Overrides the model (defaults: `gpt-4o`, `claude-sonnet-5`). |
 | `NEXT_PUBLIC_SITE_URL` | Base URL used for canonical and Open Graph tags. |
+| `DATABASE_PATH` | Where the SQLite file is. Defaults to `.data/demo.db`; `:memory:` for a throwaway run. |
+| `STORAGE_TTL_DAYS` | Idle days before a visitor's sandbox is removed. Defaults to 14. |
 
 Extraction needs one provider key, not both; if both are set, OpenAI is used. With no key the endpoint answers 501 and the buttons say so: the feature is wired and starts working the moment a key appears. Keys are read on the server only and never reach the browser.
+
+`demo_uid` is a functional random id, not tracking, so there is no consent banner.
 
 ## Tests
 
