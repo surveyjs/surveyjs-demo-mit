@@ -10,9 +10,10 @@ import { EXTERNAL_URLS, SITE_LINKS } from "@/lib/site";
  * and Dashboard included, which is true only where the demo ships them.
  */
 export const MYSURVEYS_COPY = {
-  title: "MySurveys — a form management application built with SurveyJS",
+  // The heading is the sidebar label, as on every page (`e2e/sidebar.spec.ts`),
+  // so what MySurveys is opens the description instead.
   description:
-    "Everything on this page is built from the same libraries as the rest of this demo: your users create forms, run them, and see the results — a working example of the application many customers build first.",
+    "A form management application built with SurveyJS. Everything on this page is built from the same libraries as the rest of this demo: your users create forms, run them, and see the results — a working example of the application many customers build first.",
 } as const;
 
 export interface MySurveysScreenshot {

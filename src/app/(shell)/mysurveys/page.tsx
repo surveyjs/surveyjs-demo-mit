@@ -42,7 +42,7 @@ export default function MySurveysPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <PageHeader title={MYSURVEYS_COPY.title} description={MYSURVEYS_COPY.description} />
+      <PageHeader title={nav.label} description={MYSURVEYS_COPY.description} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {MYSURVEYS_SCREENSHOTS.map((shot) => (

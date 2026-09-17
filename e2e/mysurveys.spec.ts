@@ -24,7 +24,7 @@ test.describe("in the full edition", () => {
     const response = await page.goto("/mysurveys");
     expect(response?.status()).toBe(200);
 
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(MYSURVEYS_COPY.title);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("MySurveys");
     await expect(page.getByText(MYSURVEYS_COPY.description)).toBeVisible();
     // A page about an application, not a form: no editor button, no survey.
     await expect(page.getByRole("link", { name: features.designer.label })).toHaveCount(0);
