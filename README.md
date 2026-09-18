@@ -33,8 +33,9 @@ Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.co
 | `/encounter-note` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
 | `/appointment` | A mock clinic site that is the header, the form and the panel the form drives: the request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. It opens in English or Spanish — one definition, and the patient's chart picks which. |
 | `/starter` | A multi-step checkout form and nothing else. The smallest page here, and the place to start reading. |
-| `/definition` | The form as a JSON document: a Monaco editor with survey-core's linter under it on the left, the form it produces on the right, following you as you type. `?form=…` chooses which form. |
-| `/api/extract` | POST a document and a `formId`; answers come back keyed by question name. Needs an LLM key — see [Environment](#environment). |
+| `/definition` | The form as a JSON document: a Monaco editor with survey-core's linter under it on the left, the form it produces on the right, following you as you type. `?form=…` chooses which form. Break it with one of the demo actions and press Save: the server runs the same rules and refuses to store it. |
+| `/api/extract` | POST a document and a `formId`; answers come back keyed by question name, with anything that does not fit the form dropped and listed. Needs an LLM key — see [Environment](#environment). |
+| `/api/storage/*` | The storage routes the browser calls. Every one that writes checks first: a response against the definition it answers, a definition against the linter and the form's tests. A refusal is a 422 naming the first thing wrong, and nothing is stored. |
 
 The embedded pages (`/feedback`, `/encounter-note`, `/appointment`) render without the admin chrome, each in its own brand, and each outlines what SurveyJS drew with a dashed ring so there is no argument about which part of the page is the library. They share one toolbar: *Login as* switches between the preset users a demo ships with, and *Edit the user* opens that account in a popup — an editor that is itself a SurveyJS survey, so the library edits its own input. Each demo passes the account to survey-core as one variable, so the definition reads `{user.firstName}` in titles, in `defaultValueExpression` and in `visibleIf`.
 
@@ -135,6 +136,7 @@ src/
     embedded/                   One folder per demo, plus what they share
     ui/                         shadcn/ui primitives
   features/                     Extension points; no-op defaults in this edition
+  lib/checks/                   What the write routes enforce: a response against its definition, a definition against the linter and its tests
   storage/                      The only files that touch stored data: the seams, access.ts, and backend/
   archive/insurance-claim/      The CMS-1500 claim, kept but not wired (see its README)
 assets/work-order/              The job sheet's HTML, fonts, signatures and sample values
