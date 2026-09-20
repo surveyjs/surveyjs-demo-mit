@@ -34,6 +34,28 @@ const FORBIDDEN_PACKAGES = [
 /** Catches every spelling of them in source: imports, requires, CSS paths. */
 const FORBIDDEN_SOURCE = /survey-(creator|pdf|analytics)/;
 
+/**
+ * A link to public documentation is not a dependency.
+ *
+ * `src/lib/docs.ts` carries the surveyjs.io pages the "how it's built" modules
+ * link, and some of those pages are about the commercial products — the MIT
+ * edition shows a Full-only feature as a link across rather than as a gap, and a
+ * reader who follows it should land on what that product is. The path of such a
+ * URL contains `survey-creator`, which the pattern above would otherwise read as
+ * an import.
+ *
+ * Only the URL is removed, and only on the line it sits on: a line that links a
+ * page *and* imports a package still fails. Nothing an import, a `require` or a
+ * CSS path can look like is an absolute `https://surveyjs.io/…`, so this takes
+ * no real spelling out of the check.
+ */
+const DOCUMENTATION_URL = /https:\/\/surveyjs\.io\/[^\s"'`)]*/g;
+
+/** A line with its documentation links taken out, which is what gets tested. */
+function withoutDocumentationLinks(line) {
+  return line.replace(DOCUMENTATION_URL, "");
+}
+
 /** Where a reference would actually matter. */
 const SCAN_DIRS = ["src", "e2e"];
 const SCAN_FILES = ["next.config.mjs"];
@@ -69,7 +91,7 @@ function scan(path) {
   const text = readFileSync(path, "utf8");
   if (!FORBIDDEN_SOURCE.test(text)) return;
   text.split("\n").forEach((line, index) => {
-    if (FORBIDDEN_SOURCE.test(line)) {
+    if (FORBIDDEN_SOURCE.test(withoutDocumentationLinks(line))) {
       findings.push({
         file: relative(REPO_ROOT, path).replace(/\\/g, "/"),
         line: index + 1,
