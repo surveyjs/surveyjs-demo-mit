@@ -240,7 +240,7 @@ The variable context travels with the definition. A personalized form reads vari
 
 ### Testing
 
-`survey-core/tester` is the linter's sibling. It is headless too, and it runs behaviour tests against a real `SurveyModel`: answer this, then expect that to be visible or hold that value. It was published in `survey-core` 3.0.4, which `latest` now installs.
+`survey-core/tester` is the linter's sibling. It is headless too, and it runs behaviour tests against a real `SurveyModel`: answer this, then expect that to be visible or hold that value. It was published in `survey-core` 3.0.4, so every version the `^3.1.1` range installs has it.
 
 **Where the suites run.** `checkDefinition` runs a form's suite against the definition a visitor is trying to store, after the linter and before the write: a definition that lints clean but no longer does what the form does is a 422 with `check: "tests"` and the test's name in the message. `e2e/server-checks.spec.ts` runs every suite against the definition that ships. Nothing else calls the tester, and `/api/lint` deliberately does not.
 
@@ -265,7 +265,7 @@ npm run storage:gc               # remove visitors idle for STORAGE_TTL_DAYS
 node scripts/check-mit-pure.mjs  # no commercial SurveyJS packages
 ```
 
-There is deliberately no `package-lock.json`. Every SurveyJS package is pinned to `latest` so the template always shows the current library, and a lock file would freeze what that means. `.npmrc` sets `package-lock=false`, so `npm install` neither reads nor writes one, and `/package-lock.json` is in `.gitignore`. The cost is accepted: installs are not reproducible, and a bad upstream release breaks a fresh clone until it is fixed upstream.
+There is deliberately no `package-lock.json`. Every SurveyJS package takes the caret range `^3.1.1`, so the template always shows the current 3.x release without crossing into a new major, and a lock file would freeze what that means. `.npmrc` sets `package-lock=false`, so `npm install` neither reads nor writes one, and `/package-lock.json` is in `.gitignore`. The cost is accepted: installs are not reproducible, and a bad upstream release breaks a fresh clone until it is fixed upstream.
 
 ## Environment
 
