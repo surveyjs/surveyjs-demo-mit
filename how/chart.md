@@ -13,7 +13,7 @@ const json = await loadSurveyJson("encounter-note") ?? survey.json;
 { user_dateOfBirth: "1979-04-02", user_conditions: ["asthma"], … }
 ```
 
-[src/app/embedded/chart/page.tsx](../src/app/embedded/chart/page.tsx)
+[src/app/chart/page.tsx](../src/app/chart/page.tsx)
 
 ## What the definition reads
 
@@ -143,7 +143,7 @@ The note is signed on a signature pad question at the end of it.
 
 The definition is read on the server, so this eight-page note is in the first HTML response.
 
-[Get started with React](https://surveyjs.io/form-library/documentation/get-started-react) · [src/app/embedded/chart/page.tsx](../src/app/embedded/chart/page.tsx)
+[Get started with React](https://surveyjs.io/form-library/documentation/get-started-react) · [src/app/chart/page.tsx](../src/app/chart/page.tsx)
 
 <!-- edition: full -->
 ### PDF export
@@ -171,7 +171,7 @@ The dock's editor link opens the drag-and-drop designer instead of the JSON work
 
 ## Source files
 
-- [src/app/embedded/chart/page.tsx](../src/app/embedded/chart/page.tsx)
+- [src/app/chart/page.tsx](../src/app/chart/page.tsx)
 - [src/components/embedded/chart/ChartDemo.tsx](../src/components/embedded/chart/ChartDemo.tsx)
 - [src/components/embedded/shared/useDemo.ts](../src/components/embedded/shared/useDemo.ts)
 - [src/schemas/encounter-note.ts](../src/schemas/encounter-note.ts)

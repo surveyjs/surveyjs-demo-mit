@@ -2,7 +2,7 @@
  * The "how it's built" explainers, read from Markdown.
  *
  * One file per example in `how/` at the repository root, named after its route:
- * `/leads` → `how/leads.md`, `/embedded/chart` → `how/embedded-chart.md`. A
+ * `/leads` → `how/leads.md`, `/chart` → `how/chart.md`. A
  * person opens that file, reads it top to bottom and edits it without knowing
  * TypeScript — on GitHub's own preview included, which is why the body is plain
  * GitHub-flavoured Markdown and the two conventions that are not (`definition=`
@@ -46,7 +46,7 @@ export interface HowContent {
   readonly body: string;
 }
 
-/** `/embedded/chart` → `embedded-chart.md`. Derived, so a route and a file cannot disagree. */
+/** `/chart` → `chart.md`. Derived, so a route and a file cannot disagree. */
 export function howFileName(navPath: string): string {
   return `${navPath.replace(/^\//, "").replace(/\//g, "-")}.md`;
 }

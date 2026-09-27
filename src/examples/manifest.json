@@ -9,7 +9,7 @@
         "mit": "https://app-mit.demos.surveyjs.io/leads",
         "full": "https://app.demos.surveyjs.io/leads"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "leads",
       "ready": true,
       "related": ["workOrders", "embeddedFeedback"]
     },
@@ -21,7 +21,7 @@
         "mit": "https://app-mit.demos.surveyjs.io/work-orders",
         "full": "https://app.demos.surveyjs.io/work-orders"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "work-orders",
       "ready": true,
       "related": ["leads", "embeddedChart"]
     },
@@ -30,10 +30,10 @@
       "name": "Feedback",
       "problem": "Collect feedback inside your product",
       "runUrl": {
-        "mit": "https://app-mit.demos.surveyjs.io/embedded/feedback",
-        "full": "https://app.demos.surveyjs.io/embedded/feedback"
+        "mit": "https://app-mit.demos.surveyjs.io/feedback",
+        "full": "https://app.demos.surveyjs.io/feedback"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "feedback",
       "ready": true,
       "related": ["embeddedClinic", "leads"]
     },
@@ -42,10 +42,10 @@
       "name": "Encounter note",
       "problem": "Run long clinical forms",
       "runUrl": {
-        "mit": "https://app-mit.demos.surveyjs.io/embedded/chart",
-        "full": "https://app.demos.surveyjs.io/embedded/chart"
+        "mit": "https://app-mit.demos.surveyjs.io/chart",
+        "full": "https://app.demos.surveyjs.io/chart"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "chart",
       "ready": true,
       "related": ["embeddedClinic", "healthcare"]
     },
@@ -54,10 +54,10 @@
       "name": "Appointment",
       "problem": "Let a form drive the page around it",
       "runUrl": {
-        "mit": "https://app-mit.demos.surveyjs.io/embedded/clinic",
-        "full": "https://app.demos.surveyjs.io/embedded/clinic"
+        "mit": "https://app-mit.demos.surveyjs.io/clinic",
+        "full": "https://app.demos.surveyjs.io/clinic"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "clinic",
       "ready": true,
       "related": ["embeddedChart", "healthcare"]
     },
@@ -69,7 +69,7 @@
         "mit": "https://app-mit.demos.surveyjs.io/starter",
         "full": "https://app.demos.surveyjs.io/starter"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "starter",
       "ready": true,
       "related": ["definition", "leads"],
       "inMenu": false
@@ -82,7 +82,7 @@
         "mit": "https://app-mit.demos.surveyjs.io/definition",
         "full": "https://app.demos.surveyjs.io/definition"
       },
-      "useCaseAnchor": "",
+      "useCaseAnchor": "definition",
       "ready": true,
       "related": ["starter", "leads"],
       "inMenu": false
@@ -92,7 +92,7 @@
       "name": "Healthcare",
       "problem": "Healthcare forms end to end",
       "url": "https://healthcare.demos.surveyjs.io/",
-      "useCaseAnchor": "",
+      "useCaseAnchor": "healthcare",
       "ready": true,
       "related": ["embeddedChart", "embeddedClinic"]
     }

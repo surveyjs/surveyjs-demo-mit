@@ -24,9 +24,9 @@ const ROUTES = [
   "/definition",
   "/configure?form=work-order",
   ...(features.analyticsHref ? [features.analyticsHref("work-order")] : []),
-  "/embedded/feedback",
-  "/embedded/clinic",
-  "/embedded/chart",
+  "/feedback",
+  "/clinic",
+  "/chart",
   // One explainer per example.
   ...navPages.map((item) => howHref(item.path)),
 ];

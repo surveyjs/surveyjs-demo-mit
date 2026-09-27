@@ -3,7 +3,7 @@ import { howMetadata } from "@/lib/metadata";
 
 export const metadata = howMetadata("embeddedChart");
 
-/** How /embedded/chart is built, from `how/embedded-chart.md`. Beside the example it explains, with none of its host's chrome. */
+/** How /chart is built, from `how/chart.md`. Beside the example it explains, with none of its host's chrome. */
 export default function Page() {
   return <HowPage navId="embeddedChart" />;
 }

@@ -25,7 +25,7 @@ test("pageSourcePath maps a demo route to the file that serves it", () => {
   expect(pageSourcePath("/work-orders")).toBe("src/app/work-orders/page.tsx");
   // A record's URL is the same page.
   expect(pageSourcePath("/work-orders/WO-2026-0118")).toBe("src/app/work-orders/page.tsx");
-  expect(pageSourcePath("/embedded/chart")).toBe("src/app/embedded/chart/page.tsx");
+  expect(pageSourcePath("/chart")).toBe("src/app/chart/page.tsx");
   expect(pageSourcePath("/configure")).toBeUndefined();
   expect(pageSourcePath("/")).toBeUndefined();
 });
@@ -45,7 +45,7 @@ test("pageSourcePath has nothing to say about an explainer", () => {
   // page wants is `how/<route>.md`, which its own links already reach.
   expect(pageSourcePath("/leads/how")).toBeUndefined();
   expect(pageSourcePath("/work-orders/how")).toBeUndefined();
-  expect(pageSourcePath("/embedded/chart/how")).toBeUndefined();
+  expect(pageSourcePath("/chart/how")).toBeUndefined();
 });
 
 test("isHowRoute is a registered page's /how, and nothing else", () => {

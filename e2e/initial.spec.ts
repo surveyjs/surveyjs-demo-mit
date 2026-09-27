@@ -10,9 +10,9 @@ import { startSession } from "./session";
 const surveyRoutes = [
   "/leads",
   "/starter",
-  "/embedded/feedback",
-  "/embedded/chart",
-  "/embedded/clinic",
+  "/feedback",
+  "/chart",
+  "/clinic",
 ];
 const allRoutes = [
   "/",
@@ -70,9 +70,9 @@ for (const route of surveyRoutes) {
   });
 }
 
-test("/embedded/chart is the survey and almost nothing else", async ({ page }) => {
+test("/chart is the survey and almost nothing else", async ({ page }) => {
   test.slow();
-  await page.goto("/embedded/chart");
+  await page.goto("/chart");
   const card = page.locator("[data-survey-root]");
 
   // The note is titled, banner and all, from the chart that is open.
@@ -97,7 +97,7 @@ test("/embedded/chart is the survey and almost nothing else", async ({ page }) =
 
 test("opening another chart changes the note's shape", async ({ page }) => {
   test.slow();
-  await page.goto("/embedded/chart");
+  await page.goto("/chart");
   const dock = dockOf(page);
   const card = page.locator("[data-survey-root]");
 
@@ -253,11 +253,11 @@ async function typeInEditor(
   await field.press("Tab");
 }
 
-test("/embedded/feedback renders the same definition differently per user", async ({
+test("/feedback renders the same definition differently per user", async ({
   page,
 }) => {
   test.slow();
-  await page.goto("/embedded/feedback");
+  await page.goto("/feedback");
   const card = page.locator("#feedback");
 
   // The host page and the survey are reading the same account object.
@@ -293,7 +293,7 @@ test("/embedded/feedback renders the same definition differently per user", asyn
 });
 
 test("the dock links to the one editor", async ({ page }) => {
-  await page.goto("/embedded/feedback");
+  await page.goto("/feedback");
   const dock = dockOf(page);
 
   // No editor in the host page: every form in the template is edited on one
@@ -311,7 +311,7 @@ test("the dock links to the one editor", async ({ page }) => {
 
 test("Login as renders the same definition for a different customer", async ({ page }) => {
   test.slow();
-  await page.goto("/embedded/feedback");
+  await page.goto("/feedback");
   const dock = dockOf(page);
   const card = page.locator("#feedback");
 
@@ -334,7 +334,7 @@ test("Login as renders the same definition for a different customer", async ({ p
 });
 
 test("the dock leads to more examples, and the demo outlines where SurveyJS draws", async ({ page }) => {
-  await page.goto("/embedded/chart");
+  await page.goto("/chart");
   const dock = dockOf(page);
 
   // No way "home" any more: the menu of every example replaces it.
@@ -352,13 +352,13 @@ test("the dock leads to more examples, and the demo outlines where SurveyJS draw
   await expect(page.locator("[data-survey-root]")).toHaveCSS("outline-style", "dashed");
 });
 
-test("/embedded/clinic opens in the chart's language and fills the request from it", async ({
+test("/clinic opens in the chart's language and fills the request from it", async ({
   page,
 }) => {
   test.slow();
   // Maria Delgado's chart says `preferredLanguage: "es"`, so the page — the form
   // and the site around it — is Spanish before any JavaScript runs.
-  const response = await page.goto("/embedded/clinic");
+  const response = await page.goto("/clinic");
   const serverHtml = await response!.text();
   // Both languages travel to the browser — the definition is a prop, so the
   // whole of it is in the payload. What proves the server *rendered* Spanish is

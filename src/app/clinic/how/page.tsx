@@ -3,7 +3,7 @@ import { howMetadata } from "@/lib/metadata";
 
 export const metadata = howMetadata("embeddedClinic");
 
-/** How /embedded/clinic is built, from `how/embedded-clinic.md`. Beside the example it explains, with none of its host's chrome. */
+/** How /clinic is built, from `how/clinic.md`. Beside the example it explains, with none of its host's chrome. */
 export default function Page() {
   return <HowPage navId="embeddedClinic" />;
 }

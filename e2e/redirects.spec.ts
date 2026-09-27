@@ -18,6 +18,11 @@ const REDIRECTS = [
   ["/how", "/"],
   ["/mysurveys", "/"],
   ["/mysurveys/how", "/"],
+  // The host pages, from before they lost their prefix.
+  ["/embedded/feedback", "/feedback"],
+  ["/embedded/chart", "/chart"],
+  ["/embedded/clinic", "/clinic"],
+  ["/embedded/clinic/how", "/clinic/how"],
 ] as const;
 
 for (const [from, to] of REDIRECTS) {

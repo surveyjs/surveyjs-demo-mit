@@ -67,6 +67,9 @@ const nextConfig = {
       { source: "/how", destination: "/", permanent: false },
       { source: "/mysurveys", destination: "/", permanent: false },
       { source: "/mysurveys/how", destination: "/", permanent: false },
+      // The host pages lost their `/embedded` prefix when the admin shell they
+      // stood outside of was removed; the explainers moved with them.
+      { source: "/embedded/:path*", destination: "/:path*", permanent: false },
     ];
   },
 };

@@ -172,7 +172,7 @@
 .lint-line-highlight { background: color-mix(in oklab, var(--accent) 70%, transparent); }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Embedded demo (/embedded) — a mock product site that hosts the survey.
+   Embedded demos (/feedback, /chart, /clinic) — a mock product site that hosts the survey.
 
    Only the effects Tailwind utilities cannot express live here: the brand hue
    the demo toolbar swaps at runtime, and the gradient/grid washes the hero is

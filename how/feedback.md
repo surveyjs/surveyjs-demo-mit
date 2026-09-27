@@ -13,7 +13,7 @@ const json = await loadSurveyJson("customer-satisfaction") ?? survey.json;
 model.setVariable("user_plan", "business");
 ```
 
-[src/app/embedded/feedback/page.tsx](../src/app/embedded/feedback/page.tsx)
+[src/app/feedback/page.tsx](../src/app/feedback/page.tsx)
 
 ## What the definition reads
 
@@ -117,7 +117,7 @@ The form takes the host site's own brand colour and type, not this template's.
 
 The definition is read on the server, so the form is in the HTML the host page sends.
 
-[Get started with React](https://surveyjs.io/form-library/documentation/get-started-react) · [src/app/embedded/feedback/page.tsx](../src/app/embedded/feedback/page.tsx)
+[Get started with React](https://surveyjs.io/form-library/documentation/get-started-react) · [src/app/feedback/page.tsx](../src/app/feedback/page.tsx)
 
 ### One JSON definition, edited from the dock
 
@@ -151,7 +151,7 @@ The dock's editor link opens the drag-and-drop designer instead of the JSON work
 
 ## Source files
 
-- [src/app/embedded/feedback/page.tsx](../src/app/embedded/feedback/page.tsx)
+- [src/app/feedback/page.tsx](../src/app/feedback/page.tsx)
 - [src/components/embedded/feedback/CadenceDemo.tsx](../src/components/embedded/feedback/CadenceDemo.tsx)
 - [src/components/embedded/feedback/CadenceSite.tsx](../src/components/embedded/feedback/CadenceSite.tsx)
 - [src/components/embedded/shared/useDemo.ts](../src/components/embedded/shared/useDemo.ts)

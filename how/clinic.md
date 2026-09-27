@@ -13,7 +13,7 @@ const json = await loadSurveyJson("clinic-visit") ?? survey.json;
 chartLocale(patient.preferredLanguage) // "es" | "en"
 ```
 
-[src/app/embedded/clinic/page.tsx](../src/app/embedded/clinic/page.tsx)
+[src/app/clinic/page.tsx](../src/app/clinic/page.tsx)
 
 ## What the definition reads
 
@@ -132,7 +132,7 @@ The form wears the clinic's colours, and its own strings come from the host page
 
 A Spanish-speaking patient is sent Spanish HTML, not English HTML that swaps itself out.
 
-[Get started with React](https://surveyjs.io/form-library/documentation/get-started-react) · [src/app/embedded/clinic/page.tsx](../src/app/embedded/clinic/page.tsx)
+[Get started with React](https://surveyjs.io/form-library/documentation/get-started-react) · [src/app/clinic/page.tsx](../src/app/clinic/page.tsx)
 
 ### Expressions over a dynamic panel and matrices
 
@@ -166,7 +166,7 @@ The designer's Translation tab opens this definition's English and Spanish side 
 
 ## Source files
 
-- [src/app/embedded/clinic/page.tsx](../src/app/embedded/clinic/page.tsx)
+- [src/app/clinic/page.tsx](../src/app/clinic/page.tsx)
 - [src/components/embedded/clinic/RidgelineDemo.tsx](../src/components/embedded/clinic/RidgelineDemo.tsx)
 - [src/components/embedded/clinic/RidgelineSite.tsx](../src/components/embedded/clinic/RidgelineSite.tsx)
 - [src/components/embedded/clinic/ridgeline-strings.ts](../src/components/embedded/clinic/ridgeline-strings.ts)

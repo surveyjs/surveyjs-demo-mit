@@ -1,8 +1,8 @@
 # How it's built — the explainers
 
 One file per example. Everything a `/x/how` page says about its example is in the
-file named after its route: `/leads` → `leads.md`, `/embedded/chart` →
-`embedded-chart.md`. The server reads the file at build time and builds the page
+file named after its route: `/leads` → `leads.md`, `/chart` →
+`chart.md`. The server reads the file at build time and builds the page
 from it (`src/lib/how-content.ts`), so editing a sentence here and rebuilding
 changes that page and nothing else.
 

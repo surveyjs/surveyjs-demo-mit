@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { features } from "../src/features";
 import { loadExamples } from "../src/examples/load";
-import { menuExamples, MENU_LIMIT, runLink } from "../src/examples/entries";
+import { menuExamples, MENU_LIMIT, problemHref, runLink } from "../src/examples/entries";
 import { otherEditionHref } from "../src/lib/routes";
 import { DOCK_LABELS, PAGE_ACTIONS } from "../src/lib/site";
 import { getNavItem, navPages } from "../src/schemas/navigation";
@@ -37,7 +37,7 @@ test.describe("More examples", () => {
     const expected = menuExamples((await loadExamples()).entries);
     expect(expected.length).toBeLessThanOrEqual(MENU_LIMIT);
 
-    await page.goto("/embedded/feedback");
+    await page.goto("/feedback");
     const menu = await openMenu(page);
     const rows = menu.locator("li[data-example]");
     await expect(rows).toHaveCount(expected.length);
@@ -59,7 +59,7 @@ test.describe("More examples", () => {
 
   test("every run link stays on this host and edition, except an example on a host of its own", async ({ page }) => {
     const expected = menuExamples((await loadExamples()).entries);
-    await page.goto("/embedded/chart");
+    await page.goto("/chart");
     const menu = await openMenu(page);
 
     for (const entry of expected) {
@@ -77,6 +77,19 @@ test.describe("More examples", () => {
       }
     }
 
+    // Each problem opens that example's section of the use-cases page, in a new tab.
+    for (const entry of expected) {
+      const useCase = problemHref(entry);
+      const problem = menu.locator(`li[data-example="${entry.id}"] a[href^="https://surveyjs.io/use-cases"]`);
+      if (!useCase) {
+        await expect(problem).toHaveCount(0);
+        continue;
+      }
+      await expect(problem).toHaveAttribute("href", useCase);
+      await expect(problem).toHaveAttribute("target", "_blank");
+      await expect(problem).toContainText(entry.problem);
+    }
+
     // And a row goes there, in this tab.
     await menu.getByRole("link", { name: getNavItem("leads").label, exact: true }).click();
     await expect(page).toHaveURL(/\/leads$/);
@@ -84,7 +97,7 @@ test.describe("More examples", () => {
   });
 
   test("closes on Escape and on a click outside, and works from the keyboard", async ({ page }) => {
-    await page.goto("/embedded/feedback");
+    await page.goto("/feedback");
     const trigger = dockOf(page).getByRole("button", { name: DOCK_LABELS.moreExamples });
 
     // Escape closes it and gives focus back to the trigger.
@@ -206,7 +219,7 @@ test.describe("at 390×844", () => {
   }
 
   test("⋯ holds what the bar has no room for", async ({ page }) => {
-    await page.goto("/embedded/feedback");
+    await page.goto("/feedback");
     const dock = dockOf(page);
     // On the bar: the menu, the editor link, Login as and ⋯.
     await expect(dock.getByRole("button", { name: DOCK_LABELS.moreExamples })).toBeVisible();

@@ -4,9 +4,10 @@ import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { test, expect } from "@playwright/test";
 import bundledJson from "../src/examples/manifest.json";
-import { BUNDLED_EXAMPLES } from "../src/examples/entries";
+import { BUNDLED_EXAMPLES, problemHref } from "../src/examples/entries";
 import { loadExamples } from "../src/examples/load";
 import { parseManifest } from "../src/examples/parse";
+import { USE_CASES_URL } from "../src/lib/site";
 import { navPages } from "../src/schemas/navigation";
 
 /**
@@ -42,6 +43,15 @@ test.describe("the bundled manifest", () => {
         expect(pathname, `${entry.id}: ${url}`).toBe(page.path);
         expect(existsSync(path.join(ROOT, `src/app${pathname}/page.tsx`)), url).toBe(true);
       }
+    }
+  });
+
+  test("links each example's section on the use-cases page, named like its route", () => {
+    // `/work-orders` is `#work-orders`; the example on a host of its own is its id.
+    for (const entry of BUNDLED_EXAMPLES.entries) {
+      const expected = entry.runUrl ? new URL(entry.runUrl.mit).pathname.slice(1) : entry.id;
+      expect(entry.useCaseAnchor, entry.id).toBe(expected);
+      expect(problemHref(entry), entry.id).toBe(`${USE_CASES_URL}#${expected}`);
     }
   });
 });

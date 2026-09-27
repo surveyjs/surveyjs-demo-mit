@@ -17,7 +17,7 @@ export interface ExampleEntry {
   readonly runUrl?: Readonly<Record<Edition, string>>;
   /** An example on a host of its own, opened in a new tab. */
   readonly url?: string;
-  /** Its section on https://surveyjs.io/use-cases. Empty until that page has one. */
+  /** Its section on https://surveyjs.io/use-cases, named like its route (`/work-orders` → `work-orders`). Empty leaves the problem unlinked. */
   readonly useCaseAnchor?: string;
   /** False hides it everywhere unless `NEXT_PUBLIC_SHOW_UNREADY` is `"true"`. */
   readonly ready: boolean;

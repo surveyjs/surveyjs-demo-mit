@@ -30,9 +30,9 @@ Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.co
 | `/` | The index of every example: what each one shows, how it is built, and where it runs. For the team and for developers, so it is not indexed; visitors arrive at an example from the site's [use-cases page](https://surveyjs.io/use-cases). |
 | `/leads` | Larkspur CRM's opportunity record: contacts as a dynamic panel, line items and a security-review checklist as dynamic matrices, totals and a qualification score as expressions. One form views, edits and creates; saving writes both your columns and the full response. |
 | `/work-orders` | Tallis Mechanical's dispatch desk: field service job sheets. Add a PDF, a scan or a phone photo of a filled sheet and the extractor returns a draft record to check on screen, linked to the original it was read from. (The [full edition](https://app.demos.surveyjs.io) also prints a record back onto the company's own job sheet as a PDF.) |
-| `/embedded/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
-| `/embedded/chart` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
-| `/embedded/clinic` | A mock clinic site that is the header, the form and the panel the form drives: the request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. It opens in English or Spanish — one definition, and the patient's chart picks which. |
+| `/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
+| `/chart` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
+| `/clinic` | A mock clinic site that is the header, the form and the panel the form drives: the request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. It opens in English or Spanish — one definition, and the patient's chart picks which. |
 | `/starter` | A multi-step checkout form and nothing else. The smallest page here, and the place to start reading. |
 | `/definition` | The form as a JSON document: a Monaco editor with survey-core's linter under it on the left, the form it produces on the right, following you as you type. `?form=…` chooses which form. Break it with one of the demo actions and press Save: the server runs the same rules and refuses to store it. |
 | `/api/extract` | POST a document and a `formId`; answers come back keyed by question name, with anything that does not fit the form dropped and listed. Needs an LLM key — see [Environment](#environment). |
@@ -113,8 +113,7 @@ src/
   app/
     page.tsx                    The index of every example
     leads/  work-orders/  starter/  definition/
-    embedded/                   The host sites
-      feedback/  chart/  clinic/
+    feedback/  chart/  clinic/  The host sites
     */how/                      One explainer per example, from how/<route>.md
     api/extract/                Document → answers
     api/storage/                The storage routes the browser calls: session, definitions, results, submissions, documents, reset

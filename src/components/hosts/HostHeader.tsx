@@ -7,7 +7,7 @@ import type { RecordHost } from "./hosts";
 /**
  * The host product's own header on a records page: its mark in the brand
  * colour, its name and one line under it, and who is signed in. The records
- * page is that product's screen, the way `/embedded/feedback` is Cadence's.
+ * page is that product's screen, the way `/feedback` is Cadence's.
  *
  * `sticky top-0 h-14`: the records page's rail sticks at `top-14` and the form
  * column scrolls to `scroll-mt-14`, both clearing exactly this bar.
