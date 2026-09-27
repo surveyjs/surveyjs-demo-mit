@@ -4,7 +4,7 @@ A working application with SurveyJS forms inside it, built only with MIT-license
 
 Clone it and start your own project from it. Nothing here needs a licence key.
 
-**[Run the demo](https://mit.demos.surveyjs.io)** · [Full edition](https://demos.surveyjs.io) (adds Survey Creator, PDF Generator and Dashboard) · [What you can build](https://surveyjs.io/use-cases) · [Server integration](https://surveyjs.io/backend-integration/examples)
+**[Run the demo](https://app-mit.demos.surveyjs.io)** · [Full edition](https://app.demos.surveyjs.io) (adds Survey Creator, PDF Generator and Dashboard) · [What you can build](https://surveyjs.io/use-cases) · [Server integration](https://surveyjs.io/backend-integration/examples)
 
 ## Quick start
 
@@ -27,17 +27,18 @@ Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.co
 
 | Route | What it shows |
 | --- | --- |
-| `/leads` | A CRM opportunity record: contacts as a dynamic panel, line items and a security-review checklist as dynamic matrices, totals and a qualification score as expressions. One form views, edits and creates; saving writes both your columns and the full response. |
-| `/work-orders` | Field service job sheets. Add a PDF, a scan or a phone photo of a filled sheet and the extractor returns a draft record to check on screen, linked to the original it was read from. (The [full edition](https://demos.surveyjs.io) also prints a record back onto the company's own job sheet as a PDF.) |
-| `/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
-| `/encounter-note` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
-| `/appointment` | A mock clinic site that is the header, the form and the panel the form drives: the request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. It opens in English or Spanish — one definition, and the patient's chart picks which. |
+| `/` | The index of every example: what each one shows, how it is built, and where it runs. For the team and for developers, so it is not indexed; visitors arrive at an example from the site's [use-cases page](https://surveyjs.io/use-cases). |
+| `/leads` | Larkspur CRM's opportunity record: contacts as a dynamic panel, line items and a security-review checklist as dynamic matrices, totals and a qualification score as expressions. One form views, edits and creates; saving writes both your columns and the full response. |
+| `/work-orders` | Tallis Mechanical's dispatch desk: field service job sheets. Add a PDF, a scan or a phone photo of a filled sheet and the extractor returns a draft record to check on screen, linked to the original it was read from. (The [full edition](https://app.demos.surveyjs.io) also prints a record back onto the company's own job sheet as a PDF.) |
+| `/embedded/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
+| `/embedded/chart` | A clinician's workspace that is only a survey — eight pages, a problem list with detail rows and duplicate detection, a medication matrix that totals daily dose, an exam grid whose rows are generated from what was flagged abnormal, calculated scores, camera capture, a signed attestation. The React component around it is a header bar. |
+| `/embedded/clinic` | A mock clinic site that is the header, the form and the panel the form drives: the request arrives filled in from the patient's chart, derives the copay from the plan and the visit type, flags an HMO referral, and updates the summary beside it as the patient answers. It opens in English or Spanish — one definition, and the patient's chart picks which. |
 | `/starter` | A multi-step checkout form and nothing else. The smallest page here, and the place to start reading. |
 | `/definition` | The form as a JSON document: a Monaco editor with survey-core's linter under it on the left, the form it produces on the right, following you as you type. `?form=…` chooses which form. Break it with one of the demo actions and press Save: the server runs the same rules and refuses to store it. |
 | `/api/extract` | POST a document and a `formId`; answers come back keyed by question name, with anything that does not fit the form dropped and listed. Needs an LLM key — see [Environment](#environment). |
 | `/api/storage/*` | The storage routes the browser calls. Every one that writes checks first: a response against the definition it answers, a definition against the linter and the form's tests. A refusal is a 422 naming the first thing wrong, and nothing is stored. |
 
-The embedded pages (`/feedback`, `/encounter-note`, `/appointment`) render without the admin chrome, each in its own brand, and each outlines what SurveyJS drew with a dashed ring so there is no argument about which part of the page is the library. They share one toolbar: *Login as* switches between the preset users a demo ships with, and *Edit the user* opens that account in a popup — an editor that is itself a SurveyJS survey, so the library edits its own input. Each demo passes the account to survey-core as one variable, so the definition reads `{user.firstName}` in titles, in `defaultValueExpression` and in `visibleIf`.
+There is no admin chrome and no sidebar. Every example is a standalone host — Larkspur CRM, Tallis Mechanical, Cadence, Ridgeline Chart, Ridgeline Family Health — each in its own brand, and each outlines what SurveyJS drew with a dashed ring so there is no argument about which part of the page is the library; Starter and Definition wear a plain header with the demo's name. Every example shares one dock at the bottom of the screen: *More examples* lists the others and links back to the use-cases page, *How this page is built* opens the page's explainer, and then the form's editor, Prefill, Reset, PDF and Analytics where the edition has them, *Login as* the preset users a page ships with, *Edit the user* (an editor that is itself a SurveyJS survey, so the library edits its own input), and the switch to the same page in the other edition. Each demo passes the account to survey-core as variables, one per field, so the definition reads `{user_firstName}` in titles, in `defaultValueExpression` and in `visibleIf`. Finish a form and a *See next* card suggests two related examples.
 
 ## What to look at first
 
@@ -110,10 +111,11 @@ That is also how the [Full edition](https://github.com/surveyjs/surveyjs-demo) i
 ```
 src/
   app/
-    (shell)/                    Pages inside the admin chrome
-      leads/  work-orders/  starter/  definition/
-    embedded/                   The embedded demos — no admin chrome
-      feedback/  encounter-note/  appointment/
+    page.tsx                    The index of every example
+    leads/  work-orders/  starter/  definition/
+    embedded/                   The host sites
+      feedback/  chart/  clinic/
+    */how/                      One explainer per example, from how/<route>.md
     api/extract/                Document → answers
     api/storage/                The storage routes the browser calls: session, definitions, results, submissions, documents, reset
   schemas/
@@ -123,18 +125,21 @@ src/
     clinic-info.ts              The demo clinic's directory, plans, derived visit summary
     patient-record.ts           The chart the appointment demo renders its form for
     data/                       Seed records and demo response data
-    navigation.ts               Route ↔ schema mapping used by the sidebar
+    navigation.ts               The route registry: each page's path, label and form
   components/
     SurveyForm.tsx              Renders a model with survey-react-ui
     JsonEditor.tsx              Monaco wrapper (client-only)
-    AdminShell.tsx, Sidebar.tsx, TopBar.tsx, ThemeSwitcher.tsx
+    dock/                       The one dock: More examples, the ⋯ menu, See next
+    hosts/                      The records pages' host headers, and the neutral one
+    examples/                   The root index and the manifest's provider
     definition/                 The editor: JSON + linter, and the live form
-    records/                    The shared records page: list, form, user switcher
+    records/                    The shared records page: list and form
     extract/                    Extraction from paper: sample documents and upload
     WorkOrdersView.tsx          The records page plus extraction from a document
     lint/                       survey-core's linter as a status bar
     embedded/                   One folder per demo, plus what they share
     ui/                         shadcn/ui primitives
+  examples/                     The examples manifest: manifest.json, its guard and its loader
   features/                     Extension points; no-op defaults in this edition
   lib/checks/                   What the write routes enforce: a response against its definition, a definition against the linter and its tests
   storage/                      The only files that touch stored data: the seams, access.ts, and backend/
@@ -145,7 +150,7 @@ scripts/storage-gc.mjs          Removes idle visitors (npm run storage:gc)
   styles/                       App-local overrides on top of the SurveyJS adapter
 ```
 
-To add a form: drop a definition into `src/schemas/`, register it in [index.ts](src/schemas/index.ts) and [navigation.ts](src/schemas/navigation.ts), and create a page that passes it to `SurveyForm`.
+To add a form: drop a definition into `src/schemas/`, register it in [index.ts](src/schemas/index.ts) and [navigation.ts](src/schemas/navigation.ts), create a page that passes it to `SurveyForm` and renders the dock, add an entry to [src/examples/manifest.json](src/examples/manifest.json), and describe it in `how/<route>.md`.
 
 ## Environment
 
@@ -156,7 +161,9 @@ Copy [.env.example](.env.example) to `.env` — `.env` is git-ignored, so your k
 | `OPENAI_API_KEY` | Enables `/api/extract` through OpenAI. |
 | `ANTHROPIC_API_KEY` | Enables `/api/extract` through Anthropic. Used when no OpenAI key is set. |
 | `EXTRACTOR_MODEL` | Overrides the model (defaults: `gpt-4o`, `claude-sonnet-5`). |
-| `NEXT_PUBLIC_SITE_URL` | Base URL used for canonical and Open Graph tags. |
+| `NEXT_PUBLIC_SITE_URL` | This host, for canonical and Open Graph tags. **Required on every deployment**: `https://app-mit.demos.surveyjs.io` for this edition, `https://app.demos.surveyjs.io` for the full one. A production build or start without it prints an error. |
+| `NEXT_PUBLIC_EXAMPLES_MANIFEST_URL` | Where the site publishes the examples manifest. Unset, or when the URL fails, the bundled `src/examples/manifest.json` is used. |
+| `NEXT_PUBLIC_SHOW_UNREADY` | `true` also lists the manifest entries not marked `ready`. |
 | `DATABASE_PATH` | Where the SQLite file is. Defaults to `.data/demo.db`; `:memory:` for a throwaway run. |
 | `STORAGE_TTL_DAYS` | Idle days before a visitor's sandbox is removed. Defaults to 14. |
 

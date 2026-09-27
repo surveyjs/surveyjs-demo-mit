@@ -28,7 +28,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { features } from "@/features";
-import { allNavPages, type NavId, type NavPage } from "@/schemas/navigation";
+import { getNavItem, type NavId, type NavPage } from "@/schemas/navigation";
 import { howHref, otherEditionHref } from "@/lib/routes";
 import { HOW_BUILT_TEXT } from "@/lib/how-built";
 
@@ -40,7 +40,7 @@ export const HOW_README = "README.md";
 
 export interface HowContent {
   readonly nav: NavPage;
-  /** Front matter `summary`: the meta description, the lead paragraph and the index card. */
+  /** Front matter `summary`: the meta description and the lead paragraph. */
   readonly summary: string;
   /** The body, edition rule applied, ready for the Markdown renderer. */
   readonly body: string;
@@ -239,18 +239,12 @@ export function readHowSource(navPath: string): string {
   return readFileSync(howFileFullPath(navPath), "utf8");
 }
 
-function navById(navId: NavId): NavPage {
-  const nav = allNavPages.find((item) => item.id === navId);
-  if (!nav) throw new Error(`No sidebar row for ${navId}`);
-  return nav;
-}
-
 /** One example's explainer: its row, its one sentence, and its body. */
 export function getHowContent(navId: NavId): HowContent {
   const cached = cache.get(navId);
   if (cached) return cached;
 
-  const nav = navById(navId);
+  const nav = getNavItem(navId);
   const { data, body } = parseFrontMatter(readHowSource(nav.path));
   if (data.nav !== navId) {
     throw new Error(`${howFilePath(nav.path)}: front matter says nav: ${data.nav ?? "(none)"}`);
@@ -265,15 +259,4 @@ export function getHowContent(navId: NavId): HowContent {
   };
   cache.set(navId, content);
   return content;
-}
-
-/**
- * Every example, in sidebar order, from **both** editions' rows.
- *
- * An example this edition does not ship is still listed — as one the other
- * edition has, linked to that host — rather than silently missing, which is what
- * `/how` renders and what the index card for `/mysurveys` is in the MIT edition.
- */
-export function listHowContent(): readonly HowContent[] {
-  return allNavPages.map((nav) => getHowContent(nav.id));
 }

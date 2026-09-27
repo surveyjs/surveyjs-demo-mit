@@ -15,7 +15,7 @@
  *    dynamic `import()` when it is called, never at the top of the file.
  *
  * It holds the edition's name and pill, its repository, where the other edition
- * is hosted (for the top bar's switch link), which editor opens a form, and the
+ * is hosted (for the dock's edition switch), which editor opens a form, and the
  * optional commercial actions. Here every optional action is left undefined, so
  * the buttons for them do not render at all.
  */

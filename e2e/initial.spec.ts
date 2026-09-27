@@ -2,7 +2,8 @@ import { test, expect } from "@playwright/test";
 import { features } from "../src/features";
 import { checkoutJson } from "../src/schemas/checkout";
 import { navPages } from "../src/schemas/navigation";
-import { HOW_INDEX, howHref } from "../src/lib/routes";
+import { howHref } from "../src/lib/routes";
+import { DOCK_LABELS } from "../src/lib/site";
 import { SHORT_CHECKOUT } from "./short-checkout";
 import { startSession } from "./session";
 
@@ -22,21 +23,40 @@ const allRoutes = [
   "/work-orders/WO-2026-0118",
   "/work-orders/from-document",
   "/definition",
-  // A page with no form on it, and the full edition's alone.
-  ...(features.edition === "full" ? ["/mysurveys"] : []),
   // The one editor, on a plain form and on a personalized one.
   "/configure",
   "/configure?form=clinic-visit",
-  // The explainers: the index, and one per example this edition ships. They are
-  // all inside the shell, an embedded demo's included.
-  HOW_INDEX,
+  // The explainers, one per example.
   ...navPages.map((item) => howHref(item.path)),
 ];
 
-test("root redirects to the first page", async ({ page }) => {
-  await page.goto("/");
-  await expect(page).toHaveURL(/\/leads$/);
+/** The dock, on every example page. */
+function dockOf(page: import("@playwright/test").Page) {
+  return page.getByRole("toolbar", { name: DOCK_LABELS.toolbar });
+}
+
+test("/ is the index of every example, not a redirect", async ({ page }) => {
+  const response = await page.goto("/");
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/$/);
   await expect(page).toHaveTitle(/SurveyJS/i);
+  for (const nav of navPages) {
+    await expect(page.locator(`[data-example="${nav.id}"]`)).toBeVisible();
+  }
+});
+
+test("/definition is the JSON editor and its linter", async ({ page }) => {
+  test.slow();
+  await page.goto("/definition");
+  await expect(page.locator(".monaco-editor").first()).toBeVisible({ timeout: 30_000 });
+  await expect(
+    page.getByText("Static analysis: all checks passed", { exact: true }),
+  ).toBeVisible({ timeout: 20_000 });
+
+  // The picker opens any form in the template on the same page.
+  await page.getByRole("combobox", { name: "Form" }).selectOption("work-order");
+  await expect(page).toHaveURL(/\/definition\?form=work-order$/);
+  await expect(page.getByText("Work order — form JSON")).toBeVisible();
 });
 
 for (const route of surveyRoutes) {
@@ -69,10 +89,7 @@ test("/embedded/chart is the survey and almost nothing else", async ({ page }) =
 
   // A red flag in the prefilled answers escalates the visit — by trigger, and
   // the question it writes to did not exist a moment ago.
-  await page
-    .getByRole("toolbar", { name: "Embedded demo tools" })
-    .getByRole("button", { name: "Prefill" })
-    .click();
+  await dockOf(page).getByRole("button", { name: DOCK_LABELS.prefill }).click();
   await expect(card.getByText("Escalate to same-day evaluation")).toBeVisible({
     timeout: 15_000,
   });
@@ -81,7 +98,7 @@ test("/embedded/chart is the survey and almost nothing else", async ({ page }) =
 test("opening another chart changes the note's shape", async ({ page }) => {
   test.slow();
   await page.goto("/embedded/chart");
-  const dock = page.getByRole("toolbar", { name: "Embedded demo tools" });
+  const dock = dockOf(page);
   const card = page.locator("[data-survey-root]");
 
   await dock.getByRole("button", { name: /Open chart/ }).click();
@@ -213,10 +230,7 @@ for (const route of allRoutes) {
 
 /** Opens the toolbar's user popup and waits for the editor survey inside it. */
 async function openUserDialog(page: import("@playwright/test").Page) {
-  await page
-    .getByRole("toolbar", { name: "Embedded demo tools" })
-    .getByRole("button", { name: "Edit the user" })
-    .click();
+  await dockOf(page).getByRole("button", { name: DOCK_LABELS.editUser }).click();
   const dialog = page.getByRole("dialog");
   // The editor is a SurveyJS survey — same markup as the demo it drives.
   await expect(dialog.locator(".sd-root-modern")).toBeVisible();
@@ -278,9 +292,9 @@ test("/embedded/feedback renders the same definition differently per user", asyn
   await expect(page.locator("header").first()).toContainText("John Rivera");
 });
 
-test("the demo toolbar links to the one editor", async ({ page }) => {
+test("the dock links to the one editor", async ({ page }) => {
   await page.goto("/embedded/feedback");
-  const dock = page.getByRole("toolbar", { name: "Embedded demo tools" });
+  const dock = dockOf(page);
 
   // No editor in the host page: every form in the template is edited on one
   // page, and this link opens it on this form.
@@ -298,7 +312,7 @@ test("the demo toolbar links to the one editor", async ({ page }) => {
 test("Login as renders the same definition for a different customer", async ({ page }) => {
   test.slow();
   await page.goto("/embedded/feedback");
-  const dock = page.getByRole("toolbar", { name: "Embedded demo tools" });
+  const dock = dockOf(page);
   const card = page.locator("#feedback");
 
   // The demo opens as the first preset account: fourteen months in, a ticket
@@ -319,14 +333,17 @@ test("Login as renders the same definition for a different customer", async ({ p
   await expect(page.locator("header").first()).toContainText("Priya Shah");
 });
 
-test("the demo links home and outlines where SurveyJS draws", async ({ page }) => {
+test("the dock leads to more examples, and the demo outlines where SurveyJS draws", async ({ page }) => {
   await page.goto("/embedded/chart");
-  const dock = page.getByRole("toolbar", { name: "Embedded demo tools" });
+  const dock = dockOf(page);
 
-  await expect(dock.getByRole("link", { name: "SurveyJS demos" })).toHaveAttribute(
-    "href",
-    "/",
-  );
+  // No way "home" any more: the menu of every example replaces it.
+  await expect(dock.getByRole("link", { name: "SurveyJS demos" })).toHaveCount(0);
+  await dock.getByRole("button", { name: DOCK_LABELS.moreExamples }).click();
+  const menu = page.getByRole("dialog", { name: DOCK_LABELS.moreExamples });
+  await expect(menu.getByRole("link", { name: "Encounter note", exact: true })).toHaveAttribute("aria-current", "page");
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
 
   // The attribute goes on <html> for as long as the demo is on screen; what
   // matters is that the rule it keys reaches the one element marking where
@@ -351,7 +368,7 @@ test("/embedded/clinic opens in the chart's language and fills the request from 
   expect(serverHtml).toContain('aria-label="Su visita"');
   expect(serverHtml).toContain("Siguiente");
 
-  const dock = page.getByRole("toolbar", { name: "Embedded demo tools" });
+  const dock = dockOf(page);
   const panel = page.getByRole("complementary", { name: "Su visita" });
   const card = page.locator("#request");
 
@@ -378,7 +395,7 @@ test("/embedded/clinic opens in the chart's language and fills the request from 
   // patient never sees — asked in her language.
   await expect(card).toContainText("¿Es por algo que ya le tratamos?");
 
-  await dock.getByRole("button", { name: "Prefill" }).click();
+  await dock.getByRole("button", { name: DOCK_LABELS.prefill }).click();
 
   // Behavioral health bills at the specialist copay, and the plan on file is the
   // HMO — so the panel shows $35 and the referral warning rather than the happy

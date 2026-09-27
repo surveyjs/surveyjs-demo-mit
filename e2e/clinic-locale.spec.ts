@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { DOCK_LABELS } from "../src/lib/site";
 import {
   chartLocale,
   formatDollars,
@@ -29,7 +30,7 @@ function pressLocale(page: Page, locale: "EN" | "ES") {
 }
 
 function dockOf(page: Page) {
-  return page.getByRole("toolbar", { name: "Embedded demo tools" });
+  return page.getByRole("toolbar", { name: DOCK_LABELS.toolbar });
 }
 
 /**
