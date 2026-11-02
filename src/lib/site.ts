@@ -30,7 +30,7 @@ export const DOCK_LABELS = {
   /** The toolbar's accessible name. */
   toolbar: "Demo tools",
   moreExamples: "More examples",
-  allUseCases: "All use cases",
+  allUseCases: "All Use Cases",
   /** The "⋯" menu that holds what the bar has no room for. */
   overflow: "More demo tools",
   prefill: "Prefill",

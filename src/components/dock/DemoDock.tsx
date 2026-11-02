@@ -102,8 +102,8 @@ export interface DemoDockProps {
  * Every control exists to make a single claim checkable, and each renders only
  * when the page passes what it needs:
  *
- *  - **More examples** — the manifest, one line per example, and the way back to
- *    the site's use-cases page. Never collapses;
+ *  - **the current example** — opens the manifest, one line per example, and
+ *    the way back to the site's use-cases page. Never collapses;
  *  - **How this page is built** and **Source** — the explainer, in this tab, and
  *    the route file on GitHub;
  *  - **the editor link** (`features.designer`) — the form is a JSON document,

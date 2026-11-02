@@ -339,7 +339,7 @@ test("the dock leads to more examples, and the demo outlines where SurveyJS draw
 
   // No way "home" any more: the menu of every example replaces it.
   await expect(dock.getByRole("link", { name: "SurveyJS demos" })).toHaveCount(0);
-  await dock.getByRole("button", { name: DOCK_LABELS.moreExamples }).click();
+  await dock.getByRole("button", { name: "Encounter note", exact: true }).click();
   const menu = page.getByRole("dialog", { name: DOCK_LABELS.moreExamples });
   await expect(menu.getByRole("link", { name: "Encounter note", exact: true })).toHaveAttribute("aria-current", "page");
   await page.keyboard.press("Escape");

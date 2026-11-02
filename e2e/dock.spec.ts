@@ -1,9 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 import { features } from "../src/features";
 import { loadExamples } from "../src/examples/load";
-import { menuExamples, MENU_LIMIT, problemHref, runLink } from "../src/examples/entries";
+import { findExample, menuExamples, MENU_LIMIT, runLink } from "../src/examples/entries";
 import { otherEditionHref } from "../src/lib/routes";
-import { DOCK_LABELS, PAGE_ACTIONS } from "../src/lib/site";
+import { DOCK_LABELS, NEW_TAB_MARK, PAGE_ACTIONS, USE_CASES_URL } from "../src/lib/site";
 import { getNavItem, navPages } from "../src/schemas/navigation";
 import { SHORT_CHECKOUT } from "./short-checkout";
 import { startSession } from "./session";
@@ -26,8 +26,12 @@ function menuOf(page: Page) {
   return page.getByRole("dialog", { name: DOCK_LABELS.moreExamples });
 }
 
+function menuTrigger(page: Page) {
+  return dockOf(page).locator('button[aria-haspopup="dialog"]');
+}
+
 async function openMenu(page: Page) {
-  await dockOf(page).getByRole("button", { name: DOCK_LABELS.moreExamples }).click();
+  await menuTrigger(page).click();
   await expect(menuOf(page)).toBeVisible();
   return menuOf(page);
 }
@@ -45,16 +49,17 @@ test.describe("More examples", () => {
       await expect(rows.nth(index)).toHaveAttribute("data-example", entry.id);
       await expect(rows.nth(index)).toContainText(entry.name);
     }
-    // The heading says whose demo this is, and which edition.
-    await expect(menu).toContainText(features.brand.editionLabel);
+    await expect(menuTrigger(page)).toHaveText(findExample(await loadExamples(), "embeddedFeedback")!.name);
+    // The landing-page link is the heading, appears only once, and precedes the examples.
+    const landing = menu.getByRole("link", { name: `${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}` });
+    await expect(landing).toHaveCount(1);
+    await expect(landing).toHaveAttribute("href", USE_CASES_URL);
+    await expect(landing).toHaveAttribute("target", "_blank");
+    await expect(menu.getByRole("link").first()).toHaveText(`${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}`);
     // Here, and only here, "Feedback" is the page you are on.
     const current = menu.locator('[aria-current="page"]');
     await expect(current).toHaveCount(1);
     await expect(current).toHaveText(getNavItem("embeddedFeedback").label);
-    await expect(menu.getByRole("link", { name: /All use cases/ })).toHaveAttribute(
-      "href",
-      "https://surveyjs.io/use-cases",
-    );
   });
 
   test("every run link stays on this host and edition, except an example on a host of its own", async ({ page }) => {
@@ -77,28 +82,23 @@ test.describe("More examples", () => {
       }
     }
 
-    // Each problem opens that example's section of the use-cases page, in a new tab.
+    // Descriptions remain visible text; each row has only the demo link.
     for (const entry of expected) {
-      const useCase = problemHref(entry);
-      const problem = menu.locator(`li[data-example="${entry.id}"] a[href^="https://surveyjs.io/use-cases"]`);
-      if (!useCase) {
-        await expect(problem).toHaveCount(0);
-        continue;
-      }
-      await expect(problem).toHaveAttribute("href", useCase);
-      await expect(problem).toHaveAttribute("target", "_blank");
-      await expect(problem).toContainText(entry.problem);
+      const row = menu.locator(`li[data-example="${entry.id}"]`);
+      await expect(row.getByRole("link")).toHaveCount(1);
+      await expect(row.locator("span")).toHaveText(entry.problem);
     }
 
     // And a row goes there, in this tab.
     await menu.getByRole("link", { name: getNavItem("leads").label, exact: true }).click();
     await expect(page).toHaveURL(/\/leads$/);
     await expect(dockOf(page)).toBeVisible();
+    await expect(menuTrigger(page)).toHaveText(findExample(await loadExamples(), "leads")!.name);
   });
 
   test("closes on Escape and on a click outside, and works from the keyboard", async ({ page }) => {
     await page.goto("/feedback");
-    const trigger = dockOf(page).getByRole("button", { name: DOCK_LABELS.moreExamples });
+    const trigger = menuTrigger(page);
 
     // Escape closes it and gives focus back to the trigger.
     await openMenu(page);
@@ -217,7 +217,10 @@ test.describe("at 390×844", () => {
         expect(rect.x + rect.width).toBeLessThanOrEqual(390);
       }
       // What never collapses is still on the bar.
-      await expect(dock.getByRole("button", { name: DOCK_LABELS.moreExamples })).toBeVisible();
+      const currentName = findExample(await loadExamples(), item.id)?.name ?? item.label;
+      await expect(menuTrigger(page)).toHaveAccessibleName(currentName);
+      await expect(menuTrigger(page).locator("span")).toBeVisible();
+      await expect(menuTrigger(page)).toHaveText(currentName);
     });
   }
 
@@ -225,7 +228,7 @@ test.describe("at 390×844", () => {
     await page.goto("/feedback");
     const dock = dockOf(page);
     // On the bar: the menu, the editor link, Login as and ⋯.
-    await expect(dock.getByRole("button", { name: DOCK_LABELS.moreExamples })).toBeVisible();
+    await expect(menuTrigger(page)).toBeVisible();
     await expect(dock.getByRole("link", { name: features.designer.label })).toBeVisible();
     await expect(dock.getByRole("button", { name: /^Login as:/ })).toBeVisible();
     for (const name of [PAGE_ACTIONS.source, PAGE_ACTIONS.howBuilt, DOCK_LABELS.prefill, DOCK_LABELS.reset, DOCK_LABELS.editUser]) {
