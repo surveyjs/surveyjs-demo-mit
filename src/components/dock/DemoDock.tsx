@@ -9,7 +9,7 @@ import {
   ChartColumnIcon,
   ChevronDownIcon,
   Code2Icon,
-  FileCode2Icon,
+  GithubIcon,
   FileDownIcon,
   MoonIcon,
   PencilRulerIcon,
@@ -172,7 +172,7 @@ export function DemoDock({
   // breakpoints up, with the same guards.
   const overflow: OverflowItem[] = [
     ...(source
-      ? [{ key: "source", label: PAGE_ACTIONS.source, icon: FileCode2Icon, below: "lg", href: source, newTab: true } as const]
+      ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "lg", href: source, newTab: true } as const]
       : []),
     ...(showTheme
       ? [{ key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme } as const]
@@ -366,7 +366,7 @@ export function DemoDock({
               aria-label={PAGE_ACTIONS.source}
               title={PAGE_ACTIONS.source}
             >
-              <FileCode2Icon />
+              <GithubIcon />
               <span className={LABEL}>{PAGE_ACTIONS.source}</span>
             </a>
           </Button>
