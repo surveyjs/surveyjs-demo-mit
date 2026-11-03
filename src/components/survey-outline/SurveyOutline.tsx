@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { mergeTailwindClasses } from "@/lib/utils";
 
 /**
@@ -25,38 +25,51 @@ export function useSurveyOutline(): void {
   // `SurveyCard` and `SurveyOutline` carry.
   useEffect(() => {
     const root = document.documentElement;
+    root.setAttribute("data-demo-outline", "");
     root.setAttribute("data-demo-highlight", "");
-    return () => root.removeAttribute("data-demo-highlight");
+    return () => {
+      root.removeAttribute("data-demo-outline");
+      root.removeAttribute("data-demo-highlight");
+    };
   }, []);
 }
 
-/**
- * Drops the outline until the page remounts. One-way on purpose: nothing brings
- * the ring back, and switching records does not either.
- */
-export function hideSurveyOutline(): void {
-  document.documentElement.removeAttribute("data-demo-highlight");
+function subscribeToOutline(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-demo-outline", "data-demo-highlight"],
+  });
+  return () => observer.disconnect();
 }
 
-/**
- * The corner label. It is a button rather than a pseudo-element because it is
- * also the way out: whoever has seen where the form is drawn dismisses the ring
- * from the ring itself, which is where they are already looking. Hidden by CSS
- * unless the outline is on.
- */
+function getOutlineState() {
+  const root = document.documentElement;
+  if (!root.hasAttribute("data-demo-outline")) return "unavailable";
+  return root.hasAttribute("data-demo-highlight") ? "visible" : "hidden";
+}
+
+/** The dock controls the same attributes that the page's outline hook owns. */
+export function useSurveyOutlineControl() {
+  const state = useSyncExternalStore(subscribeToOutline, getOutlineState, () => "unavailable");
+  return {
+    available: state !== "unavailable",
+    visible: state === "visible",
+    toggle: () => document.documentElement.toggleAttribute("data-demo-highlight"),
+  };
+}
+
+/** The corner label names the highlighted area; the dock controls visibility. */
 export function SurveyOutlineLabel() {
   return (
-    <button
-      type="button"
+    <span
       data-survey-outline-label=""
       // The demo talking about the page, like the dock — English in every
       // locale, including inside a host site rendered in Spanish.
       lang="en"
-      title="Hide the outline and look at the page as a visitor would"
-      onClick={hideSurveyOutline}
     >
-      SurveyJS renders this (hide selection)
-    </button>
+      SurveyJS renders this
+    </span>
   );
 }
 

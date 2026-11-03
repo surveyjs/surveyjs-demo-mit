@@ -350,6 +350,15 @@ test("the dock leads to more examples, and the demo outlines where SurveyJS draw
   // SurveyJS draws, and that nobody has to press anything for it.
   await expect(page.locator("html")).toHaveAttribute("data-demo-highlight", "");
   await expect(page.locator("[data-survey-root]")).toHaveCSS("outline-style", "dashed");
+
+  const highlight = dock.getByRole("button", { name: DOCK_LABELS.highlightSurvey, exact: true });
+  await expect(highlight).toHaveAttribute("aria-pressed", "true");
+  await highlight.click();
+  await expect(page.locator("[data-survey-root]")).toHaveCSS("outline-style", "none");
+  await expect(highlight).toHaveAttribute("aria-pressed", "false");
+  await highlight.press("Space");
+  await expect(page.locator("[data-survey-root]")).toHaveCSS("outline-style", "dashed");
+  await expect(highlight).toHaveAttribute("aria-pressed", "true");
 });
 
 test("/clinic opens in the chart's language and fills the request from it", async ({

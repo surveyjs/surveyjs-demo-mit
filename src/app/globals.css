@@ -241,9 +241,7 @@ html[data-demo-highlight] [data-survey-root] {
   animation: demo-survey-ring 1.9s ease-out infinite;
 }
 
-/* The label is a button rather than a pseudo-element, because it is also the
-   way out: whoever has seen where the form is drawn can dismiss the ring from
-   the ring itself, which is where they are already looking. */
+/* The label names the highlighted area; visibility is controlled in the dock. */
 [data-survey-outline-label] {
   display: none;
 }
@@ -266,11 +264,6 @@ html[data-demo-highlight] [data-survey-root] [data-survey-outline-label] {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  cursor: pointer;
-}
-
-html[data-demo-highlight] [data-survey-root] [data-survey-outline-label]:hover {
-  filter: brightness(1.08);
 }
 
 @keyframes demo-survey-ring {

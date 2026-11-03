@@ -31,6 +31,7 @@ export const DOCK_LABELS = {
   toolbar: "Demo tools",
   moreExamples: "More examples",
   allUseCases: "All Use Cases",
+  highlightSurvey: "Highlight SurveyJS",
   /** The "⋯" menu that holds what the bar has no room for. */
   overflow: "More demo tools",
   prefill: "Prefill",

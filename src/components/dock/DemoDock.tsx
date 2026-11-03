@@ -5,17 +5,18 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   ArrowLeftRightIcon,
-  BlocksIcon,
   ChartColumnIcon,
   ChevronDownIcon,
+  CircleHelpIcon,
   Code2Icon,
   GithubIcon,
   FileDownIcon,
   MoonIcon,
   PencilRulerIcon,
   RotateCcwIcon,
+  ScanLineIcon,
   SunIcon,
-  UserRoundIcon,
+  UserPenIcon,
   UsersRoundIcon,
   WandSparklesIcon,
   type LucideIcon,
@@ -31,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { StorageReadOnlyBanner } from "@/components/StorageAccess";
+import { useSurveyOutlineControl } from "@/components/survey-outline/SurveyOutline";
 import { getNavItem, type NavId } from "@/schemas/navigation";
 import { howHref, otherEditionHref, pageSourcePath, sourceHref } from "@/lib/routes";
 import { DOCK_LABELS, PAGE_ACTIONS } from "@/lib/site";
@@ -151,6 +153,7 @@ export function DemoDock({
 }: DemoDockProps) {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
+  const outline = useSurveyOutlineControl();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -178,7 +181,7 @@ export function DemoDock({
       ? [{ key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme } as const]
       : []),
     { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "lg", href: switchHref },
-    { key: "how", label: PAGE_ACTIONS.howBuilt, icon: BlocksIcon, below: "lg", href: how },
+    { key: "how", label: PAGE_ACTIONS.howBuilt, icon: CircleHelpIcon, below: "lg", href: how },
     ...(analyticsHref
       ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "lg", href: analyticsHref } as const]
       : []),
@@ -192,26 +195,11 @@ export function DemoDock({
       ? [{ key: "prefill", label: DOCK_LABELS.prefill, icon: WandSparklesIcon, below: "sm", onSelect: onPrefill, disabled: prefillDisabled } as const]
       : []),
     ...(onEditUser
-      ? [{ key: "editUser", label: editLabel, icon: UserRoundIcon, below: "sm", onSelect: onEditUser, disabled: editUserDisabled } as const]
+      ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "sm", onSelect: onEditUser, disabled: editUserDisabled } as const]
       : []),
   ];
 
   const formTools = [
-    configureHref && (
-      // The one control that is meant to be pressed, so the one painted in the
-      // host brand rather than hidden in the greys. Never collapses.
-      <Button
-        key="designer"
-        asChild
-        size="sm"
-        className="demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
-      >
-        <a href={configureHref} title={features.designer.hint}>
-          <DesignerIcon />
-          <span className="truncate">{features.designer.label}</span>
-        </a>
-      </Button>
-    ),
     onPrefill && (
       <Button
         key="prefill"
@@ -324,7 +312,7 @@ export function DemoDock({
         disabled={editUserDisabled}
         onClick={onEditUser}
       >
-        <UserRoundIcon />
+        <UserPenIcon />
         <span className={LABEL}>{editLabel}</span>
         {edited && <span className="bg-primary size-1.5 rounded-full opacity-70" aria-hidden />}
       </Button>
@@ -353,7 +341,7 @@ export function DemoDock({
             the page is written there, in `how/<route>.md`. */}
         <Button variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
           <a href={how} aria-label={PAGE_ACTIONS.howBuilt} title={PAGE_ACTIONS.howBuilt}>
-            <BlocksIcon />
+            <CircleHelpIcon />
             <span className={LABEL}>{PAGE_ACTIONS.howBuilt}</span>
           </a>
         </Button>
@@ -369,6 +357,21 @@ export function DemoDock({
               <GithubIcon />
               <span className={LABEL}>{PAGE_ACTIONS.source}</span>
             </a>
+          </Button>
+        )}
+
+        {outline.available && (
+          <Button
+            variant={outline.visible ? "secondary" : "ghost"}
+            size="sm"
+            className={QUIET}
+            aria-label={DOCK_LABELS.highlightSurvey}
+            aria-pressed={outline.visible}
+            title={outline.visible ? "Hide SurveyJS outlines" : "Show SurveyJS outlines"}
+            onClick={outline.toggle}
+          >
+            <ScanLineIcon />
+            <span className={LABEL}>{DOCK_LABELS.highlightSurvey}</span>
           </Button>
         )}
 
@@ -403,6 +406,20 @@ export function DemoDock({
         )}
 
         <DockOverflow items={overflow} />
+
+        {/* The editor stays at the right edge, in the host brand. Never collapses. */}
+        {configureHref && (
+          <Button
+            asChild
+            size="sm"
+            className="demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
+          >
+            <a href={configureHref} title={features.designer.hint}>
+              <DesignerIcon />
+              <span className="truncate">{features.designer.label}</span>
+            </a>
+          </Button>
+        )}
       </div>
     </div>
   );
