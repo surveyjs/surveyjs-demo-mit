@@ -207,7 +207,7 @@ function markdownComponents(navPath: string): Components {
      */
     a: ({ node, href = "", children }) => {
       const linkButtonClass = node?.properties["data-card-link"]
-        ? "inline-flex max-w-full items-center rounded-[12px] border border-neutral-300 bg-white px-3 py-2 text-xs font-medium text-neutral-900 no-underline [overflow-wrap:anywhere] hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500"
+        ? "inline-flex max-w-full items-center rounded-[12px] border border-border bg-background px-3 py-2 text-xs font-medium text-foreground no-underline [overflow-wrap:anywhere] hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         : undefined;
       if (href === badgeHref) {
         return (
