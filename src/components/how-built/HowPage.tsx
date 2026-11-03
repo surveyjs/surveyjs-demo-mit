@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import type { Element, ElementContent, Nodes } from "hast";
+import type { Element, ElementContent, Nodes, Root } from "hast";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
@@ -66,6 +66,65 @@ function isLinkList(node: Element): boolean {
   });
 }
 
+/** Group explainer items after section headings, keeping their links and code together. */
+function rehypeLeadCards() {
+  return (tree: Root) => {
+    const children: Root["children"] = [];
+    let card: Element | undefined;
+    let inSection = false;
+    let hasLinks = false;
+
+    for (const node of tree.children) {
+      if (node.type !== "element") {
+        children.push(node);
+        continue;
+      }
+      if (node.tagName === "h2") {
+        inSection = true;
+        card = undefined;
+        children.push(node);
+        continue;
+      }
+      if (!inSection || (!card && node.tagName !== "p" && node.tagName !== "h3")) {
+        children.push(node);
+        continue;
+      }
+
+      const links = node.tagName === "p" && isLinkRow(node);
+      if (links) {
+        if (node.children.some((child) =>
+          isElement(child, "a") && child.properties.href === otherEditionHowHref("/leads"),
+        )) continue;
+        node.children = node.children.filter((child) => child.type !== "text");
+        for (const child of node.children) {
+          if (isElement(child, "a")) {
+            child.properties["data-card-link"] = true;
+          }
+        }
+      }
+      if (node.tagName === "h3" || (node.tagName === "p" && !links && hasLinks)) {
+        card = undefined;
+      }
+      if (!card) {
+        card = {
+          type: "element",
+          tagName: "div",
+          properties: {
+            className: ["mt-4", "border", "rounded-[24px]", "p-[24px]", "[&>:first-child]:mt-0"],
+            "data-how-card": true,
+          },
+          children: [],
+        };
+        children.push(card);
+        hasLinks = false;
+      }
+      card.children.push(node);
+      hasLinks = hasLinks || links;
+    }
+    tree.children = children;
+  };
+}
+
 /**
  * The renderer for one explainer's Markdown.
  *
@@ -93,7 +152,14 @@ function markdownComponents(navPath: string): Components {
 
     p: ({ node, children }) =>
       node && isLinkRow(node) ? (
-        <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">{children}</p>
+        <p
+          className={mergeTailwindClasses(
+            "mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs",
+            navPath === "/leads" && "mt-[24px] gap-2",
+          )}
+        >
+          {children}
+        </p>
       ) : (
         <p className="mt-2 text-sm leading-relaxed">{children}</p>
       ),
@@ -139,7 +205,10 @@ function markdownComponents(navPath: string): Components {
      * the Markdown file so the same link works in GitHub's preview; `/…` is a
      * route in this application; anything else is documentation.
      */
-    a: ({ href = "", children }) => {
+    a: ({ node, href = "", children }) => {
+      const linkButtonClass = node?.properties["data-card-link"]
+        ? "inline-flex max-w-full items-center rounded-[12px] border border-neutral-300 bg-white px-3 py-2 text-xs font-medium text-neutral-900 no-underline [overflow-wrap:anywhere] hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500"
+        : undefined;
       if (href === badgeHref) {
         return (
           <a href={href} className="underline-offset-4">
@@ -156,7 +225,7 @@ function markdownComponents(navPath: string): Components {
       const kind = howLinkKind(href);
       if (kind === "route") {
         return (
-          <a href={href} className="text-primary underline-offset-4 hover:underline">
+          <a href={href} className={linkButtonClass ?? "text-primary underline-offset-4 hover:underline"}>
             {children}
           </a>
         );
@@ -167,7 +236,7 @@ function markdownComponents(navPath: string): Components {
             href={href}
             target="_blank"
             rel="noreferrer"
-            className="text-primary underline-offset-4 hover:underline"
+            className={linkButtonClass ?? "text-primary underline-offset-4 hover:underline"}
           >
             {children} ↗
           </a>
@@ -180,9 +249,9 @@ function markdownComponents(navPath: string): Components {
           href={repoPath ? sourceHref(repoPath) : href}
           target="_blank"
           rel="noreferrer"
-          className="text-primary font-mono text-xs underline-offset-4 hover:underline"
+          className={linkButtonClass ?? "text-primary font-mono text-xs underline-offset-4 hover:underline"}
         >
-          {children}
+          {linkButtonClass && repoPath ? "Source on GitHub" : children}
         </a>
       );
     },
@@ -283,7 +352,11 @@ export function HowPage({ navId }: { navId: NavId }) {
           </header>
 
           <div className={mergeTailwindClasses("mt-2")}>
-            <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents(nav.path)}>
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={navId === "leads" ? [rehypeLeadCards] : []}
+              components={markdownComponents(nav.path)}
+            >
               {body}
             </Markdown>
           </div>
