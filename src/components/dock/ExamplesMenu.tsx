@@ -68,27 +68,28 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
             const run = runLink(entry, features.edition);
             const current = entry.id === currentId;
             return (
-              <li
-                key={entry.id}
-                data-example={entry.id}
-                className={mergeTailwindClasses(
-                  "flex min-w-0 items-baseline gap-2 px-3 py-1.5 text-sm",
-                  current && "bg-accent",
-                )}
-              >
+              <li key={entry.id} data-example={entry.id}>
                 <a
                   href={run.href}
                   {...(run.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                  aria-label={`${entry.name}${run.external ? ` ${NEW_TAB_MARK}` : ""}`}
                   aria-current={current ? "page" : undefined}
                   className={mergeTailwindClasses(
-                    "hover:text-primary shrink-0 font-medium whitespace-nowrap underline-offset-4 hover:underline",
-                    current && "text-primary",
+                    "group hover:bg-accent focus-visible:bg-accent focus-visible:ring-ring flex min-w-0 items-baseline gap-2 px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none",
+                    current && "bg-accent",
                   )}
                 >
-                  {entry.name}
-                  {run.external && ` ${NEW_TAB_MARK}`}
+                  <strong
+                    className={mergeTailwindClasses(
+                      "shrink-0 font-medium whitespace-nowrap underline-offset-4 group-hover:underline",
+                      current && "text-primary underline",
+                    )}
+                  >
+                    {entry.name}
+                    {run.external && ` ${NEW_TAB_MARK}`}
+                  </strong>
+                  <span className="text-muted-foreground min-w-0 truncate text-xs">{entry.problem}</span>
                 </a>
-                <span className="text-muted-foreground min-w-0 truncate text-xs">{entry.problem}</span>
               </li>
             );
           })}

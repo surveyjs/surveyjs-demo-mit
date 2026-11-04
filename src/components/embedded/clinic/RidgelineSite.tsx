@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import {
   CalendarCheckIcon,
   CheckIcon,
@@ -10,10 +8,8 @@ import {
   HeartPulseIcon,
   LanguagesIcon,
   MapPinIcon,
-  MoonIcon,
   PhoneIcon,
   StethoscopeIcon,
-  SunIcon,
   TriangleAlertIcon,
   UserRoundIcon,
 } from "lucide-react";
@@ -50,36 +46,6 @@ import { RIDGELINE_BANNER, RIDGELINE_STRINGS } from "./ridgeline-strings";
 
 /* ── chrome ─────────────────────────────────────────────────────────────────── */
 
-/**
- * Light and dark, where a real site puts it: in its own utility bar.
- *
- * It is not a demo control — every visitor expects a site to have one — so it
- * belongs to the host page rather than to the reviewer's toolbar. The label only
- * appears once mounted, because the server has no way to know which scheme the
- * browser will resolve.
- */
-function SchemeToggle({ locale }: { locale: ClinicLocale }) {
-  const strings = RIDGELINE_STRINGS[locale];
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  const isDark = mounted && resolvedTheme === "dark";
-
-  return (
-    <button
-      type="button"
-      className="hover:text-foreground focus-visible:ring-ring/50 flex items-center gap-1.5 rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      aria-label={isDark ? strings.switchToLight : strings.switchToDark}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-    >
-      {isDark ? <MoonIcon className="size-3.5" /> : <SunIcon className="size-3.5" />}
-      {isDark ? strings.schemeDark : strings.schemeLight}
-    </button>
-  );
-}
-
 export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
   const strings = RIDGELINE_STRINGS[locale];
 
@@ -95,7 +61,6 @@ export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
         <span className="ml-auto flex items-center gap-x-5">
           <span>{strings.payBill}</span>
           <span className="text-foreground font-medium">{strings.patientPortal}</span>
-          <SchemeToggle locale={locale} />
         </span>
       </div>
     </div>

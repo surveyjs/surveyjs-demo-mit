@@ -94,8 +94,6 @@ export interface DemoDockProps {
   /** The account has been changed in this window — worth a dot on the button. */
   edited?: boolean;
   userOpen?: boolean;
-  /** False where the host site has a colour-scheme control of its own. */
-  showTheme?: boolean;
 }
 
 /**
@@ -114,7 +112,7 @@ export interface DemoDockProps {
  *  - **Login as** and **Edit the user** — the same definition, a different
  *    person, and the form changes shape. Login as never collapses;
  *  - **the edition switch** — the same pathname on the other edition's host,
- *    in this tab — and the colour scheme, where the host has no control of its own.
+ *    in this tab — and the colour scheme for every demo.
  *
  * Below `lg` the page's links and exports move into "⋯", and below `sm` the
  * form's controls follow them (`DockOverflow`); breakpoints, so the server HTML
@@ -149,7 +147,6 @@ export function DemoDock({
   editLabel = DOCK_LABELS.editUser,
   edited = false,
   userOpen = false,
-  showTheme = true,
 }: DemoDockProps) {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
@@ -177,9 +174,7 @@ export function DemoDock({
     ...(source
       ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "lg", href: source, newTab: true } as const]
       : []),
-    ...(showTheme
-      ? [{ key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme } as const]
-      : []),
+    { key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme },
     { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "lg", href: switchHref },
     { key: "how", label: PAGE_ACTIONS.howBuilt, icon: CircleHelpIcon, below: "lg", href: how },
     ...(analyticsHref
@@ -390,20 +385,16 @@ export function DemoDock({
             <span className={LABEL}>{switchLabel}</span>
           </a>
         </Button>
-        {/* Only where the host site has no control of its own: a colour scheme
-            is the page's business, not the survey's. */}
-        {showTheme && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.lg)}
-            aria-label={themeLabel}
-            title={themeLabel}
-            onClick={toggleTheme}
-          >
-            {isDark ? <MoonIcon /> : <SunIcon />}
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.lg)}
+          aria-label={themeLabel}
+          title={themeLabel}
+          onClick={toggleTheme}
+        >
+          {isDark ? <MoonIcon /> : <SunIcon />}
+        </Button>
 
         <DockOverflow items={overflow} />
 

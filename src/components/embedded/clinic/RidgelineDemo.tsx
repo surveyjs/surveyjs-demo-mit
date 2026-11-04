@@ -184,8 +184,7 @@ export function RidgelineDemo({ survey }: { survey: DemoSurvey }) {
           </>
         }
       />
-      {/* The clinic site has its own light/dark control in its utility bar. */}
-      <DemoDock {...demo.dockProps} showTheme={false} />
+      <DemoDock {...demo.dockProps} />
     </div>
   );
 }

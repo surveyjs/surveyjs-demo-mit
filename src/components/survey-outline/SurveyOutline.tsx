@@ -19,11 +19,12 @@ import { mergeTailwindClasses } from "@/lib/utils";
  * Turns the outline on while the calling component is mounted. The embedded
  * demos call it through `useDemo`; the records pages call it directly.
  */
-export function useSurveyOutline(): void {
+export function useSurveyOutline(enabled = true): void {
   // One attribute on <html> for as long as the caller is on screen; the outline
   // itself is in `globals.css`, keyed off the `data-survey-root` marker that
   // `SurveyCard` and `SurveyOutline` carry.
   useEffect(() => {
+    if (!enabled) return;
     const root = document.documentElement;
     root.setAttribute("data-demo-outline", "");
     root.setAttribute("data-demo-highlight", "");
@@ -31,7 +32,7 @@ export function useSurveyOutline(): void {
       root.removeAttribute("data-demo-outline");
       root.removeAttribute("data-demo-highlight");
     };
-  }, []);
+  }, [enabled]);
 }
 
 function subscribeToOutline(onChange: () => void) {
@@ -81,10 +82,15 @@ export function SurveyOutlineLabel() {
 export function SurveyOutline({
   className,
   children,
+  activate = false,
 }: {
   className?: string;
   children: ReactNode;
+  /** Activate the outline and its dock control when this boundary owns them. */
+  activate?: boolean;
 }) {
+  useSurveyOutline(activate);
+
   return (
     <div data-survey-root="" className={mergeTailwindClasses("relative", className)}>
       <SurveyOutlineLabel />
