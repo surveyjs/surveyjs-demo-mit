@@ -7,6 +7,7 @@ import type { Model } from "survey-core";
 import {
   getFormNavItem,
   getRecordCollection,
+  getVariablePresets,
   isActiveRoute,
   recordTitle,
   sortRows,
@@ -263,6 +264,15 @@ export function RecordsView({
   const activeUser = users.find((user) => user.id === activeUserId) ?? users[0];
   // A session user is a plain account: it becomes `user_…` variables here, once.
   const variables = useMemo(() => (activeUser ? toVariables(activeUser) : undefined), [activeUser]);
+
+  const userOptions = useMemo(() => {
+    const presets = getVariablePresets(schemaId)?.presets;
+    return users.map((user) => ({
+      id: user.id,
+      name: user.name,
+      description: presets?.find((preset) => preset.variables.user_id === user.id)?.description,
+    }));
+  }, [schemaId, users]);
 
   /* ── the URL ─────────────────────────────────────────────────────────────── */
 
@@ -973,7 +983,7 @@ export function RecordsView({
         onExportPdf={canExportPdf ? saveAsPdf : undefined}
         exportPdfDisabled={!model || !open}
         analyticsHref={features.analyticsHref?.(schemaId)}
-        users={users}
+        users={userOptions}
         activeUserId={activeUser?.id}
         onSelectUser={selectUser}
       />
