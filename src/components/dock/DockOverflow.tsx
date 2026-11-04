@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import type { LucideIcon } from "lucide-react";
 import { EllipsisIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DOCK_LABELS, NEW_TAB_MARK } from "@/lib/site";
@@ -28,6 +30,7 @@ export interface OverflowItem {
   readonly onSelect?: () => void;
   /** The same guard the bar's control honours. */
   readonly disabled?: boolean;
+  readonly separatorBefore?: boolean;
 }
 
 /** In the bar: shown from the breakpoint up, gone below it (the menu has it there). */
@@ -74,27 +77,28 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
         {items.map((item) => {
           const Icon = item.icon;
           const className = MENU_ONLY_BELOW[item.below];
-          if (item.onSelect) {
-            return (
-              <DropdownMenuItem
-                key={item.key}
-                className={className}
-                disabled={item.disabled}
-                onSelect={item.onSelect}
-              >
-                <Icon />
-                {item.label}
-              </DropdownMenuItem>
-            );
-          }
           return (
-            <DropdownMenuItem key={item.key} className={className} disabled={item.disabled} asChild>
-              <a href={item.href} {...(item.newTab ? { target: "_blank", rel: "noreferrer" } : {})}>
-                <Icon />
-                {item.label}
-                {item.newTab && ` ${NEW_TAB_MARK}`}
-              </a>
-            </DropdownMenuItem>
+            <Fragment key={item.key}>
+              {item.separatorBefore && <DropdownMenuSeparator className={className} />}
+              {item.onSelect ? (
+                <DropdownMenuItem
+                  className={className}
+                  disabled={item.disabled}
+                  onSelect={item.onSelect}
+                >
+                  <Icon />
+                  {item.label}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem className={className} disabled={item.disabled} asChild>
+                  <a href={item.href} {...(item.newTab ? { target: "_blank", rel: "noreferrer" } : {})}>
+                    <Icon />
+                    {item.label}
+                    {item.newTab && ` ${NEW_TAB_MARK}`}
+                  </a>
+                </DropdownMenuItem>
+              )}
+            </Fragment>
           );
         })}
       </DropdownMenuContent>

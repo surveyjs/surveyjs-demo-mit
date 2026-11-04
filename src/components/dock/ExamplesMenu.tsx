@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUpIcon, LayersIcon } from "lucide-react";
+import { ChevronDownIcon, MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useExamples } from "@/components/examples/ExamplesProvider";
@@ -9,6 +9,16 @@ import { features } from "@/features";
 import { DOCK_LABELS, NEW_TAB_MARK, USE_CASES_URL } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { getNavItem, type NavId } from "@/schemas/navigation";
+
+function exampleGroup(id: string): string {
+  switch (id) {
+    case "starter": return "start";
+    case "healthcare":
+    case "humanResources": return "applications";
+    case "definition": return "tools";
+    default: return "forms";
+  }
+}
 
 /**
  * The current example's name opens the way to the others, and back to the
@@ -38,9 +48,9 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
           className="shrink-0 gap-1.5 rounded-full text-[11px] font-medium tracking-wide uppercase"
           aria-label={currentName}
         >
-          <LayersIcon className="size-3.5" />
+          <MenuIcon className="size-3.5" />
           <span className="truncate">{currentName}</span>
-          <ChevronUpIcon className="opacity-60" />
+          <ChevronDownIcon className="opacity-60" />
         </Button>
       </PopoverTrigger>
       {/* Above the toolbar itself (z-70), which is fixed over the page. */}
@@ -63,11 +73,16 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
           </a>
         </p>
         <ul className="py-1">
-          {entries.map((entry) => {
+          {entries.map((entry, index) => {
             const run = runLink(entry, features.edition);
             const current = entry.id === currentId;
+            const startsGroup = index > 0 && exampleGroup(entry.id) !== exampleGroup(entries[index - 1].id);
             return (
-              <li key={entry.id} data-example={entry.id}>
+              <li
+                key={entry.id}
+                data-example={entry.id}
+                className={startsGroup ? "mt-1 border-t pt-1" : undefined}
+              >
                 <a
                   href={run.href}
                   {...(run.external ? { target: "_blank", rel: "noreferrer" } : {})}

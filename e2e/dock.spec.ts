@@ -238,15 +238,15 @@ test.describe("at 390×844", () => {
     await dock.getByRole("button", { name: DOCK_LABELS.overflow }).click();
     const menu = page.getByRole("menu");
     const expected = [
-      PAGE_ACTIONS.source,
-      /^Switch to (light|dark) mode$/,
-      `${features.brand.otherEdition.label} →`,
       PAGE_ACTIONS.howBuilt,
+      PAGE_ACTIONS.source,
+      `${features.brand.otherEdition.label} →`,
       ...(features.analyticsHref ? [DOCK_LABELS.analytics] : []),
       ...(features.exportPdf ? [DOCK_LABELS.savePdf] : []),
       DOCK_LABELS.reset,
       DOCK_LABELS.prefill,
       DOCK_LABELS.editUser,
+      /^Current mode: (Dark|Light)$/,
     ];
     const items = menu.getByRole("menuitem");
     await expect(items).toHaveCount(expected.length);

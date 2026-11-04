@@ -159,7 +159,7 @@ export function DemoDock({
   useEffect(() => setMounted(true), []);
 
   const isDark = mounted && resolvedTheme === "dark";
-  const themeLabel = mounted ? `Switch to ${isDark ? "light" : "dark"} mode` : "Toggle colour scheme";
+  const themeLabel = mounted ? `Current mode: ${isDark ? "Dark" : "Light"}` : "Colour scheme";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
   const how = howHref(getNavItem(exampleId).path);
@@ -175,12 +175,11 @@ export function DemoDock({
   // then the form's controls below `sm`. The bar shows the same items from those
   // breakpoints up, with the same guards.
   const overflow: OverflowItem[] = [
+    { key: "how", label: PAGE_ACTIONS.howBuilt, icon: CircleHelpIcon, below: "lg", href: how },
     ...(source
       ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "lg", href: source, newTab: true } as const]
       : []),
-    { key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme },
     { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "lg", href: switchHref },
-    { key: "how", label: PAGE_ACTIONS.howBuilt, icon: CircleHelpIcon, below: "lg", href: how },
     ...(analyticsHref
       ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "lg", href: analyticsHref } as const]
       : []),
@@ -196,6 +195,7 @@ export function DemoDock({
     ...(onEditUser
       ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "sm", onSelect: onEditUser, disabled: editUserDisabled } as const]
       : []),
+    { key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme, separatorBefore: true },
   ];
 
   const formTools = [
