@@ -83,8 +83,7 @@
       },
       "useCaseAnchor": "definition",
       "ready": true,
-      "related": ["starter", "leads"],
-      "inMenu": false
+      "related": ["starter", "leads"]
     },
     {
       "id": "healthcare",
@@ -94,6 +93,14 @@
       "useCaseAnchor": "healthcare",
       "ready": true,
       "related": ["embeddedChart", "embeddedClinic"]
+    },
+    {
+      "id": "humanResources",
+      "name": "Human Resources",
+      "problem": "Manage employee records",
+      "url": "https://hr.demos.surveyjs.io/manage",
+      "ready": true,
+      "related": []
     }
   ]
 }

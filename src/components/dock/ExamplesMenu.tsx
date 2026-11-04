@@ -27,7 +27,6 @@ import { getNavItem, type NavId } from "@/schemas/navigation";
 export function ExamplesMenu({ currentId }: { currentId: NavId }) {
   const manifest = useExamples();
   const entries = menuExamples(manifest.entries);
-  // Read the whole manifest: Definition does not appear in the menu.
   const currentName = findExample(manifest, currentId)?.name ?? getNavItem(currentId).label;
 
   return (
