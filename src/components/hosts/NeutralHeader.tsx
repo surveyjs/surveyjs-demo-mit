@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { LayersIcon } from "lucide-react";
 import { DEMO_NAME } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
@@ -14,27 +15,32 @@ import { mergeTailwindClasses } from "@/lib/utils";
 export function NeutralHeader({
   title,
   description,
+  actions,
   width = "max-w-[96rem]",
 }: {
   title?: string;
   description?: string;
+  actions?: ReactNode;
   width?: string;
 }) {
   return (
     <header className="border-b">
       <div className={mergeTailwindClasses("mx-auto flex w-full flex-col gap-4 px-4 py-4 sm:px-6", width)}>
-        <Link
-          href="/"
-          className="hover:text-primary flex w-fit min-w-0 items-center gap-2 underline-offset-4 hover:underline"
-        >
-          <span
-            className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
-            aria-hidden
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <Link
+            href="/"
+            className="hover:text-primary flex w-fit min-w-0 items-center gap-2 underline-offset-4 hover:underline"
           >
-            <LayersIcon className="size-4" />
-          </span>
-          <span className="truncate text-sm font-semibold">{DEMO_NAME}</span>
-        </Link>
+            <span
+              className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
+              aria-hidden
+            >
+              <LayersIcon className="size-4" />
+            </span>
+            <span className="truncate text-sm font-semibold">{DEMO_NAME}</span>
+          </Link>
+          {actions}
+        </div>
         {title && (
           <div>
             <h1 className="text-xl font-semibold tracking-tight">{title}</h1>

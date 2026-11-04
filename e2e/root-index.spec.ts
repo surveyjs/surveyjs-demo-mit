@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { features } from "../src/features";
 import { loadExamples } from "../src/examples/load";
-import { MENU_LIMIT, menuExamples, problemHref, runLink, visibleExamples } from "../src/examples/entries";
+import { MENU_LIMIT, menuExamples, runLink, visibleExamples } from "../src/examples/entries";
 import type { ExampleEntry } from "../src/examples/types";
 import { HOW_BUILT_TEXT } from "../src/lib/how-built";
 import { howHref } from "../src/lib/routes";
@@ -22,7 +22,7 @@ test("a card per visible example, with its links", async ({ page }) => {
 
   for (const entry of entries) {
     const card = page.locator(`[data-example="${entry.id}"]`);
-    await expect(card.getByRole("heading", { level: 2 })).toHaveText(entry.name);
+    await expect(card.getByRole("heading", { level: 3 })).toHaveText(entry.name);
     await expect(card).toContainText(entry.problem);
 
     const run = runLink(entry, features.edition);
@@ -37,11 +37,8 @@ test("a card per visible example, with its links", async ({ page }) => {
     if (page_) await expect(how).toHaveAttribute("href", howHref(page_.path));
     else await expect(how).toHaveCount(0);
 
-    // The problem links the use-cases page only once it has a section for it.
-    const useCase = problemHref(entry);
-    const problemLink = card.locator('a[href^="https://surveyjs.io/use-cases"]');
-    if (useCase) await expect(problemLink).toHaveAttribute("href", useCase);
-    else await expect(problemLink).toHaveCount(0);
+    // Card descriptions are plain text; navigation is in the action buttons.
+    await expect(card.locator("p a")).toHaveCount(0);
   }
 
   // Starter and Definition are listed here though the dock's menu leaves them out.
