@@ -7,6 +7,7 @@ import { EmbeddedSurvey, SurveyCard } from "../shared/EmbeddedSurvey";
 import { SignedInChip } from "../shared/SignedInChip";
 import { accountText } from "../shared/demo-accounts";
 import { useDemo } from "../shared/useDemo";
+import { ENCOUNTER_NOTE_COPY } from "../shared/patient-demo-copy";
 import { HOST_BRANDS, type DemoSurvey } from "../shared/demo-controls";
 
 const ANCHOR = "note";
@@ -39,6 +40,7 @@ export function ChartDemo({ survey }: { survey: DemoSurvey }) {
     survey,
     anchorId: ANCHOR,
     brandId: CHART_BRAND,
+    userDescriptions: ENCOUNTER_NOTE_COPY.descriptions,
   });
 
   const mrn = accountText(demo.account, "mrn");
@@ -65,7 +67,7 @@ export function ChartDemo({ survey }: { survey: DemoSurvey }) {
           <div className="ml-auto flex items-center gap-2">
             <SignedInChip
               account={demo.account}
-              meta={mrn ? `Chart open · MRN ${mrn}` : "Chart open"}
+              meta={mrn ? `Patient · MRN ${mrn}` : "Patient selected"}
             />
           </div>
         </div>
@@ -86,12 +88,8 @@ export function ChartDemo({ survey }: { survey: DemoSurvey }) {
         </div>
       </main>
 
-      <DemoUserDialog {...demo.userDialogProps} />
-      <DemoDock
-        {...demo.dockProps}
-        usersLabel="Open chart"
-        editLabel="Edit the chart"
-      />
+      <DemoUserDialog {...demo.userDialogProps} {...ENCOUNTER_NOTE_COPY.dialog} />
+      <DemoDock {...demo.dockProps} {...ENCOUNTER_NOTE_COPY.dock} />
     </div>
   );
 }

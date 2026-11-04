@@ -46,7 +46,13 @@ import { RIDGELINE_BANNER, RIDGELINE_STRINGS } from "./ridgeline-strings";
 
 /* ── chrome ─────────────────────────────────────────────────────────────────── */
 
-export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
+export function ClinicUtilityBar({
+  locale,
+  onLocaleChange,
+}: {
+  locale: ClinicLocale;
+  onLocaleChange: (next: ClinicLocale) => void;
+}) {
   const strings = RIDGELINE_STRINGS[locale];
 
   return (
@@ -58,10 +64,11 @@ export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
         <span className="flex items-center gap-1.5">
           <ClockIcon className="size-3.5" /> {strings.urgentCareHours}
         </span>
-        <span className="ml-auto flex items-center gap-x-5">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
           <span>{strings.payBill}</span>
           <span className="text-foreground font-medium">{strings.patientPortal}</span>
-        </span>
+          <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} className="shrink-0" />
+        </div>
       </div>
     </div>
   );
@@ -70,9 +77,9 @@ export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
 /**
  * The page's language, as a two-button segmented control.
  *
- * Present for every patient and at every width — the nav beside it is what hides
- * below `lg`, not this: a patient who was handed the wrong language must always
- * be able to fix it. Each button carries its own `lang` and the language's name
+ * Present in the utility bar for every patient and at every width: a patient
+ * who was handed the wrong language must always be able to fix it. Each button
+ * carries its own `lang` and the language's name
  * in full, so "ES" is announced as Spanish rather than spelled out in English.
  */
 export function LocaleSwitch({
@@ -125,13 +132,11 @@ export function ClinicHeader({
   onRequest,
   account,
   locale,
-  onLocaleChange,
 }: {
   onRequest: () => void;
   /** The patient whose portal record the form is rendered from. */
   account: Record<string, unknown>;
   locale: ClinicLocale;
-  onLocaleChange: (next: ClinicLocale) => void;
 }) {
   const strings = RIDGELINE_STRINGS[locale];
   const mrn = accountText(account, "mrn");
@@ -162,7 +167,6 @@ export function ClinicHeader({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} />
           <SignedInChip
             account={account}
             meta={mrn ? `${strings.mrn} ${mrn} · ${plan}` : undefined}

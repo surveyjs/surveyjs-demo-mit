@@ -284,6 +284,13 @@ html[data-demo-highlight] [data-survey-root] [data-survey-outline-label] {
   }
 }
 
+/* Non-modal editors keep SurveyJS popups interactive while locking the page.
+   A stable gutter prevents the layout shifting when the scrollbar disappears. */
+html:has([data-lock-background-scroll][data-state="open"]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
 /* The dock sits over every example page and should read as an overlay, not as
    part of the host site. It is fully visible by default: on a phone there is no
    way to reveal a dimmed control, and a reviewer who cannot find the dock cannot

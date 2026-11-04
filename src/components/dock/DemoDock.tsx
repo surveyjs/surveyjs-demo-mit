@@ -87,10 +87,12 @@ export interface DemoDockProps {
    * product; the clinician's workspace opens a patient's chart instead.
    */
   usersLabel?: string;
+  usersTitle?: string;
   /** Opens the popup that edits the signed-in user. */
   onEditUser?: () => void;
   editUserDisabled?: boolean;
   editLabel?: string;
+  editTitle?: string;
   /** The account has been changed in this window — worth a dot on the button. */
   edited?: boolean;
   userOpen?: boolean;
@@ -142,9 +144,11 @@ export function DemoDock({
   onSelectUser,
   usersDisabled,
   usersLabel = DOCK_LABELS.loginAs,
+  usersTitle = "Sign in as somebody else — the same form, a different person",
   onEditUser,
   editUserDisabled,
   editLabel = DOCK_LABELS.editUser,
+  editTitle = "Change the signed-in user the form is rendered for — the editor is a SurveyJS form too",
   edited = false,
   userOpen = false,
 }: DemoDockProps) {
@@ -266,7 +270,7 @@ export function DemoDock({
             size="sm"
             className="min-w-0 shrink gap-1.5 rounded-full"
             aria-label={`${usersLabel}: ${activeUser.name}`}
-            title="Sign in as somebody else — the same form, a different person"
+            title={usersTitle}
             disabled={usersDisabled}
           >
             <UsersRoundIcon />
@@ -303,7 +307,7 @@ export function DemoDock({
         className={mergeTailwindClasses("min-w-0 gap-1.5 rounded-full", SHOWN_FROM.sm, userOpen && "shadow-inner")}
         aria-pressed={userOpen}
         aria-label={editLabel}
-        title="Change the signed-in user the form is rendered for — the editor is a SurveyJS form too"
+        title={editTitle}
         disabled={editUserDisabled}
         onClick={onEditUser}
       >
