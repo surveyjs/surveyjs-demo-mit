@@ -2,6 +2,18 @@
   "version": 1,
   "entries": [
     {
+      "id": "starter",
+      "name": "Starter",
+      "problem": "Start from the smallest page",
+      "runUrl": {
+        "mit": "https://app-mit.demos.surveyjs.io/starter",
+        "full": "https://app.demos.surveyjs.io/starter"
+      },
+      "useCaseAnchor": "starter",
+      "ready": true,
+      "related": ["definition", "leads"]
+    },
+    {
       "id": "leads",
       "name": "Leads",
       "problem": "Edit records in your app",
@@ -60,19 +72,6 @@
       "useCaseAnchor": "clinic",
       "ready": true,
       "related": ["embeddedChart", "healthcare"]
-    },
-    {
-      "id": "starter",
-      "name": "Starter",
-      "problem": "Start from the smallest page",
-      "runUrl": {
-        "mit": "https://app-mit.demos.surveyjs.io/starter",
-        "full": "https://app.demos.surveyjs.io/starter"
-      },
-      "useCaseAnchor": "starter",
-      "ready": true,
-      "related": ["definition", "leads"],
-      "inMenu": false
     },
     {
       "id": "definition",
