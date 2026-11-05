@@ -15,7 +15,8 @@ import { navPages } from "../src/schemas/navigation";
  */
 
 test("a card per visible example, with its links", async ({ page }) => {
-  const entries = visibleExamples((await loadExamples()).entries);
+  const entries = visibleExamples((await loadExamples()).entries)
+    .filter((entry) => entry.id !== "starter" && entry.id !== "definition");
   await page.goto("/");
   const cards = page.locator("[data-example]");
   await expect(cards).toHaveCount(entries.length);
@@ -41,9 +42,9 @@ test("a card per visible example, with its links", async ({ page }) => {
     await expect(card.locator("p a")).toHaveCount(0);
   }
 
-  // Starter and Definition are listed here though the dock's menu leaves them out.
-  await expect(page.locator('[data-example="starter"]')).toBeVisible();
-  await expect(page.locator('[data-example="definition"]')).toBeVisible();
+  // The catalog excludes Starter and Definition & checks.
+  await expect(page.locator('[data-example="starter"]')).toHaveCount(0);
+  await expect(page.locator('[data-example="definition"]')).toHaveCount(0);
 });
 
 test("is not indexed, and is canonical where every page is", async ({ page }) => {
