@@ -26,7 +26,7 @@ Hiding a question by role or by stage never deletes its answer, which is what ke
 none
 ```
 
-[Survey data model](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model) · [Conditional logic](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic)
+[Survey data model API](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model) · [Conditional logic docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic)
 
 The budget amount is rendered only for a session whose user is a manager.
 
@@ -34,7 +34,7 @@ The budget amount is rendered only for a session whose user is a manager.
 {budgetConfirmed} = true and {user_role} = 'manager'
 ```
 
-[Variables](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables) · [Conditional logic](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic)
+[Variables docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables) · [Conditional logic docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic)
 
 A discount over 20% fails validation unless the signed-in user is a manager.
 
@@ -42,7 +42,7 @@ A discount over 20% fails validation unless the signed-in user is a manager.
 {row.discountPct} <= 20 or {user_role} = 'manager'
 ```
 
-[Data validation](https://surveyjs.io/form-library/documentation/data-validation) · [Variables](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables)
+[Validation docs](https://surveyjs.io/form-library/documentation/data-validation) · [Variables docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables)
 
 The deal value is summed out of the line items on every keystroke, never accumulated and never read back from storage.
 
@@ -50,7 +50,7 @@ The deal value is summed out of the line items on every keystroke, never accumul
 round(sumInArray({lineItems}, 'lineTotal'), 2)
 ```
 
-[Expressions](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#expressions) · [Calculated values](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#calculated-values)
+[Expressions docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#expressions) · [Calculated values docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#calculated-values)
 
 The economic-buyer warning counts the contacts whose role says so, so the rule lives in the definition rather than in the page.
 
@@ -58,7 +58,7 @@ The economic-buyer warning counts the contacts whose role says so, so the rule l
 countInArray({contacts}, 'fullName') > 0 and countInArray({contacts}, 'fullName', '{role} = economicBuyer') = 0
 ```
 
-[Expressions](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#expressions) · [Dynamic panel](https://surveyjs.io/form-library/documentation/api-reference/dynamic-panel-model)
+[Expressions docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#expressions) · [Dynamic panel API](https://surveyjs.io/form-library/documentation/api-reference/dynamic-panel-model)
 
 ## Data out
 
@@ -78,61 +78,61 @@ PUT /api/storage/results/leads/LEAD-0001
 
 The route rebuilds this same model with the signed-in user's variables and refuses a record the definition rejects, naming the first bad cell.
 
-[Server-side validation](https://surveyjs.io/form-library/documentation/data-validation#server-side-validation) · [Data validation](https://surveyjs.io/form-library/documentation/data-validation) · [Server-side validation (example)](https://surveyjs.io/form-library/examples/javascript-server-side-form-validation/reactjs) · [src/lib/checks/check-response.ts](../src/lib/checks/check-response.ts) · [Validate the response (backend)](https://surveyjs.io/backend-integration/examples#validate)
+[Server-side validation docs](https://surveyjs.io/form-library/documentation/data-validation#server-side-validation) · [Validation docs](https://surveyjs.io/form-library/documentation/data-validation) · [Server-side validation demo](https://surveyjs.io/form-library/examples/javascript-server-side-form-validation/reactjs) · [src/lib/checks/check-response.ts](../src/lib/checks/check-response.ts) · [Validate the response (backend)](https://surveyjs.io/backend-integration/examples#validate)
 
 ### Variables from the server
 
 `user_id`, `user_name`, `user_role` and `user_currency` come from `listSessionUsers` on the server, which is `getSession` in your app.
 
-[Variables](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables) · [setVariable](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model#setVariable) · [Custom variables (example)](https://surveyjs.io/form-library/examples/custom-variables-for-background-form-calculations/reactjs) · [src/storage/session.ts](../src/storage/session.ts) · [Variables and previous answers (backend)](https://surveyjs.io/backend-integration/examples#load)
+[Variables docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables) · [setVariable API](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model#setVariable) · [Custom variables demo](https://surveyjs.io/form-library/examples/custom-variables-for-background-form-calculations/reactjs) · [src/storage/session.ts](../src/storage/session.ts) · [Variables and previous answers (backend)](https://surveyjs.io/backend-integration/examples#load)
 
 ### Variable presets
 
 The presets declare those four variables and carry the two people this page signs in as, so the editor and the linter know them too.
 
-[Variables](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables) · [Custom variables (example)](https://surveyjs.io/form-library/examples/custom-variables-for-background-form-calculations/reactjs) · [src/schemas/variables/leads.ts](../src/schemas/variables/leads.ts)
+[Variables docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#variables) · [Custom variables demo](https://surveyjs.io/form-library/examples/custom-variables-for-background-form-calculations/reactjs) · [src/schemas/variables/leads.ts](../src/schemas/variables/leads.ts)
 
 ### One JSON definition, edited from the dock
 
 Three pages of JSON hold every question, every total and every rule on this page, the ones that read the signed-in user included.
 
-[Form Library](https://surveyjs.io/form-library/documentation/overview) · [Backend integration](https://surveyjs.io/documentation/backend-integration) · [src/schemas/leads.ts](../src/schemas/leads.ts)
+[Form Library docs](https://surveyjs.io/form-library/documentation/overview) · [Backend integration guide](https://surveyjs.io/documentation/backend-integration) · [src/schemas/leads.ts](../src/schemas/leads.ts)
 
 ### Page titles on the progress bar
 
 The bar names each page, and `navigationTitle` gives two of them a shorter label there — "Account", "Qualification" — while the page heading keeps the full title.
 
-[progressBarShowPageTitles](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model#progressBarShowPageTitles) · [navigationTitle](https://surveyjs.io/form-library/documentation/api-reference/page-model#navigationTitle) · [src/schemas/leads.ts](../src/schemas/leads.ts)
+[progressBarShowPageTitles API](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model#progressBarShowPageTitles) · [navigationTitle API](https://surveyjs.io/form-library/documentation/api-reference/page-model#navigationTitle) · [src/schemas/leads.ts](../src/schemas/leads.ts)
 
 ### Expressions over a dynamic panel and matrices
 
 Line totals, discounts, the deal value and the stage-weighted value are all expressions over the current answers.
 
-[Expressions](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#expressions) · [Dynamic panel](https://surveyjs.io/form-library/documentation/api-reference/dynamic-panel-model) · [Dynamic matrix](https://surveyjs.io/form-library/documentation/api-reference/dynamic-matrix-table-question-model) · [Expressions in a dynamic panel (example)](https://surveyjs.io/form-library/examples/how-to-use-expressions-in-dynamic-panel/reactjs) · [Expression totals (example)](https://surveyjs.io/form-library/examples/expression-question-for-dynamic-form-calculations/reactjs) · [Adding rows to a dynamic matrix (example)](https://surveyjs.io/form-library/examples/dynamic-matrix-add-new-rows/reactjs) · [src/schemas/leads.ts](../src/schemas/leads.ts)
+[Expressions docs](https://surveyjs.io/form-library/documentation/design-survey/conditional-logic#expressions) · [Dynamic panel API](https://surveyjs.io/form-library/documentation/api-reference/dynamic-panel-model) · [Dynamic matrix API](https://surveyjs.io/form-library/documentation/api-reference/dynamic-matrix-table-question-model) · [Panel expressions demo](https://surveyjs.io/form-library/examples/how-to-use-expressions-in-dynamic-panel/reactjs) · [Expression totals demo](https://surveyjs.io/form-library/examples/expression-question-for-dynamic-form-calculations/reactjs) · [Adding matrix rows demo](https://surveyjs.io/form-library/examples/dynamic-matrix-add-new-rows/reactjs) · [src/schemas/leads.ts](../src/schemas/leads.ts)
 
 ### New-record defaults from the session
 
 `newRecord` sets a new lead's owner and currency from the signed-in user in code, so opening an old lead as somebody else never rewrites them.
 
-[Survey data model](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model) · [Auto-populating fields (example)](https://surveyjs.io/form-library/examples/auto-populate-form-fields/reactjs) · [src/schemas/collections/leads.ts](../src/schemas/collections/leads.ts)
+[Survey data model API](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model) · [Auto-population demo](https://surveyjs.io/form-library/examples/auto-populate-form-fields/reactjs) · [src/schemas/collections/leads.ts](../src/schemas/collections/leads.ts)
 
 ### Mapped columns plus the document
 
 `toColumns` derives seven values from each record — five the list shows, plus the currency the money column reads and the expected close it sorts by.
 
-[Storing survey results](https://surveyjs.io/form-library/documentation/how-to-store-survey-results) · [Saving and restoring responses (example)](https://surveyjs.io/form-library/examples/save-and-restore-user-responses-to-complete-survey/reactjs) · [src/schemas/collections/leads.ts](../src/schemas/collections/leads.ts) · [Responses in a relational database (backend)](https://surveyjs.io/backend-integration/examples#relational)
+[Response storage docs](https://surveyjs.io/form-library/documentation/how-to-store-survey-results) · [Save and restore demo](https://surveyjs.io/form-library/examples/save-and-restore-user-responses-to-complete-survey/reactjs) · [src/schemas/collections/leads.ts](../src/schemas/collections/leads.ts) · [Responses in a relational database (backend)](https://surveyjs.io/backend-integration/examples#relational)
 
 ### Choices from your API *(coming)*
 
 The owner dropdown still reads a static list in the schema file.
 
-[choicesByUrl](https://surveyjs.io/form-library/documentation/api-reference/choicesrestful) · [Choices from a REST service (example)](https://surveyjs.io/form-library/examples/dropdown-menu-load-data-from-restful-service/reactjs) · [Choices from the web (backend)](https://surveyjs.io/backend-integration/examples#choices)
+[choicesByUrl API](https://surveyjs.io/form-library/documentation/api-reference/choicesrestful) · [REST choices demo](https://surveyjs.io/form-library/examples/dropdown-menu-load-data-from-restful-service/reactjs) · [Choices from the web (backend)](https://surveyjs.io/backend-integration/examples#choices)
 
 ### An async validator calling the server *(coming)*
 
 No question here asks the server whether an answer is acceptable while it is typed.
 
-[Custom validators](https://surveyjs.io/form-library/documentation/data-validation#implement-custom-client-side-validation) · [Async validation (example)](https://surveyjs.io/form-library/examples/javascript-async-form-validation/reactjs) · [Async functions (backend)](https://surveyjs.io/backend-integration/examples#async)
+[Custom validators docs](https://surveyjs.io/form-library/documentation/data-validation#implement-custom-client-side-validation) · [Async validation demo](https://surveyjs.io/form-library/examples/javascript-async-form-validation/reactjs) · [Async functions (backend)](https://surveyjs.io/backend-integration/examples#async)
 
 ### Live updates with presence *(coming)*
 
@@ -145,7 +145,7 @@ The row ids and the no-accumulating-totals rule are here so that two people on o
 
 Save as PDF turns the open lead into a document with the answers in it.
 
-[PDF Generator](https://surveyjs.io/pdf-generator/documentation/overview) · [PDF Generator for React](https://surveyjs.io/pdf-generator/documentation/get-started-react)
+[PDF Generator docs](https://surveyjs.io/pdf-generator/documentation/overview) · [React setup guide](https://surveyjs.io/pdf-generator/documentation/get-started-react)
 <!-- /edition -->
 
 <!-- edition: full -->
@@ -153,7 +153,7 @@ Save as PDF turns the open lead into a document with the answers in it.
 
 View analytics charts the stored leads from the same definition.
 
-[Dashboard](https://surveyjs.io/dashboard/documentation/overview) · [Dashboard for React](https://surveyjs.io/dashboard/documentation/get-started-react) · [Responses in the Dashboard (backend)](https://surveyjs.io/backend-integration/examples#dashboard)
+[Dashboard docs](https://surveyjs.io/dashboard/documentation/overview) · [React setup guide](https://surveyjs.io/dashboard/documentation/get-started-react) · [Responses in the Dashboard (backend)](https://surveyjs.io/backend-integration/examples#dashboard)
 <!-- /edition -->
 
 <!-- edition: full -->
@@ -161,7 +161,7 @@ View analytics charts the stored leads from the same definition.
 
 The dock's editor button opens this definition in the drag-and-drop designer.
 
-[Survey Creator](https://surveyjs.io/survey-creator/documentation/overview) · [Survey Creator for React](https://surveyjs.io/survey-creator/documentation/get-started-react) · [Load and save definitions (backend)](https://surveyjs.io/backend-integration/examples#creator-save)
+[Survey Creator docs](https://surveyjs.io/survey-creator/documentation/overview) · [React setup guide](https://surveyjs.io/survey-creator/documentation/get-started-react) · [Load and save definitions (backend)](https://surveyjs.io/backend-integration/examples#creator-save)
 <!-- /edition -->
 
 ## Source files

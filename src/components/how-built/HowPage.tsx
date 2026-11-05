@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { getNavItem, navPages, type NavId } from "@/schemas";
 import { NeutralHeader } from "@/components/hosts/NeutralHeader";
 import { HOW_BUILT_TEXT } from "@/lib/how-built";
@@ -96,11 +97,19 @@ function rehypeLeadCards() {
           isElement(child, "a") && child.properties.href === otherEditionHowHref("/leads"),
         )) continue;
         node.children = node.children.filter((child) => child.type !== "text");
+        const sourceLinks: ElementContent[] = [];
+        const otherLinks: ElementContent[] = [];
         for (const child of node.children) {
           if (isElement(child, "a")) {
             child.properties["data-card-link"] = true;
           }
+          if (isElement(child, "a") && howLinkKind(String(child.properties.href)) === "repository") {
+            sourceLinks.push(child);
+          } else {
+            otherLinks.push(child);
+          }
         }
+        node.children = [...sourceLinks, ...otherLinks];
       }
       if (node.tagName === "h3" || (node.tagName === "p" && !links && hasLinks)) {
         card = undefined;
@@ -110,13 +119,15 @@ function rehypeLeadCards() {
           type: "element",
           tagName: "div",
           properties: {
-            className: ["mt-4", "border", "rounded-[24px]", "p-[24px]", "[&>:first-child]:mt-0"],
             "data-how-card": true,
           },
           children: [],
         };
         children.push(card);
         hasLinks = false;
+      }
+      if (card.children.length === 0) {
+        node.properties["data-card-start"] = true;
       }
       card.children.push(node);
       hasLinks = hasLinks || links;
@@ -138,6 +149,15 @@ function markdownComponents(navPath: string): Components {
   const badgeHref = otherEditionHowHref(navPath);
 
   return {
+    div: ({ node, children, ...props }) =>
+      node?.properties["data-how-card"] ? (
+        <Card className="mt-4" data-how-card>
+          <CardContent>{children}</CardContent>
+        </Card>
+      ) : (
+        <div {...props}>{children}</div>
+      ),
+
     h1: ({ children }) => <h2 className="mt-8 text-lg font-semibold">{children}</h2>,
 
     h2: ({ children }) => (
@@ -146,22 +166,29 @@ function markdownComponents(navPath: string): Components {
       </h2>
     ),
 
-    h3: ({ children }) => <h3 className="mt-6 text-sm font-medium">{children}</h3>,
+    h3: ({ node, children }) => (
+      <h3 className={mergeTailwindClasses("text-sm font-medium", !node?.properties["data-card-start"] && "mt-6")}>
+        {children}
+      </h3>
+    ),
 
     h4: ({ children }) => <h4 className="mt-4 text-sm font-medium">{children}</h4>,
 
     p: ({ node, children }) =>
       node && isLinkRow(node) ? (
         <p
-          className={mergeTailwindClasses(
-            "mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs",
-            navPath === "/leads" && "mt-[24px] gap-2",
-          )}
+          className={
+            navPath === "/leads"
+              ? "mt-6 flex flex-wrap items-center gap-2 text-xs"
+              : "mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
+          }
         >
           {children}
         </p>
       ) : (
-        <p className="mt-2 text-sm leading-relaxed">{children}</p>
+        <p className={mergeTailwindClasses("text-sm leading-relaxed", !node?.properties["data-card-start"] && "mt-2")}>
+          {children}
+        </p>
       ),
 
     ul: ({ node, children }) => (
@@ -206,9 +233,6 @@ function markdownComponents(navPath: string): Components {
      * route in this application; anything else is documentation.
      */
     a: ({ node, href = "", children }) => {
-      const linkButtonClass = node?.properties["data-card-link"]
-        ? "inline-flex max-w-full items-center rounded-[12px] border border-border bg-background px-3 py-2 text-xs font-medium text-foreground no-underline [overflow-wrap:anywhere] hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        : undefined;
       if (href === badgeHref) {
         return (
           <a href={href} className="underline-offset-4">
@@ -223,9 +247,28 @@ function markdownComponents(navPath: string): Components {
       }
 
       const kind = howLinkKind(href);
+      const repoPath = kind === "repository" ? repoPathFromLink(href) : undefined;
+      if (node?.properties["data-card-link"]) {
+        return (
+          <Button
+            asChild
+            variant={repoPath ? "default" : "outline"}
+            size="sm"
+          >
+            <a
+              href={repoPath ? sourceHref(repoPath) : href}
+              target={kind === "route" ? undefined : "_blank"}
+              rel={kind === "route" ? undefined : "noreferrer"}
+            >
+              {repoPath ? "Source on GitHub" : children}
+              {kind === "external" && " ↗"}
+            </a>
+          </Button>
+        );
+      }
       if (kind === "route") {
         return (
-          <a href={href} className={linkButtonClass ?? "text-primary underline-offset-4 hover:underline"}>
+          <a href={href} className="text-primary underline-offset-4 hover:underline">
             {children}
           </a>
         );
@@ -236,22 +279,21 @@ function markdownComponents(navPath: string): Components {
             href={href}
             target="_blank"
             rel="noreferrer"
-            className={linkButtonClass ?? "text-primary underline-offset-4 hover:underline"}
+            className="text-primary underline-offset-4 hover:underline"
           >
             {children} ↗
           </a>
         );
       }
 
-      const repoPath = repoPathFromLink(href);
       return (
         <a
           href={repoPath ? sourceHref(repoPath) : href}
           target="_blank"
           rel="noreferrer"
-          className={linkButtonClass ?? "text-primary font-mono text-xs underline-offset-4 hover:underline"}
+          className="text-primary font-mono text-xs underline-offset-4 hover:underline"
         >
-          {linkButtonClass && repoPath ? "Source on GitHub" : children}
+          {children}
         </a>
       );
     },
