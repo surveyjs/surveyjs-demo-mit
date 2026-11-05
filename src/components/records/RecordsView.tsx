@@ -477,6 +477,14 @@ export function RecordsView({
     [collectionId, guard, leaveImport, writeRoute, activeUser],
   );
 
+  const prefillNewRecord = useCallback(() => {
+    const current = openRef.current;
+    const form = modelRef.current;
+    if (current?.mode !== "new" || !form || !collection.prefill || importingRef.current) return;
+    // Merge only sample fields: preserve the record's ID, defaults and current profile values.
+    form.mergeData(structuredClone(collection.prefill));
+  }, [collection]);
+
   const cancel = useCallback(
     () =>
       guard(() => {
@@ -974,6 +982,8 @@ export function RecordsView({
       <DemoDock
         exampleId={exampleId}
         configureHref={configureHref(schemaId)}
+        onPrefill={open?.mode === "new" && !importing && collection.prefill ? prefillNewRecord : undefined}
+        prefillDisabled={!model || readOnly || loading || saving || importBusy}
         onReset={() => setConfirmReset(true)}
         // Enabled with no record open too: an emptied list is exactly when it
         // is wanted.
