@@ -332,15 +332,22 @@ html:has([data-lock-background-scroll][data-state="open"]) {
   scrollbar-gutter: stable;
 }
 
-/* Dim the dock gently at rest for mouse users. Touch screens and active
-   controls stay fully visible, including while a portaled menu is open. */
+/* Keep the backdrop separate so fading the toolbar still reveals blurred content. */
 .demo-dock {
-  opacity: 1;
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition: opacity 150ms ease;
 }
 @media (hover: hover) and (pointer: fine) {
+  .demo-dock-backdrop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
   .demo-dock {
     opacity: 0.75;
+    will-change: opacity;
   }
   .demo-dock:hover,
   .demo-dock:focus-within,

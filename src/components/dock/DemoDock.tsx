@@ -340,95 +340,97 @@ export function DemoDock({
         <StorageReadOnlyBanner className="pointer-events-auto" />
         {/* One row, as wide as its contents and never wider than the screen: the
             editor keeps its full label; secondary controls move into "⋯" first. */}
-        <div
-          data-demo-dock=""
-          data-edition={features.edition}
-          lang="en"
-          role="toolbar"
-          aria-label={DOCK_LABELS.toolbar}
-          className="demo-dock bg-background pointer-events-auto flex cursor-default max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg"
-        >
-          <ExamplesMenu currentId={exampleId} />
-
-          {/* The explainer, in this tab: everything this template says about
-              the page is written there, in `how/<route>.md`. */}
-          <DockButton tooltip={PAGE_ACTIONS.howBuilt} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
-            <a href={how} aria-label={PAGE_ACTIONS.howBuilt}>
-              <CircleHelpIcon />
-              <span className={LABEL}>{PAGE_ACTIONS.howBuilt}</span>
-            </a>
-          </DockButton>
-          {source && (
-            <DockButton tooltip={PAGE_ACTIONS.source} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
-              <a
-                href={source}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={PAGE_ACTIONS.source}
-              >
-                <GithubIcon />
-                <span className={LABEL}>{PAGE_ACTIONS.source}</span>
-              </a>
-            </DockButton>
-          )}
-
-          {outline.available && (
-            <DockButton
-              variant={outline.visible ? "secondary" : "ghost"}
-              size="sm"
-              className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
-              aria-label={DOCK_LABELS.highlightSurvey}
-              aria-pressed={outline.visible}
-              tooltip={outline.visible ? "Hide SurveyJS Outlines" : "Show SurveyJS Outlines"}
-              onClick={outline.toggle}
-            >
-              <ScanLineIcon />
-              <span className={LABEL}>{DOCK_LABELS.highlightSurvey}</span>
-            </DockButton>
-          )}
-
-          {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden lg:block" : "hidden xl:block")}
-          {formTools}
-
-          {userTools.length > 0 && divider("user", "hidden lg:block")}
-          {userTools}
-
-          {divider("site", "hidden xl:block")}
-          {/* The same pathname on the other edition's host, in this tab: the
-              routes are identical, a record's URL included. */}
-          <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
-            <a href={switchHref} aria-label={switchLabel}>
-              <ArrowLeftRightIcon />
-              <span className={LABEL}>{switchLabel}</span>
-            </a>
-          </DockButton>
-          <DockButton
-            variant="ghost"
-            size="icon-sm"
-            className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.xl)}
-            aria-label={themeLabel}
-            tooltip="Switch Theme"
-            onClick={toggleTheme}
+        <div className="demo-dock-backdrop relative max-w-full rounded-full">
+          <div
+            data-demo-dock=""
+            data-edition={features.edition}
+            lang="en"
+            role="toolbar"
+            aria-label={DOCK_LABELS.toolbar}
+            className="demo-dock bg-background pointer-events-auto relative flex cursor-default max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg"
           >
-            {isDark ? <MoonIcon /> : <SunIcon />}
-          </DockButton>
+            <ExamplesMenu currentId={exampleId} />
 
-          <DockOverflow items={overflow} />
-
-          {/* The editor stays at the right edge from sm; mobile keeps it in ⋯. */}
-          {configureHref && (
-            <DockButton
-              tooltip={designerHint}
-              asChild
-              size="sm"
-              className={mergeTailwindClasses("demo-brand-bg text-primary-foreground shrink-0 gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90", SHOWN_FROM.sm)}
-            >
-              <a href={configureHref}>
-                <DesignerIcon />
-                <span>{designerLabel}</span>
+            {/* The explainer, in this tab: everything this template says about
+                the page is written there, in `how/<route>.md`. */}
+            <DockButton tooltip={PAGE_ACTIONS.howBuilt} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
+              <a href={how} aria-label={PAGE_ACTIONS.howBuilt}>
+                <CircleHelpIcon />
+                <span className={LABEL}>{PAGE_ACTIONS.howBuilt}</span>
               </a>
             </DockButton>
-          )}
+            {source && (
+              <DockButton tooltip={PAGE_ACTIONS.source} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
+                <a
+                  href={source}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={PAGE_ACTIONS.source}
+                >
+                  <GithubIcon />
+                  <span className={LABEL}>{PAGE_ACTIONS.source}</span>
+                </a>
+              </DockButton>
+            )}
+
+            {outline.available && (
+              <DockButton
+                variant={outline.visible ? "secondary" : "ghost"}
+                size="sm"
+                className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
+                aria-label={DOCK_LABELS.highlightSurvey}
+                aria-pressed={outline.visible}
+                tooltip={outline.visible ? "Hide SurveyJS Outlines" : "Show SurveyJS Outlines"}
+                onClick={outline.toggle}
+              >
+                <ScanLineIcon />
+                <span className={LABEL}>{DOCK_LABELS.highlightSurvey}</span>
+              </DockButton>
+            )}
+
+            {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden lg:block" : "hidden xl:block")}
+            {formTools}
+
+            {userTools.length > 0 && divider("user", "hidden lg:block")}
+            {userTools}
+
+            {divider("site", "hidden xl:block")}
+            {/* The same pathname on the other edition's host, in this tab: the
+                routes are identical, a record's URL included. */}
+            <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
+              <a href={switchHref} aria-label={switchLabel}>
+                <ArrowLeftRightIcon />
+                <span className={LABEL}>{switchLabel}</span>
+              </a>
+            </DockButton>
+            <DockButton
+              variant="ghost"
+              size="icon-sm"
+              className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.xl)}
+              aria-label={themeLabel}
+              tooltip="Switch Theme"
+              onClick={toggleTheme}
+            >
+              {isDark ? <MoonIcon /> : <SunIcon />}
+            </DockButton>
+
+            <DockOverflow items={overflow} />
+
+            {/* The editor stays at the right edge from sm; mobile keeps it in ⋯. */}
+            {configureHref && (
+              <DockButton
+                tooltip={designerHint}
+                asChild
+                size="sm"
+                className={mergeTailwindClasses("demo-brand-bg text-primary-foreground shrink-0 gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90", SHOWN_FROM.sm)}
+              >
+                <a href={configureHref}>
+                  <DesignerIcon />
+                  <span>{designerLabel}</span>
+                </a>
+              </DockButton>
+            )}
+          </div>
         </div>
       </div>
     </TooltipProvider>
