@@ -21,7 +21,8 @@ import {
   WandSparklesIcon,
   type LucideIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { DockButton } from "./DockButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -200,61 +201,60 @@ export function DemoDock({
 
   const formTools = [
     onPrefill && (
-      <Button
+      <DockButton
         key="prefill"
         variant="ghost"
         size="sm"
         className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
         aria-label={DOCK_LABELS.prefill}
-        title="Fill every page with sample answers"
+        tooltip="Fill every page with sample answers"
         disabled={prefillDisabled}
         onClick={onPrefill}
       >
         <WandSparklesIcon />
         <span className={LABEL}>{DOCK_LABELS.prefill}</span>
-      </Button>
+      </DockButton>
     ),
     onReset && (
-      <Button
+      <DockButton
         key="reset"
         variant="ghost"
         size="sm"
         className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
         aria-label={resetLabel}
-        title={resetTitle}
+        tooltip={resetTitle}
         disabled={resetDisabled}
         onClick={onReset}
       >
         <RotateCcwIcon />
         <span className={LABEL}>{resetLabel}</span>
-      </Button>
+      </DockButton>
     ),
     onExportPdf && (
-      <Button
+      <DockButton
         key="pdf"
         variant="ghost"
         size="sm"
         className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
         aria-label={DOCK_LABELS.savePdf}
-        title="Download this form, with the answers so far, as a PDF"
+        tooltip="Download this form, with the answers so far, as a PDF"
         disabled={exportPdfDisabled}
         onClick={onExportPdf}
       >
         <FileDownIcon />
         <span className={LABEL}>{DOCK_LABELS.savePdf}</span>
-      </Button>
+      </DockButton>
     ),
     analyticsHref && (
-      <Button key="analytics" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+      <DockButton key="analytics" tooltip="Charts built from this form's responses — SurveyJS Dashboard reads the same definition" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
         <a
           href={analyticsHref}
           aria-label={DOCK_LABELS.analytics}
-          title="Charts built from this form's responses — SurveyJS Dashboard reads the same definition"
         >
           <ChartColumnIcon />
           <span className={LABEL}>{DOCK_LABELS.analytics}</span>
         </a>
-      </Button>
+      </DockButton>
     ),
   ].filter(Boolean);
 
@@ -265,12 +265,12 @@ export function DemoDock({
     users.length > 1 && activeUser && onSelectUser && (
       <DropdownMenu key="users" modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button
+          <DockButton
             variant="ghost"
             size="sm"
             className="min-w-0 shrink gap-1.5 rounded-full"
             aria-label={`${usersLabel}: ${activeUser.name}`}
-            title={usersTitle}
+            tooltip={usersTitle}
             disabled={usersDisabled}
           >
             <UsersRoundIcon />
@@ -278,7 +278,7 @@ export function DemoDock({
               {usersLabel}: {activeUser.name}
             </span>
             <ChevronDownIcon className="opacity-60" />
-          </Button>
+          </DockButton>
         </DropdownMenuTrigger>
         {/* Above the toolbar itself (z-70), which is fixed over the page. */}
         <DropdownMenuContent align="center" lang="en" className="z-[80] w-72">
@@ -300,122 +300,124 @@ export function DemoDock({
       </DropdownMenu>
     ),
     onEditUser && (
-      <Button
+      <DockButton
         key="editUser"
         variant={userOpen ? "secondary" : "ghost"}
         size="sm"
         className={mergeTailwindClasses("min-w-0 gap-1.5 rounded-full", SHOWN_FROM.sm, userOpen && "shadow-inner")}
         aria-pressed={userOpen}
         aria-label={editLabel}
-        title={editTitle}
+        tooltip={editTitle}
         disabled={editUserDisabled}
         onClick={onEditUser}
       >
         <UserPenIcon />
         <span className={LABEL}>{editLabel}</span>
         {edited && <span className="bg-primary size-1.5 rounded-full opacity-70" aria-hidden />}
-      </Button>
+      </DockButton>
     ),
   ].filter(Boolean);
 
   return (
     // Fixed over the page, bottom centre. The column lets clicks through to the
     // page beside the card, the banner and the toolbar.
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[70] flex flex-col items-center gap-2 px-4">
-      <SeeNextCard currentId={exampleId} />
-      <StorageReadOnlyBanner className="pointer-events-auto" />
-      {/* One row, as wide as its contents and never wider than the screen: the
-          longest labels truncate, and what has no room left moves into "⋯". */}
-      <div
-        data-demo-dock=""
-        data-edition={features.edition}
-        lang="en"
-        role="toolbar"
-        aria-label={DOCK_LABELS.toolbar}
-        className="demo-dock bg-background/85 pointer-events-auto flex max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg backdrop-blur"
-      >
-        <ExamplesMenu currentId={exampleId} />
-
-        {/* The explainer, in this tab: everything this template says about
-            the page is written there, in `how/<route>.md`. */}
-        <Button variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
-          <a href={how} aria-label={PAGE_ACTIONS.howBuilt} title={PAGE_ACTIONS.howBuilt}>
-            <CircleHelpIcon />
-            <span className={LABEL}>{PAGE_ACTIONS.howBuilt}</span>
-          </a>
-        </Button>
-        {source && (
-          <Button variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
-            <a
-              href={source}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={PAGE_ACTIONS.source}
-              title={PAGE_ACTIONS.source}
-            >
-              <GithubIcon />
-              <span className={LABEL}>{PAGE_ACTIONS.source}</span>
-            </a>
-          </Button>
-        )}
-
-        {outline.available && (
-          <Button
-            variant={outline.visible ? "secondary" : "ghost"}
-            size="sm"
-            className={QUIET}
-            aria-label={DOCK_LABELS.highlightSurvey}
-            aria-pressed={outline.visible}
-            title={outline.visible ? "Hide SurveyJS outlines" : "Show SurveyJS outlines"}
-            onClick={outline.toggle}
-          >
-            <ScanLineIcon />
-            <span className={LABEL}>{DOCK_LABELS.highlightSurvey}</span>
-          </Button>
-        )}
-
-        {formTools.length > 0 && divider("form")}
-        {formTools}
-
-        {userTools.length > 0 && divider("user")}
-        {userTools}
-
-        {divider("site", "hidden lg:block")}
-        {/* The same pathname on the other edition's host, in this tab: the
-            routes are identical, a record's URL included. */}
-        <Button variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
-          <a href={switchHref} aria-label={switchLabel} title={`This page in the ${otherLabel}`}>
-            <ArrowLeftRightIcon />
-            <span className={LABEL}>{switchLabel}</span>
-          </a>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.lg)}
-          aria-label={themeLabel}
-          title={themeLabel}
-          onClick={toggleTheme}
+    <TooltipProvider delayDuration={150}>
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[70] flex flex-col items-center gap-2 px-4">
+        <SeeNextCard currentId={exampleId} />
+        <StorageReadOnlyBanner className="pointer-events-auto" />
+        {/* One row, as wide as its contents and never wider than the screen: the
+            longest labels truncate, and what has no room left moves into "⋯". */}
+        <div
+          data-demo-dock=""
+          data-edition={features.edition}
+          lang="en"
+          role="toolbar"
+          aria-label={DOCK_LABELS.toolbar}
+          className="demo-dock bg-background/85 pointer-events-auto flex max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg backdrop-blur"
         >
-          {isDark ? <MoonIcon /> : <SunIcon />}
-        </Button>
+          <ExamplesMenu currentId={exampleId} />
 
-        <DockOverflow items={overflow} />
-
-        {/* The editor stays at the right edge, in the host brand. Never collapses. */}
-        {configureHref && (
-          <Button
-            asChild
-            size="sm"
-            className="demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
-          >
-            <a href={configureHref} title={features.designer.hint}>
-              <DesignerIcon />
-              <span className="truncate">{features.designer.label}</span>
+          {/* The explainer, in this tab: everything this template says about
+              the page is written there, in `how/<route>.md`. */}
+          <DockButton tooltip={PAGE_ACTIONS.howBuilt} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+            <a href={how} aria-label={PAGE_ACTIONS.howBuilt}>
+              <CircleHelpIcon />
+              <span className={LABEL}>{PAGE_ACTIONS.howBuilt}</span>
             </a>
-          </Button>
-        )}
+          </DockButton>
+          {source && (
+            <DockButton tooltip={PAGE_ACTIONS.source} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+              <a
+                href={source}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={PAGE_ACTIONS.source}
+              >
+                <GithubIcon />
+                <span className={LABEL}>{PAGE_ACTIONS.source}</span>
+              </a>
+            </DockButton>
+          )}
+
+          {outline.available && (
+            <DockButton
+              variant={outline.visible ? "secondary" : "ghost"}
+              size="sm"
+              className={QUIET}
+              aria-label={DOCK_LABELS.highlightSurvey}
+              aria-pressed={outline.visible}
+              tooltip={outline.visible ? "Hide SurveyJS outlines" : "Show SurveyJS outlines"}
+              onClick={outline.toggle}
+            >
+              <ScanLineIcon />
+              <span className={LABEL}>{DOCK_LABELS.highlightSurvey}</span>
+            </DockButton>
+          )}
+
+          {formTools.length > 0 && divider("form")}
+          {formTools}
+
+          {userTools.length > 0 && divider("user")}
+          {userTools}
+
+          {divider("site", "hidden lg:block")}
+          {/* The same pathname on the other edition's host, in this tab: the
+              routes are identical, a record's URL included. */}
+          <DockButton tooltip={`This page in the ${otherLabel}`} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+            <a href={switchHref} aria-label={switchLabel}>
+              <ArrowLeftRightIcon />
+              <span className={LABEL}>{switchLabel}</span>
+            </a>
+          </DockButton>
+          <DockButton
+            variant="ghost"
+            size="icon-sm"
+            className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.lg)}
+            aria-label={themeLabel}
+            tooltip={themeLabel}
+            onClick={toggleTheme}
+          >
+            {isDark ? <MoonIcon /> : <SunIcon />}
+          </DockButton>
+
+          <DockOverflow items={overflow} />
+
+          {/* The editor stays at the right edge, in the host brand. Never collapses. */}
+          {configureHref && (
+            <DockButton
+              tooltip={features.designer.hint}
+              asChild
+              size="sm"
+              className="demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
+            >
+              <a href={configureHref}>
+                <DesignerIcon />
+                <span className="truncate">{features.designer.label}</span>
+              </a>
+            </DockButton>
+          )}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

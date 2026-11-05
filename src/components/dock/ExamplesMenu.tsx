@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDownIcon, MenuIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { DockButton } from "./DockButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useExamples } from "@/components/examples/ExamplesProvider";
 import { findExample, menuExamples, runLink } from "@/examples/entries";
@@ -42,16 +42,17 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
   return (
     <Popover modal={false}>
       <PopoverTrigger asChild>
-        <Button
+        <DockButton
           variant="ghost"
           size="sm"
           className="shrink-0 gap-1.5 rounded-full text-[11px] font-medium tracking-wide uppercase"
+          tooltip={DOCK_LABELS.moreExamples}
           aria-label={currentName}
         >
           <MenuIcon className="size-3.5" />
           <span className="truncate">{currentName}</span>
           <ChevronDownIcon className="opacity-60" />
-        </Button>
+        </DockButton>
       </PopoverTrigger>
       {/* Above the toolbar itself (z-70), which is fixed over the page. */}
       <PopoverContent

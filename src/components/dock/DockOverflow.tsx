@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import type { LucideIcon } from "lucide-react";
 import { EllipsisIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { DockButton } from "./DockButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,15 +62,15 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
     // going shifts this centred, fixed toolbar sideways.
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button
+        <DockButton
           variant="ghost"
           size="icon-sm"
           className={mergeTailwindClasses("shrink-0 rounded-full", hiddenFrom)}
           aria-label={DOCK_LABELS.overflow}
-          title={DOCK_LABELS.overflow}
+          tooltip={DOCK_LABELS.overflow}
         >
           <EllipsisIcon />
-        </Button>
+        </DockButton>
       </DropdownMenuTrigger>
       {/* Above the toolbar itself (z-70), which is fixed over the page. */}
       <DropdownMenuContent side="top" align="end" lang="en" className="z-[80] w-60">
