@@ -4,7 +4,7 @@
     {
       "id": "leads",
       "name": "Leads",
-      "problem": "Edit records in your app",
+      "problem": "Manage sales opportunities in your app",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/leads",
         "full": "https://app.demos.surveyjs.io/leads"
@@ -16,7 +16,7 @@
     {
       "id": "workOrders",
       "name": "Work orders",
-      "problem": "Turn paper forms into records",
+      "problem": "Digitize field service reports",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/work-orders",
         "full": "https://app.demos.surveyjs.io/work-orders"
@@ -40,7 +40,7 @@
     {
       "id": "embeddedChart",
       "name": "Encounter note",
-      "problem": "Run long clinical forms",
+      "problem": "Capture detailed clinical notes",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/chart",
         "full": "https://app.demos.surveyjs.io/chart"
@@ -52,7 +52,7 @@
     {
       "id": "embeddedClinic",
       "name": "Appointment",
-      "problem": "Let a form drive the page around it",
+      "problem": "Build a personalized appointment flow",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/clinic",
         "full": "https://app.demos.surveyjs.io/clinic"
@@ -64,7 +64,7 @@
     {
       "id": "starter",
       "name": "Starter",
-      "problem": "Start from the smallest page",
+      "problem": "Build your first form with a minimal integration",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/starter",
         "full": "https://app.demos.surveyjs.io/starter"
@@ -77,7 +77,7 @@
     {
       "id": "definition",
       "name": "Definition & checks",
-      "problem": "Check a definition before it ships",
+      "problem": "Preview and validate your form definitions",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/definition",
         "full": "https://app.demos.surveyjs.io/definition"
@@ -95,6 +95,14 @@
       "useCaseAnchor": "healthcare",
       "ready": true,
       "related": ["embeddedChart", "embeddedClinic"]
+    },
+    {
+      "id": "humanResources",
+      "name": "Human Resources",
+      "problem": "Manage employee records",
+      "url": "https://hr.demos.surveyjs.io/manage",
+      "ready": true,
+      "related": []
     }
   ]
 }
