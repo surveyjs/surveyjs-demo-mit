@@ -117,8 +117,9 @@ export interface DemoDockProps {
  *  - **the edition switch** — the same pathname on the other edition's host,
  *    in this tab — and the colour scheme for every demo.
  *
- * Below `lg` the page's links and exports move into "⋯", and below `sm` the
- * form's controls, highlight and editor follow them (`DockOverflow`); breakpoints, so the server HTML
+ * Below `xl` the page's links and exports move into "⋯", below `lg` the
+ * form's controls and highlight follow, and below `sm` so does the editor
+ * (`DockOverflow`); breakpoints, so the server HTML
  * is already the final layout. Pinned above the toolbar: the "See next" card,
  * once the form is finished, and the storage banner in a browser that blocks
  * the cookie.
@@ -173,37 +174,37 @@ export function DemoDock({
   const activeUser = users.find((option) => option.id === activeUserId) ?? users[0];
   const DesignerIcon = DESIGNER_ICONS[features.designer.icon];
 
-  // What "⋯" holds, in its own order: the page's links and exports below `lg`,
-  // then the form's controls below `sm`. The bar shows the same items from those
+  // What "⋯" holds, in its own order: the page's links and exports below `xl`,
+  // then the form's controls below `lg` and editor below `sm`. The bar shows the same items from those
   // breakpoints up, with the same guards.
   const overflow: OverflowItem[] = [
-    { key: "how", label: `${PAGE_ACTIONS.howBuilt} ${NEW_TAB_MARK}`, icon: CircleHelpIcon, below: "lg", href: how },
+    { key: "how", label: `${PAGE_ACTIONS.howBuilt} ${NEW_TAB_MARK}`, icon: CircleHelpIcon, below: "xl", href: how },
     ...(source
-      ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "lg", href: source, newTab: true } as const]
+      ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "xl", href: source, newTab: true } as const]
       : []),
-    { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "lg", href: switchHref, separatorBefore: true },
+    { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "xl", href: switchHref, separatorBefore: true },
     ...(analyticsHref
-      ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "lg", href: analyticsHref } as const]
+      ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "xl", href: analyticsHref } as const]
       : []),
     ...(onExportPdf
-      ? [{ key: "pdf", label: DOCK_LABELS.savePdf, icon: FileDownIcon, below: "lg", onSelect: onExportPdf, disabled: exportPdfDisabled } as const]
+      ? [{ key: "pdf", label: DOCK_LABELS.savePdf, icon: FileDownIcon, below: "xl", onSelect: onExportPdf, disabled: exportPdfDisabled } as const]
       : []),
     ...(configureHref
       ? [{ key: "designer", label: features.designer.label, icon: DesignerIcon, below: "sm", href: configureHref } as const]
       : []),
     ...(outline.available
-      ? [{ key: "highlight", label: DOCK_LABELS.highlightSurvey, icon: ScanLineIcon, below: "sm", onSelect: outline.toggle, checked: outline.visible, separatorBefore: true, separatorAfter: true } as const]
+      ? [{ key: "highlight", label: DOCK_LABELS.highlightSurvey, icon: ScanLineIcon, below: "lg", onSelect: outline.toggle, checked: outline.visible, separatorBefore: true, separatorAfter: true } as const]
       : []),
     ...(onReset
-      ? [{ key: "reset", label: resetLabel, icon: RotateCcwIcon, below: "sm", onSelect: onReset, disabled: resetDisabled } as const]
+      ? [{ key: "reset", label: resetLabel, icon: RotateCcwIcon, below: "lg", onSelect: onReset, disabled: resetDisabled } as const]
       : []),
     ...(onPrefill
-      ? [{ key: "prefill", label: DOCK_LABELS.prefill, icon: WandSparklesIcon, below: "sm", onSelect: onPrefill, disabled: prefillDisabled } as const]
+      ? [{ key: "prefill", label: DOCK_LABELS.prefill, icon: WandSparklesIcon, below: "lg", onSelect: onPrefill, disabled: prefillDisabled } as const]
       : []),
     ...(onEditUser
-      ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "sm", onSelect: onEditUser, disabled: editUserDisabled } as const]
+      ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "lg", onSelect: onEditUser, disabled: editUserDisabled } as const]
       : []),
-    { key: "theme", label: themeActionLabel, icon: isDark ? SunIcon : MoonIcon, below: "lg", onSelect: toggleTheme, separatorBefore: true },
+    { key: "theme", label: themeActionLabel, icon: isDark ? SunIcon : MoonIcon, below: "xl", onSelect: toggleTheme, separatorBefore: true },
   ];
 
   const formTools = [
@@ -212,7 +213,7 @@ export function DemoDock({
         key="prefill"
         variant="ghost"
         size="sm"
-        className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
+        className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
         aria-label={DOCK_LABELS.prefill}
         tooltip="Fill with sample answers"
         disabled={prefillDisabled}
@@ -227,7 +228,7 @@ export function DemoDock({
         key="reset"
         variant="ghost"
         size="sm"
-        className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
+        className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
         aria-label={resetLabel}
         tooltip={resetTitle}
         disabled={resetDisabled}
@@ -242,7 +243,7 @@ export function DemoDock({
         key="pdf"
         variant="ghost"
         size="sm"
-        className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
+        className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)}
         aria-label={DOCK_LABELS.savePdf}
         tooltip={DOCK_LABELS.savePdf}
         disabled={exportPdfDisabled}
@@ -253,7 +254,7 @@ export function DemoDock({
       </DockButton>
     ),
     analyticsHref && (
-      <DockButton key="analytics" tooltip="View response analytics" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+      <DockButton key="analytics" tooltip="View response analytics" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
         <a
           href={analyticsHref}
           aria-label={DOCK_LABELS.analytics}
@@ -315,7 +316,7 @@ export function DemoDock({
         key="editUser"
         variant={userOpen ? "secondary" : "ghost"}
         size="sm"
-        className={mergeTailwindClasses("min-w-0 gap-1.5 rounded-full", SHOWN_FROM.sm, userOpen && "shadow-inner")}
+        className={mergeTailwindClasses("min-w-0 gap-1.5 rounded-full", SHOWN_FROM.lg, userOpen && "shadow-inner")}
         aria-pressed={userOpen}
         aria-label={editLabel}
         tooltip={editTitle}
@@ -337,7 +338,7 @@ export function DemoDock({
         <SeeNextCard currentId={exampleId} />
         <StorageReadOnlyBanner className="pointer-events-auto" />
         {/* One row, as wide as its contents and never wider than the screen: the
-            longest labels truncate, and what has no room left moves into "⋯". */}
+            editor keeps its full label; secondary controls move into "⋯" first. */}
         <div
           data-demo-dock=""
           data-edition={features.edition}
@@ -350,14 +351,14 @@ export function DemoDock({
 
           {/* The explainer, in this tab: everything this template says about
               the page is written there, in `how/<route>.md`. */}
-          <DockButton tooltip={PAGE_ACTIONS.howBuilt} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+          <DockButton tooltip={PAGE_ACTIONS.howBuilt} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
             <a href={how} aria-label={PAGE_ACTIONS.howBuilt}>
               <CircleHelpIcon />
               <span className={LABEL}>{PAGE_ACTIONS.howBuilt}</span>
             </a>
           </DockButton>
           {source && (
-            <DockButton tooltip={PAGE_ACTIONS.source} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+            <DockButton tooltip={PAGE_ACTIONS.source} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
               <a
                 href={source}
                 target="_blank"
@@ -374,7 +375,7 @@ export function DemoDock({
             <DockButton
               variant={outline.visible ? "secondary" : "ghost"}
               size="sm"
-              className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
+              className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
               aria-label={DOCK_LABELS.highlightSurvey}
               aria-pressed={outline.visible}
               tooltip={outline.visible ? "Hide SurveyJS outlines" : "Show SurveyJS outlines"}
@@ -385,16 +386,16 @@ export function DemoDock({
             </DockButton>
           )}
 
-          {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden sm:block" : "hidden lg:block")}
+          {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden lg:block" : "hidden xl:block")}
           {formTools}
 
-          {userTools.length > 0 && divider("user", "hidden sm:block")}
+          {userTools.length > 0 && divider("user", "hidden lg:block")}
           {userTools}
 
-          {divider("site", "hidden lg:block")}
+          {divider("site", "hidden xl:block")}
           {/* The same pathname on the other edition's host, in this tab: the
               routes are identical, a record's URL included. */}
-          <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+          <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
             <a href={switchHref} aria-label={switchLabel}>
               <ArrowLeftRightIcon />
               <span className={LABEL}>{switchLabel}</span>
@@ -403,9 +404,9 @@ export function DemoDock({
           <DockButton
             variant="ghost"
             size="icon-sm"
-            className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.lg)}
+            className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.xl)}
             aria-label={themeLabel}
-            tooltip={themeLabel}
+            tooltip="Switch theme"
             onClick={toggleTheme}
           >
             {isDark ? <MoonIcon /> : <SunIcon />}
@@ -419,11 +420,11 @@ export function DemoDock({
               tooltip={features.designer.hint}
               asChild
               size="sm"
-              className={mergeTailwindClasses("demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90", SHOWN_FROM.sm)}
+              className={mergeTailwindClasses("demo-brand-bg text-primary-foreground shrink-0 gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90", SHOWN_FROM.sm)}
             >
               <a href={configureHref}>
                 <DesignerIcon />
-                <span className="truncate">{features.designer.label}</span>
+                <span>{features.designer.label}</span>
               </a>
             </DockButton>
           )}

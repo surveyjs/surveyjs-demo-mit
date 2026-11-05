@@ -17,14 +17,14 @@ import { mergeTailwindClasses } from "@/lib/utils";
 
 /**
  * One control the bar gives up on a narrow screen. `below` is the breakpoint
- * under which it leaves the bar for the "⋯" menu: `lg` for the page's own
- * links and exports, `sm` for the form's controls, which the bar keeps longer.
+ * under which it leaves the bar for the "⋯" menu: `xl` for page links and
+ * exports, `lg` for form controls, and `sm` for the editor.
  */
 export interface OverflowItem {
   readonly key: string;
   readonly label: string;
   readonly icon: LucideIcon;
-  readonly below: "lg" | "sm";
+  readonly below: "xl" | "lg" | "sm";
   /** A link, or a button when `onSelect` is set instead. */
   readonly href?: string;
   readonly newTab?: boolean;
@@ -38,13 +38,15 @@ export interface OverflowItem {
 
 /** In the bar: shown from the breakpoint up, gone below it (the menu has it there). */
 export const SHOWN_FROM: Record<OverflowItem["below"], string> = {
+  xl: "hidden xl:inline-flex",
   lg: "hidden lg:inline-flex",
   sm: "hidden sm:inline-flex",
 };
 
 /** In the menu: only below the breakpoint, where the bar no longer shows it. */
 const MENU_ONLY_BELOW: Record<OverflowItem["below"], string> = {
-  lg: "",
+  xl: "",
+  lg: "lg:hidden",
   sm: "sm:hidden",
 };
 
@@ -58,7 +60,9 @@ const MENU_ONLY_BELOW: Record<OverflowItem["below"], string> = {
  */
 export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
   if (items.length === 0) return null;
-  const hiddenFrom = items.some((item) => item.below === "lg") ? "lg:hidden" : "sm:hidden";
+  const hiddenFrom = items.some((item) => item.below === "xl")
+    ? "xl:hidden"
+    : items.some((item) => item.below === "lg") ? "lg:hidden" : "sm:hidden";
 
   return (
     // `modal={false}`: a modal menu locks the page scroll, and the scrollbar
@@ -92,7 +96,7 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
                   disabled={item.disabled}
                   onCheckedChange={item.onSelect}
                 >
-                  <Icon />
+                  <Icon className="text-muted-foreground" />
                   {item.label}
                 </DropdownMenuCheckboxItem>
               ) : item.onSelect ? (
