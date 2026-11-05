@@ -240,7 +240,7 @@ test.describe("at 390×844", () => {
     const expected = [
       PAGE_ACTIONS.howBuilt,
       PAGE_ACTIONS.source,
-      `${features.brand.otherEdition.label} →`,
+      `Switch to ${features.brand.otherEdition.label}`,
       ...(features.analyticsHref ? [DOCK_LABELS.analytics] : []),
       ...(features.exportPdf ? [DOCK_LABELS.savePdf] : []),
       DOCK_LABELS.reset,

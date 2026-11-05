@@ -11,7 +11,8 @@
       },
       "useCaseAnchor": "starter",
       "ready": true,
-      "related": ["definition", "leads"]
+      "related": ["definition", "leads"],
+      "inMenu": false
     },
     {
       "id": "leads",
@@ -77,7 +78,7 @@
       "id": "healthcare",
       "name": "Healthcare",
       "problem": "Healthcare forms end to end",
-      "url": "https://healthcare.demos.surveyjs.io/",
+      "url": "https://healthcare.demos.surveyjs.io/login",
       "useCaseAnchor": "healthcare",
       "ready": true,
       "related": ["embeddedChart", "embeddedClinic"]
@@ -86,7 +87,7 @@
       "id": "humanResources",
       "name": "Human Resources",
       "problem": "Manage employee records",
-      "url": "https://hr.demos.surveyjs.io/manage",
+      "url": "https://hr.demos.surveyjs.io/login",
       "ready": true,
       "related": []
     },
@@ -100,7 +101,8 @@
       },
       "useCaseAnchor": "definition",
       "ready": true,
-      "related": ["starter", "leads"]
+      "related": ["starter", "leads"],
+      "inMenu": false
     }
   ]
 }

@@ -36,7 +36,7 @@ import { StorageReadOnlyBanner } from "@/components/StorageAccess";
 import { useSurveyOutlineControl } from "@/components/survey-outline/SurveyOutline";
 import { getNavItem, type NavId } from "@/schemas/navigation";
 import { howHref, otherEditionHref, pageSourcePath, sourceHref } from "@/lib/routes";
-import { DOCK_LABELS, PAGE_ACTIONS } from "@/lib/site";
+import { DOCK_LABELS, NEW_TAB_MARK, PAGE_ACTIONS } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { features, type Features } from "@/features";
 import { DockOverflow, SHOWN_FROM, type OverflowItem } from "./DockOverflow";
@@ -167,7 +167,7 @@ export function DemoDock({
   const sourcePath = pageSourcePath(pathname);
   const source = sourcePath ? sourceHref(sourcePath) : undefined;
   const { label: otherLabel, baseUrl } = features.brand.otherEdition;
-  const switchLabel = `${otherLabel} →`;
+  const switchLabel = `Switch to ${otherLabel}`;
   const switchHref = otherEditionHref(baseUrl, pathname);
   const activeUser = users.find((option) => option.id === activeUserId) ?? users[0];
   const DesignerIcon = DESIGNER_ICONS[features.designer.icon];
@@ -176,7 +176,7 @@ export function DemoDock({
   // then the form's controls below `sm`. The bar shows the same items from those
   // breakpoints up, with the same guards.
   const overflow: OverflowItem[] = [
-    { key: "how", label: PAGE_ACTIONS.howBuilt, icon: CircleHelpIcon, below: "lg", href: how },
+    { key: "how", label: `${PAGE_ACTIONS.howBuilt} ${NEW_TAB_MARK}`, icon: CircleHelpIcon, below: "lg", href: how },
     ...(source
       ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "lg", href: source, newTab: true } as const]
       : []),
