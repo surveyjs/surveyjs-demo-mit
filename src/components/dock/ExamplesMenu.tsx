@@ -61,9 +61,10 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
         side="top"
         align="start"
         sideOffset={8}
+        collisionPadding={12}
         lang="en"
         aria-label={DOCK_LABELS.moreExamples}
-        className="z-[80] w-[min(24rem,calc(100svw-2rem))] p-0"
+        className="z-[80] max-h-(--radix-popover-content-available-height) w-[min(24rem,calc(100svw-24px))] overflow-y-auto p-0"
       >
         <p className="text-muted-foreground border-b px-3 py-2 text-xs font-medium">
           {DOCK_LABELS.examplesTitle}

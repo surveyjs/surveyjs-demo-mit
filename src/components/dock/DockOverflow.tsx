@@ -7,6 +7,7 @@ import { DockButton } from "./DockButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuCheckboxItem,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -31,6 +32,8 @@ export interface OverflowItem {
   /** The same guard the bar's control honours. */
   readonly disabled?: boolean;
   readonly separatorBefore?: boolean;
+  readonly separatorAfter?: boolean;
+  readonly checked?: boolean;
 }
 
 /** In the bar: shown from the breakpoint up, gone below it (the menu has it there). */
@@ -73,14 +76,25 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
         </DockButton>
       </DropdownMenuTrigger>
       {/* Above the toolbar itself (z-70), which is fixed over the page. */}
-      <DropdownMenuContent side="top" align="end" lang="en" className="z-[80] w-60">
-        {items.map((item) => {
+      <DropdownMenuContent side="top" align="end" collisionPadding={12} lang="en" className="z-[80] w-60 max-w-[calc(100svw-24px)]">
+        {items.map((item, index) => {
           const Icon = item.icon;
           const className = MENU_ONLY_BELOW[item.below];
           return (
             <Fragment key={item.key}>
               {item.separatorBefore && <DropdownMenuSeparator className={className} />}
-              {item.onSelect ? (
+              {item.checked !== undefined ? (
+                <DropdownMenuCheckboxItem
+                  indicatorSide="right"
+                  className={className}
+                  checked={item.checked}
+                  disabled={item.disabled}
+                  onCheckedChange={item.onSelect}
+                >
+                  <Icon />
+                  {item.label}
+                </DropdownMenuCheckboxItem>
+              ) : item.onSelect ? (
                 <DropdownMenuItem
                   className={className}
                   disabled={item.disabled}
@@ -97,6 +111,9 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
                     {item.newTab && ` ${NEW_TAB_MARK}`}
                   </a>
                 </DropdownMenuItem>
+              )}
+              {item.separatorAfter && index < items.length - 1 && !items[index + 1].separatorBefore && (
+                <DropdownMenuSeparator className={className} />
               )}
             </Fragment>
           );

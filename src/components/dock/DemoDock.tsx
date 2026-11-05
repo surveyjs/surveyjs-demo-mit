@@ -110,7 +110,7 @@ export interface DemoDockProps {
  *  - **How this page is built** and **Source** — the explainer, in this tab, and
  *    the route file on GitHub;
  *  - **the editor link** (`features.designer`) — the form is a JSON document,
- *    edited in one place that covers every form in the template. Never collapses;
+ *    edited in one place that covers every form in the template;
  *  - **Prefill / Reset**, **PDF / Analytics** in editions that ship them;
  *  - **Login as** and **Edit the user** — the same definition, a different
  *    person, and the form changes shape. Login as never collapses;
@@ -118,7 +118,7 @@ export interface DemoDockProps {
  *    in this tab — and the colour scheme for every demo.
  *
  * Below `lg` the page's links and exports move into "⋯", and below `sm` the
- * form's controls follow them (`DockOverflow`); breakpoints, so the server HTML
+ * form's controls, highlight and editor follow them (`DockOverflow`); breakpoints, so the server HTML
  * is already the final layout. Pinned above the toolbar: the "See next" card,
  * once the form is finished, and the storage banner in a browser that blocks
  * the cookie.
@@ -186,6 +186,12 @@ export function DemoDock({
       : []),
     ...(onExportPdf
       ? [{ key: "pdf", label: DOCK_LABELS.savePdf, icon: FileDownIcon, below: "lg", onSelect: onExportPdf, disabled: exportPdfDisabled } as const]
+      : []),
+    ...(configureHref
+      ? [{ key: "designer", label: features.designer.label, icon: DesignerIcon, below: "sm", href: configureHref } as const]
+      : []),
+    ...(outline.available
+      ? [{ key: "highlight", label: DOCK_LABELS.highlightSurvey, icon: ScanLineIcon, below: "sm", onSelect: outline.toggle, checked: outline.visible, separatorBefore: true, separatorAfter: true } as const]
       : []),
     ...(onReset
       ? [{ key: "reset", label: resetLabel, icon: RotateCcwIcon, below: "sm", onSelect: onReset, disabled: resetDisabled } as const]
@@ -281,7 +287,7 @@ export function DemoDock({
           </DockButton>
         </DropdownMenuTrigger>
         {/* Above the toolbar itself (z-70), which is fixed over the page. */}
-        <DropdownMenuContent align="center" lang="en" className="z-[80] w-72">
+        <DropdownMenuContent align="center" collisionPadding={12} lang="en" className="z-[80] w-72 max-w-[calc(100svw-24px)]">
           <DropdownMenuLabel className="text-muted-foreground text-xs">{usersLabel}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup value={activeUser.id} onValueChange={onSelectUser}>
@@ -363,7 +369,7 @@ export function DemoDock({
             <DockButton
               variant={outline.visible ? "secondary" : "ghost"}
               size="sm"
-              className={QUIET}
+              className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
               aria-label={DOCK_LABELS.highlightSurvey}
               aria-pressed={outline.visible}
               tooltip={outline.visible ? "Hide SurveyJS outlines" : "Show SurveyJS outlines"}
@@ -374,10 +380,10 @@ export function DemoDock({
             </DockButton>
           )}
 
-          {formTools.length > 0 && divider("form")}
+          {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden sm:block" : "hidden lg:block")}
           {formTools}
 
-          {userTools.length > 0 && divider("user")}
+          {userTools.length > 0 && divider("user", "hidden sm:block")}
           {userTools}
 
           {divider("site", "hidden lg:block")}
@@ -402,13 +408,13 @@ export function DemoDock({
 
           <DockOverflow items={overflow} />
 
-          {/* The editor stays at the right edge, in the host brand. Never collapses. */}
+          {/* The editor stays at the right edge from sm; mobile keeps it in ⋯. */}
           {configureHref && (
             <DockButton
               tooltip={features.designer.hint}
               asChild
               size="sm"
-              className="demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90"
+              className={mergeTailwindClasses("demo-brand-bg text-primary-foreground min-w-0 shrink gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90", SHOWN_FROM.sm)}
             >
               <a href={configureHref}>
                 <DesignerIcon />

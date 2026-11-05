@@ -228,10 +228,11 @@ test.describe("at 390×844", () => {
   test("⋯ holds what the bar has no room for", async ({ page }) => {
     await page.goto("/feedback");
     const dock = dockOf(page);
-    // On the bar: the menu, the editor link, Login as and ⋯.
+    // On mobile the bar keeps the demo menu, Login as and ⋯.
     await expect(menuTrigger(page)).toBeVisible();
-    await expect(dock.getByRole("link", { name: features.designer.label })).toBeVisible();
+    await expect(dock.getByRole("link", { name: features.designer.label })).toBeHidden();
     await expect(dock.getByRole("button", { name: /^Login as:/ })).toBeVisible();
+    await expect(dock.getByRole("button", { name: DOCK_LABELS.highlightSurvey })).toBeHidden();
     for (const name of [PAGE_ACTIONS.source, PAGE_ACTIONS.howBuilt, DOCK_LABELS.prefill, DOCK_LABELS.reset, DOCK_LABELS.editUser]) {
       await expect(dock.getByRole(name === PAGE_ACTIONS.source || name === PAGE_ACTIONS.howBuilt ? "link" : "button", { name, exact: true })).toBeHidden();
     }
@@ -244,12 +245,14 @@ test.describe("at 390×844", () => {
       `Switch to ${features.brand.otherEdition.label}`,
       ...(features.analyticsHref ? [DOCK_LABELS.analytics] : []),
       ...(features.exportPdf ? [DOCK_LABELS.savePdf] : []),
+      features.designer.label,
+      DOCK_LABELS.highlightSurvey,
       DOCK_LABELS.reset,
       DOCK_LABELS.prefill,
       DOCK_LABELS.editUser,
       /^Current mode: (Dark|Light)$/,
     ];
-    const items = menu.getByRole("menuitem");
+    const items = menu.locator('[role="menuitem"], [role="menuitemcheckbox"]');
     await expect(items).toHaveCount(expected.length);
     for (const [index, name] of expected.entries()) {
       await expect(items.nth(index)).toHaveText(typeof name === "string" ? new RegExp(`^${escapeRegExp(name)}`) : name);
