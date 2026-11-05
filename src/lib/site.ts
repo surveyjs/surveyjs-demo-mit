@@ -30,6 +30,7 @@ export const DOCK_LABELS = {
   /** The toolbar's accessible name. */
   toolbar: "Demo tools",
   moreExamples: "More examples",
+  examplesTitle: "SurveyJS in Your App",
   allUseCases: "More Use Cases",
   highlightSurvey: "Highlight SurveyJS",
   /** The "⋯" menu that holds what the bar has no room for. */

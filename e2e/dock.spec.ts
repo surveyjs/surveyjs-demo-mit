@@ -50,12 +50,13 @@ test.describe("More examples", () => {
       await expect(rows.nth(index)).toContainText(entry.name);
     }
     await expect(menuTrigger(page)).toHaveText(findExample(await loadExamples(), "embeddedFeedback")!.name);
-    // The landing-page link is the heading, appears only once, and precedes the examples.
+    // The menu has a heading; its landing-page link appears once, after the examples.
+    await expect(menu.getByText(DOCK_LABELS.examplesTitle, { exact: true })).toBeVisible();
     const landing = menu.getByRole("link", { name: `${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}` });
     await expect(landing).toHaveCount(1);
     await expect(landing).toHaveAttribute("href", USE_CASES_URL);
     await expect(landing).toHaveAttribute("target", "_blank");
-    await expect(menu.getByRole("link").first()).toHaveText(`${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}`);
+    await expect(menu.getByRole("link").last()).toHaveText(`${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}`);
     // Here, and only here, "Feedback" is the page you are on.
     const current = menu.locator('[aria-current="page"]');
     await expect(current).toHaveCount(1);
@@ -71,7 +72,7 @@ test.describe("More examples", () => {
       const link = menu.locator(`li[data-example="${entry.id}"] a`).first();
       const run = runLink(entry, features.edition);
       await expect(link).toHaveAttribute("href", run.href);
-      if (entry.id === "healthcare") {
+      if (run.external) {
         expect(run.external).toBe(true);
         expect(run.href).toMatch(/^https:\/\//);
         await expect(link).toHaveAttribute("target", "_blank");

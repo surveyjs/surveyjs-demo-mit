@@ -10,6 +10,8 @@ import { DOCK_LABELS, NEW_TAB_MARK, USE_CASES_URL } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { getNavItem, type NavId } from "@/schemas/navigation";
 
+const MENU_LINK = "group hover:bg-accent focus-visible:bg-accent focus-visible:ring-ring flex min-w-0 items-baseline gap-2 px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none";
+
 function exampleGroup(id: string): string {
   switch (id) {
     case "starter": return "start";
@@ -22,7 +24,7 @@ function exampleGroup(id: string): string {
 
 /**
  * The current example's name opens the way to the others, and back to the
- * site's use-cases page through the menu's heading.
+ * site's use-cases page through the final menu item.
  *
  * One line per entry of the manifest, at most ten: the name runs the example,
  * and the problem is a plain-text description. An example in this app keeps
@@ -64,14 +66,7 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
         className="z-[80] w-[min(24rem,calc(100svw-2rem))] p-0"
       >
         <p className="text-muted-foreground border-b px-3 py-2 text-xs font-medium">
-          <a
-            href={USE_CASES_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-foreground underline-offset-4 hover:underline"
-          >
-            {DOCK_LABELS.allUseCases} {NEW_TAB_MARK}
-          </a>
+          {DOCK_LABELS.examplesTitle}
         </p>
         <ul className="py-1">
           {entries.map((entry, index) => {
@@ -90,7 +85,7 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
                   aria-label={`${entry.name}${run.external ? ` ${NEW_TAB_MARK}` : ""}`}
                   aria-current={current ? "page" : undefined}
                   className={mergeTailwindClasses(
-                    "group hover:bg-accent focus-visible:bg-accent focus-visible:ring-ring flex min-w-0 items-baseline gap-2 px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none",
+                    MENU_LINK,
                     current && "bg-accent",
                   )}
                 >
@@ -108,6 +103,13 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
               </li>
             );
           })}
+          <li className="mt-1 border-t pt-1">
+            <a href={USE_CASES_URL} target="_blank" rel="noreferrer" className={MENU_LINK}>
+              <strong className="font-medium underline-offset-4 group-hover:underline">
+                {DOCK_LABELS.allUseCases} {NEW_TAB_MARK}
+              </strong>
+            </a>
+          </li>
         </ul>
       </PopoverContent>
     </Popover>

@@ -282,7 +282,7 @@ export function DemoDock({
         </DropdownMenuTrigger>
         {/* Above the toolbar itself (z-70), which is fixed over the page. */}
         <DropdownMenuContent align="center" lang="en" className="z-[80] w-72">
-          <DropdownMenuLabel>{usersLabel}</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-muted-foreground text-xs">{usersLabel}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup value={activeUser.id} onValueChange={onSelectUser}>
             {users.map((option) => (
