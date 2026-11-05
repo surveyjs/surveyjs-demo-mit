@@ -250,7 +250,7 @@ test.describe("at 390×844", () => {
       DOCK_LABELS.reset,
       DOCK_LABELS.prefill,
       DOCK_LABELS.editUser,
-      /^Current mode: (Dark|Light)$/,
+      /^Switch to (Dark|Light)$/,
     ];
     const items = menu.locator('[role="menuitem"], [role="menuitemcheckbox"]');
     await expect(items).toHaveCount(expected.length);

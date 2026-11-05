@@ -136,7 +136,7 @@ export function DemoDock({
   onReset,
   resetDisabled,
   resetLabel = DOCK_LABELS.reset,
-  resetTitle = "Clear the answers and start the form again",
+  resetTitle = "Reset the answers",
   onExportPdf,
   exportPdfDisabled,
   analyticsHref,
@@ -145,11 +145,11 @@ export function DemoDock({
   onSelectUser,
   usersDisabled,
   usersLabel = DOCK_LABELS.loginAs,
-  usersTitle = "Sign in as somebody else — the same form, a different person",
+  usersTitle = "Switch user",
   onEditUser,
   editUserDisabled,
   editLabel = DOCK_LABELS.editUser,
-  editTitle = "Change the signed-in user the form is rendered for — the editor is a SurveyJS form too",
+  editTitle = "Edit user details",
   edited = false,
   userOpen = false,
 }: DemoDockProps) {
@@ -161,6 +161,7 @@ export function DemoDock({
 
   const isDark = mounted && resolvedTheme === "dark";
   const themeLabel = mounted ? `Current mode: ${isDark ? "Dark" : "Light"}` : "Colour scheme";
+  const themeActionLabel = mounted ? `Switch to ${isDark ? "Light" : "Dark"}` : "Switch theme";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
   const how = howHref(getNavItem(exampleId).path);
@@ -202,7 +203,7 @@ export function DemoDock({
     ...(onEditUser
       ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "sm", onSelect: onEditUser, disabled: editUserDisabled } as const]
       : []),
-    { key: "theme", label: themeLabel, icon: isDark ? MoonIcon : SunIcon, below: "lg", onSelect: toggleTheme, separatorBefore: true },
+    { key: "theme", label: themeActionLabel, icon: isDark ? SunIcon : MoonIcon, below: "lg", onSelect: toggleTheme, separatorBefore: true },
   ];
 
   const formTools = [
@@ -213,7 +214,7 @@ export function DemoDock({
         size="sm"
         className={mergeTailwindClasses(QUIET, SHOWN_FROM.sm)}
         aria-label={DOCK_LABELS.prefill}
-        tooltip="Fill every page with sample answers"
+        tooltip="Fill with sample answers"
         disabled={prefillDisabled}
         onClick={onPrefill}
       >
@@ -243,7 +244,7 @@ export function DemoDock({
         size="sm"
         className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
         aria-label={DOCK_LABELS.savePdf}
-        tooltip="Download this form, with the answers so far, as a PDF"
+        tooltip={DOCK_LABELS.savePdf}
         disabled={exportPdfDisabled}
         onClick={onExportPdf}
       >
@@ -252,7 +253,7 @@ export function DemoDock({
       </DockButton>
     ),
     analyticsHref && (
-      <DockButton key="analytics" tooltip="Charts built from this form's responses — SurveyJS Dashboard reads the same definition" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+      <DockButton key="analytics" tooltip="View response analytics" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
         <a
           href={analyticsHref}
           aria-label={DOCK_LABELS.analytics}
@@ -287,14 +288,18 @@ export function DemoDock({
           </DockButton>
         </DropdownMenuTrigger>
         {/* Above the toolbar itself (z-70), which is fixed over the page. */}
-        <DropdownMenuContent align="center" collisionPadding={12} lang="en" className="z-[80] w-72 max-w-[calc(100svw-24px)]">
+        <DropdownMenuContent align="center" collisionPadding={12} lang="en" className="z-[80] w-72 max-w-[calc(100svw-24px)] cursor-default">
           <DropdownMenuLabel className="text-muted-foreground text-xs">{usersLabel}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup value={activeUser.id} onValueChange={onSelectUser}>
             {users.map((option) => (
-              <DropdownMenuRadioItem key={option.id} value={option.id}>
+              <DropdownMenuRadioItem
+                key={option.id}
+                value={option.id}
+                className="group cursor-default pl-2 data-[state=checked]:bg-accent [&>span:first-child]:hidden"
+              >
                 <span className="flex flex-col">
-                  <span>{option.name}</span>
+                  <span className="font-medium group-data-[state=checked]:text-primary">{option.name}</span>
                   {option.description && (
                     <span className="text-muted-foreground text-xs">{option.description}</span>
                   )}
@@ -339,7 +344,7 @@ export function DemoDock({
           lang="en"
           role="toolbar"
           aria-label={DOCK_LABELS.toolbar}
-          className="demo-dock bg-background/85 pointer-events-auto flex max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg backdrop-blur"
+          className="demo-dock bg-background/85 pointer-events-auto flex cursor-default max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg backdrop-blur"
         >
           <ExamplesMenu currentId={exampleId} />
 
@@ -389,7 +394,7 @@ export function DemoDock({
           {divider("site", "hidden lg:block")}
           {/* The same pathname on the other edition's host, in this tab: the
               routes are identical, a record's URL included. */}
-          <DockButton tooltip={`This page in the ${otherLabel}`} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
+          <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)} asChild>
             <a href={switchHref} aria-label={switchLabel}>
               <ArrowLeftRightIcon />
               <span className={LABEL}>{switchLabel}</span>

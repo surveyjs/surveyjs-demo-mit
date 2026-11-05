@@ -10,7 +10,7 @@ import { DOCK_LABELS, NEW_TAB_MARK, USE_CASES_URL } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
 import { getNavItem, type NavId } from "@/schemas/navigation";
 
-const MENU_LINK = "group hover:bg-accent focus-visible:bg-accent focus-visible:ring-ring flex min-w-0 items-baseline gap-2 px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none";
+const MENU_LINK = "group cursor-default hover:bg-accent focus-visible:bg-accent focus-visible:ring-ring flex min-w-0 items-baseline gap-2 px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none";
 
 function exampleGroup(id: string): string {
   switch (id) {
@@ -48,7 +48,7 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
           variant="ghost"
           size="sm"
           className="shrink-0 gap-1.5 rounded-full text-[11px] font-medium tracking-wide uppercase"
-          tooltip={DOCK_LABELS.moreExamples}
+          tooltip={DOCK_LABELS.switchDemo}
           aria-label={currentName}
         >
           <MenuIcon className="size-3.5" />
@@ -64,7 +64,7 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
         collisionPadding={12}
         lang="en"
         aria-label={DOCK_LABELS.moreExamples}
-        className="z-[80] max-h-(--radix-popover-content-available-height) w-[min(24rem,calc(100svw-24px))] overflow-y-auto p-0"
+        className="z-[80] cursor-default max-h-(--radix-popover-content-available-height) w-[min(24rem,calc(100svw-24px))] overflow-y-auto p-0"
       >
         <p className="text-muted-foreground border-b px-3 py-2 text-xs font-medium">
           {DOCK_LABELS.examplesTitle}
@@ -92,8 +92,8 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
                 >
                   <strong
                     className={mergeTailwindClasses(
-                      "shrink-0 font-medium whitespace-nowrap underline-offset-4 group-hover:underline",
-                      current && "text-primary underline",
+                      "shrink-0 font-medium whitespace-nowrap",
+                      current && "text-primary",
                     )}
                   >
                     {entry.name}
@@ -106,7 +106,7 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
           })}
           <li className="mt-1 border-t pt-1">
             <a href={USE_CASES_URL} target="_blank" rel="noreferrer" className={MENU_LINK}>
-              <strong className="font-medium underline-offset-4 group-hover:underline">
+              <strong className="font-medium">
                 {DOCK_LABELS.allUseCases} {NEW_TAB_MARK}
               </strong>
             </a>

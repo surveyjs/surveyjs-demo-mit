@@ -76,13 +76,14 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
         </DockButton>
       </DropdownMenuTrigger>
       {/* Above the toolbar itself (z-70), which is fixed over the page. */}
-      <DropdownMenuContent side="top" align="end" collisionPadding={12} lang="en" className="z-[80] w-60 max-w-[calc(100svw-24px)]">
+      <DropdownMenuContent side="top" align="end" collisionPadding={12} lang="en" className="z-[80] w-60 max-w-[calc(100svw-24px)] cursor-default">
         {items.map((item, index) => {
           const Icon = item.icon;
-          const className = MENU_ONLY_BELOW[item.below];
+          const visibilityClassName = MENU_ONLY_BELOW[item.below];
+          const className = mergeTailwindClasses("cursor-default", visibilityClassName);
           return (
             <Fragment key={item.key}>
-              {item.separatorBefore && <DropdownMenuSeparator className={className} />}
+              {item.separatorBefore && <DropdownMenuSeparator className={visibilityClassName} />}
               {item.checked !== undefined ? (
                 <DropdownMenuCheckboxItem
                   indicatorSide="right"
@@ -113,7 +114,7 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
                 </DropdownMenuItem>
               )}
               {item.separatorAfter && index < items.length - 1 && !items[index + 1].separatorBefore && (
-                <DropdownMenuSeparator className={className} />
+                <DropdownMenuSeparator className={visibilityClassName} />
               )}
             </Fragment>
           );

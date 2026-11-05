@@ -30,6 +30,7 @@ export const DOCK_LABELS = {
   /** The toolbar's accessible name. */
   toolbar: "Demo tools",
   moreExamples: "More examples",
+  switchDemo: "Switch demo",
   examplesTitle: "SurveyJS in Your App",
   allUseCases: "More Use Cases",
   highlightSurvey: "Highlight SurveyJS",

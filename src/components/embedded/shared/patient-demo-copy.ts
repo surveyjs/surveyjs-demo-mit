@@ -1,9 +1,9 @@
 export const APPOINTMENT_COPY = {
   dock: {
     usersLabel: "View as",
-    usersTitle: "Try the appointment form as another patient",
+    usersTitle: "View as another patient",
     editLabel: "Edit patient details",
-    editTitle: "Change the patient details used to fill in the appointment form",
+    editTitle: "Edit patient details",
   },
   dialog: {
     showEditorTitle: false,
@@ -22,9 +22,9 @@ export const APPOINTMENT_COPY = {
 export const ENCOUNTER_NOTE_COPY = {
   dock: {
     usersLabel: "Select patient",
-    usersTitle: "Choose the patient whose encounter note you want to view",
+    usersTitle: "Select patient",
     editLabel: "Edit patient details",
-    editTitle: "Change the patient details used to prepare the encounter note",
+    editTitle: "Edit patient details",
   },
   dialog: {
     showEditorTitle: false,
