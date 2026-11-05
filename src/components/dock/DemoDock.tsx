@@ -180,7 +180,7 @@ export function DemoDock({
     ...(source
       ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "lg", href: source, newTab: true } as const]
       : []),
-    { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "lg", href: switchHref },
+    { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "lg", href: switchHref, separatorBefore: true },
     ...(analyticsHref
       ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "lg", href: analyticsHref } as const]
       : []),
