@@ -1,9 +1,10 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { mergeTailwindClasses } from "@/lib/utils";
 
 /**
  * The header of a page that pretends to be nobody's product: Starter,
- * Definition & checks and every "how it's built" page. The SurveyJS name links
+ * Definition & checks and every "how it's built" page. The SurveyJS logo links
  * to the main website, followed by the page's title and what it is for.
  *
  * A server component. `width` is the page's own column, so the header lines up
@@ -28,7 +29,14 @@ export function NeutralHeader({
             href="https://surveyjs.io/"
             className="hover:text-primary flex w-fit min-w-0 items-center"
           >
-            <span className="truncate text-sm font-semibold">SurveyJS</span>
+            <Image
+              src="/surveyjs-logo.svg"
+              alt="SurveyJS"
+              width={78}
+              height={32}
+              className="h-8 w-auto translate-y-1"
+              priority
+            />
           </a>
           {actions}
         </div>
