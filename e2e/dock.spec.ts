@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { features } from "../src/features";
+import { titleCase } from "../src/lib/title-case";
 import { loadExamples } from "../src/examples/load";
 import { findExample, menuExamples, MENU_LIMIT, runLink } from "../src/examples/entries";
 import { otherEditionHref } from "../src/lib/routes";
@@ -135,7 +136,7 @@ test.describe("the edition switch", () => {
   for (const path of paths) {
     test(`on ${path} it opens the same pathname on the other host, in this tab`, async ({ page }) => {
       await page.goto(path);
-      const link = dockOf(page).getByRole("link", { name: `${label} →` });
+      const link = dockOf(page).getByRole("link", { name: `Switch to ${titleCase(label)}` });
       await expect(link).toHaveAttribute("href", otherEditionHref(baseUrl, path));
       await expect(link).not.toHaveAttribute("target", /.*/);
     });
@@ -242,7 +243,7 @@ test.describe("at 390×844", () => {
     const expected = [
       PAGE_ACTIONS.howBuilt,
       PAGE_ACTIONS.source,
-      `Switch to ${features.brand.otherEdition.label}`,
+      `Switch to ${titleCase(features.brand.otherEdition.label)}`,
       ...(features.analyticsHref ? [DOCK_LABELS.analytics] : []),
       ...(features.exportPdf ? [DOCK_LABELS.savePdf] : []),
       features.designer.label,

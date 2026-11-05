@@ -28,7 +28,7 @@
     },
     {
       "id": "workOrders",
-      "name": "Work orders",
+      "name": "Work Orders",
       "problem": "Digitize field service reports",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/work-orders",
@@ -64,7 +64,7 @@
     },
     {
       "id": "embeddedChart",
-      "name": "Encounter note",
+      "name": "Encounter Note",
       "problem": "Capture detailed clinical notes",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/chart",
@@ -93,7 +93,7 @@
     },
     {
       "id": "definition",
-      "name": "Definition & checks",
+      "name": "Definition & Checks",
       "problem": "Edit and check form JSON",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/definition",

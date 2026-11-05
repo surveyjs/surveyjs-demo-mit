@@ -60,17 +60,24 @@ export function useSurveyOutlineControl() {
   };
 }
 
-/** The corner label names the highlighted area; the dock controls visibility. */
+/** The label and outer edge dismiss the highlight without covering the form. */
 export function SurveyOutlineLabel() {
   return (
-    <span
-      data-survey-outline-label=""
+    <button
+      type="button"
+      data-survey-outline-dismiss=""
+      aria-label="SurveyJS renders this. Hide SurveyJS Outlines"
+      onClick={() => document.documentElement.removeAttribute("data-demo-highlight")}
       // The demo talking about the page, like the dock — English in every
       // locale, including inside a host site rendered in Spanish.
       lang="en"
     >
-      SurveyJS renders this
-    </span>
+      <span data-survey-outline-edge="top" aria-hidden="true" />
+      <span data-survey-outline-edge="right" aria-hidden="true" />
+      <span data-survey-outline-edge="bottom" aria-hidden="true" />
+      <span data-survey-outline-edge="left" aria-hidden="true" />
+      <span data-survey-outline-label="">SurveyJS renders this</span>
+    </button>
   );
 }
 

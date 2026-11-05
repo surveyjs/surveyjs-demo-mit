@@ -57,7 +57,7 @@ export function SeeNextCard({ currentId }: { currentId: string }) {
       className="bg-background/95 pointer-events-auto cursor-default w-[min(24rem,100%)] rounded-xl border p-3 shadow-lg backdrop-blur"
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
+        <p className="text-muted-foreground text-[11px] font-medium">
           {DOCK_LABELS.seeNext}
         </p>
         <Button

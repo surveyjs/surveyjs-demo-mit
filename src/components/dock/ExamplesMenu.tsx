@@ -66,7 +66,7 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
         aria-label={DOCK_LABELS.moreExamples}
         className="z-[80] cursor-default max-h-(--radix-popover-content-available-height) w-[min(24rem,calc(100svw-24px))] overflow-y-auto p-0"
       >
-        <p className="text-muted-foreground border-b px-3 py-2 text-xs font-medium">
+        <p className="text-muted-foreground border-b px-3 py-2 text-xs font-normal">
           {DOCK_LABELS.examplesTitle}
         </p>
         <ul className="py-1">

@@ -38,6 +38,7 @@ import { getNavItem, type NavId } from "@/schemas/navigation";
 import { howHref, otherEditionHref, pageSourcePath, sourceHref } from "@/lib/routes";
 import { DOCK_LABELS, NEW_TAB_MARK, PAGE_ACTIONS } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
+import { titleCase } from "@/lib/title-case";
 import { features, type Features } from "@/features";
 import { DockOverflow, SHOWN_FROM, type OverflowItem } from "./DockOverflow";
 import { ExamplesMenu } from "./ExamplesMenu";
@@ -124,10 +125,8 @@ export interface DemoDockProps {
  * once the form is finished, and the storage banner in a browser that blocks
  * the cookie.
  *
- * It is deliberately quiet — half-transparent until pointed at, for a mouse —
- * because the demo's claim is that the survey belongs to the page. It stays
- * English on a page rendered in another language, and says so to a screen
- * reader. Nothing here would ship in a host site.
+ * It stays English on a page rendered in another language, and says so to a
+ * screen reader. Nothing here would ship in a host site.
  */
 export function DemoDock({
   exampleId,
@@ -137,7 +136,7 @@ export function DemoDock({
   onReset,
   resetDisabled,
   resetLabel = DOCK_LABELS.reset,
-  resetTitle = "Reset the answers",
+  resetTitle = "Reset the Answers",
   onExportPdf,
   exportPdfDisabled,
   analyticsHref,
@@ -146,11 +145,11 @@ export function DemoDock({
   onSelectUser,
   usersDisabled,
   usersLabel = DOCK_LABELS.loginAs,
-  usersTitle = "Switch user",
+  usersTitle = "Switch User",
   onEditUser,
   editUserDisabled,
   editLabel = DOCK_LABELS.editUser,
-  editTitle = "Edit user details",
+  editTitle = "Edit User Details",
   edited = false,
   userOpen = false,
 }: DemoDockProps) {
@@ -161,15 +160,17 @@ export function DemoDock({
   useEffect(() => setMounted(true), []);
 
   const isDark = mounted && resolvedTheme === "dark";
-  const themeLabel = mounted ? `Current mode: ${isDark ? "Dark" : "Light"}` : "Colour scheme";
-  const themeActionLabel = mounted ? `Switch to ${isDark ? "Light" : "Dark"}` : "Switch theme";
+  const themeLabel = mounted ? `Current Mode: ${isDark ? "Dark" : "Light"}` : "Colour Scheme";
+  const themeActionLabel = mounted ? `Switch to ${isDark ? "Light" : "Dark"}` : "Switch Theme";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
   const how = howHref(getNavItem(exampleId).path);
   const sourcePath = pageSourcePath(pathname);
   const source = sourcePath ? sourceHref(sourcePath) : undefined;
   const { label: otherLabel, baseUrl } = features.brand.otherEdition;
-  const switchLabel = `Switch to ${otherLabel}`;
+  const switchLabel = `Switch to ${titleCase(otherLabel)}`;
+  const designerLabel = titleCase(features.designer.label);
+  const designerHint = titleCase(features.designer.hint);
   const switchHref = otherEditionHref(baseUrl, pathname);
   const activeUser = users.find((option) => option.id === activeUserId) ?? users[0];
   const DesignerIcon = DESIGNER_ICONS[features.designer.icon];
@@ -190,7 +191,7 @@ export function DemoDock({
       ? [{ key: "pdf", label: DOCK_LABELS.savePdf, icon: FileDownIcon, below: "xl", onSelect: onExportPdf, disabled: exportPdfDisabled } as const]
       : []),
     ...(configureHref
-      ? [{ key: "designer", label: features.designer.label, icon: DesignerIcon, below: "sm", href: configureHref } as const]
+      ? [{ key: "designer", label: designerLabel, icon: DesignerIcon, below: "sm", href: configureHref } as const]
       : []),
     ...(outline.available
       ? [{ key: "highlight", label: DOCK_LABELS.highlightSurvey, icon: ScanLineIcon, below: "lg", onSelect: outline.toggle, checked: outline.visible, separatorBefore: true, separatorAfter: true } as const]
@@ -215,7 +216,7 @@ export function DemoDock({
         size="sm"
         className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
         aria-label={DOCK_LABELS.prefill}
-        tooltip="Fill with sample answers"
+        tooltip="Fill with Sample Answers"
         disabled={prefillDisabled}
         onClick={onPrefill}
       >
@@ -254,7 +255,7 @@ export function DemoDock({
       </DockButton>
     ),
     analyticsHref && (
-      <DockButton key="analytics" tooltip="View response analytics" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
+      <DockButton key="analytics" tooltip="View Response Analytics" variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
         <a
           href={analyticsHref}
           aria-label={DOCK_LABELS.analytics}
@@ -290,7 +291,7 @@ export function DemoDock({
         </DropdownMenuTrigger>
         {/* Above the toolbar itself (z-70), which is fixed over the page. */}
         <DropdownMenuContent align="center" collisionPadding={12} lang="en" className="z-[80] w-72 max-w-[calc(100svw-24px)] cursor-default">
-          <DropdownMenuLabel className="text-muted-foreground text-xs">{usersLabel}</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">{usersLabel}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup value={activeUser.id} onValueChange={onSelectUser}>
             {users.map((option) => (
@@ -345,7 +346,7 @@ export function DemoDock({
           lang="en"
           role="toolbar"
           aria-label={DOCK_LABELS.toolbar}
-          className="demo-dock bg-background/85 pointer-events-auto flex cursor-default max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg backdrop-blur"
+          className="demo-dock bg-background pointer-events-auto flex cursor-default max-w-full flex-nowrap items-center gap-1 rounded-full border px-2 py-1.5 shadow-lg"
         >
           <ExamplesMenu currentId={exampleId} />
 
@@ -378,7 +379,7 @@ export function DemoDock({
               className={mergeTailwindClasses(QUIET, SHOWN_FROM.lg)}
               aria-label={DOCK_LABELS.highlightSurvey}
               aria-pressed={outline.visible}
-              tooltip={outline.visible ? "Hide SurveyJS outlines" : "Show SurveyJS outlines"}
+              tooltip={outline.visible ? "Hide SurveyJS Outlines" : "Show SurveyJS Outlines"}
               onClick={outline.toggle}
             >
               <ScanLineIcon />
@@ -406,7 +407,7 @@ export function DemoDock({
             size="icon-sm"
             className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.xl)}
             aria-label={themeLabel}
-            tooltip="Switch theme"
+            tooltip="Switch Theme"
             onClick={toggleTheme}
           >
             {isDark ? <MoonIcon /> : <SunIcon />}
@@ -417,14 +418,14 @@ export function DemoDock({
           {/* The editor stays at the right edge from sm; mobile keeps it in ⋯. */}
           {configureHref && (
             <DockButton
-              tooltip={features.designer.hint}
+              tooltip={designerHint}
               asChild
               size="sm"
               className={mergeTailwindClasses("demo-brand-bg text-primary-foreground shrink-0 gap-1.5 rounded-full font-semibold shadow-sm hover:opacity-90", SHOWN_FROM.sm)}
             >
               <a href={configureHref}>
                 <DesignerIcon />
-                <span>{features.designer.label}</span>
+                <span>{designerLabel}</span>
               </a>
             </DockButton>
           )}

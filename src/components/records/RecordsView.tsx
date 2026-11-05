@@ -989,7 +989,7 @@ export function RecordsView({
         // is wanted.
         resetDisabled={readOnly || importBusy}
         resetLabel={DOCK_LABELS.resetData}
-        resetTitle="Reset all demo data"
+        resetTitle="Reset All Demo Data"
         onExportPdf={canExportPdf ? saveAsPdf : undefined}
         exportPdfDisabled={!model || !open}
         analyticsHref={features.analyticsHref?.(schemaId)}

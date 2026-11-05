@@ -1,9 +1,9 @@
 export const APPOINTMENT_COPY = {
   dock: {
     usersLabel: "View as",
-    usersTitle: "View as another patient",
-    editLabel: "Edit patient details",
-    editTitle: "Edit patient details",
+    usersTitle: "View as Another Patient",
+    editLabel: "Edit Patient Details",
+    editTitle: "Edit Patient Details",
   },
   dialog: {
     showEditorTitle: false,
@@ -13,18 +13,18 @@ export const APPOINTMENT_COPY = {
       "Change patient details to see how the appointment form updates.",
   },
   descriptions: {
-    "Maria Delgado": "Saved details · prescription refills",
-    "Daniel Okafor": "Medicare · different visit costs and referral requirements",
-    "Priya Raman": "New patient · additional registration questions",
+    "Maria Delgado": "Saved details · Prescription refills",
+    "Daniel Okafor": "Medicare · Different visit costs and referral requirements",
+    "Priya Raman": "New patient · Additional registration questions",
   },
 } as const;
 
 export const ENCOUNTER_NOTE_COPY = {
   dock: {
-    usersLabel: "Select patient",
-    usersTitle: "Select patient",
-    editLabel: "Edit patient details",
-    editTitle: "Edit patient details",
+    usersLabel: "Select Patient",
+    usersTitle: "Select Patient",
+    editLabel: "Edit Patient Details",
+    editTitle: "Edit Patient Details",
   },
   dialog: {
     showEditorTitle: false,
@@ -34,8 +34,8 @@ export const ENCOUNTER_NOTE_COPY = {
       "Change patient details to see how the encounter note updates.",
   },
   descriptions: {
-    "Maria Delgado": "Interpreter needed · existing diagnoses and medications",
-    "Daniel Okafor": "Former smoker · tobacco counselling question",
-    "Priya Raman": "New patient · additional first-visit page",
+    "Maria Delgado": "Interpreter needed · Existing diagnoses and medications",
+    "Daniel Okafor": "Former smoker · Tobacco counselling question",
+    "Priya Raman": "New patient · Additional first-visit page",
   },
 } as const;

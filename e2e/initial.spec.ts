@@ -343,9 +343,9 @@ test("the dock leads to more examples, and the demo outlines where SurveyJS draw
 
   // No way "home" any more: the menu of every example replaces it.
   await expect(dock.getByRole("link", { name: "SurveyJS demos" })).toHaveCount(0);
-  await dock.getByRole("button", { name: "Encounter note", exact: true }).click();
+  await dock.getByRole("button", { name: "Encounter Note", exact: true }).click();
   const menu = page.getByRole("dialog", { name: DOCK_LABELS.moreExamples });
-  await expect(menu.getByRole("link", { name: "Encounter note", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(menu.getByRole("link", { name: "Encounter Note", exact: true })).toHaveAttribute("aria-current", "page");
   await page.keyboard.press("Escape");
   await expect(menu).toHaveCount(0);
 
@@ -363,6 +363,17 @@ test("the dock leads to more examples, and the demo outlines where SurveyJS draw
   await highlight.press("Space");
   await expect(page.locator("[data-survey-root]")).toHaveCSS("outline-style", "dashed");
   await expect(highlight).toHaveAttribute("aria-pressed", "true");
+
+  // Both the unchanged caption and the outside edge dismiss the same highlight.
+  await page.locator("[data-survey-outline-label]").click();
+  await expect(highlight).toHaveAttribute("aria-pressed", "false");
+  await highlight.click();
+  await page.locator('[data-survey-outline-edge="top"]').click();
+  await expect(highlight).toHaveAttribute("aria-pressed", "false");
+  await highlight.click();
+  await page.locator("[data-survey-outline-dismiss]").press("Enter");
+  await expect(page.locator("[data-survey-root]")).toHaveCSS("outline-style", "none");
+  await expect(highlight).toHaveAttribute("aria-pressed", "false");
 });
 
 test("/clinic opens in the chart's language and fills the request from it", async ({
