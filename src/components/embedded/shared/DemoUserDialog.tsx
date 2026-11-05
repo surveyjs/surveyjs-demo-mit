@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
+  DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { SurveyData, SurveyJSON } from "@/schemas";
@@ -96,11 +97,16 @@ export function DemoUserDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+      {/* Radix omits its overlay in non-modal mode. This visual backdrop keeps
+          SurveyJS popups and the live page interactive. */}
+      <DialogPortal>
+        <div aria-hidden="true" data-slot="dialog-overlay" className="pointer-events-none fixed inset-0 z-[75] bg-black/50" />
+      </DialogPortal>
       <DialogContent
         data-lock-background-scroll=""
         // The reviewer’s popup, not the host site: English in every locale.
         lang="en"
-        className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl"
+        className="z-[80] flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl"
         onInteractOutside={stayOpen}
       >
         <DialogHeader className="border-b p-4 text-left">
