@@ -10,15 +10,11 @@ import { DOCK_LABELS, NEW_TAB_MARK, USE_CASES_URL } from "@/lib/site";
 import { navPages } from "@/schemas/navigation";
 
 const CARD_ORDER = [
-  "starter", "leads", "workOrders", "embeddedFeedback", "embeddedClinic",
-  "embeddedChart", "healthcare", "humanResources", "definition",
+  "leads", "workOrders", "embeddedFeedback", "embeddedClinic",
+  "embeddedChart", "healthcare", "humanResources",
 ];
 
 const SECTIONS = [
-  {
-    id: "start",
-    title: "Start here",
-  },
   {
     id: "forms",
     title: "Forms in your app",
@@ -29,31 +25,24 @@ const SECTIONS = [
     title: "Complete applications",
     description: "See how forms fit into healthcare and HR applications.",
   },
-  {
-    id: "tools",
-    title: "Developer tools",
-    description: "Inspect, preview, and validate your form definitions.",
-  },
 ] as const;
 
 function sectionFor(entry: ExampleEntry): (typeof SECTIONS)[number]["id"] {
   switch (entry.id) {
-    case "starter": return "start";
     case "healthcare":
     case "humanResources": return "applications";
-    case "definition": return "tools";
     default: return "forms";
   }
 }
 
-function ExampleCard({ entry, compact }: { entry: ExampleEntry; compact: boolean }) {
+function ExampleCard({ entry }: { entry: ExampleEntry }) {
   const run = runLink(entry, features.edition);
   const page = navPages.find((item) => item.id === entry.id);
 
   return (
     <Card
       data-example={entry.id}
-      className={`h-full gap-6 px-6 ${compact ? "sm:flex-row sm:items-center sm:justify-between" : ""}`}
+      className="h-full gap-6 px-6"
     >
       <div className="flex-1 space-y-1">
         <h3 className="text-base font-semibold">{entry.name}</h3>
@@ -83,9 +72,8 @@ function ExampleCard({ entry, compact }: { entry: ExampleEntry; compact: boolean
  * arrive at an example from the site's use-cases page and move between them
  * with the dock, so this page is not indexed and not designed as a landing page.
  *
- * The same visibility rule as the dock's menu — `ready`, or every entry with
- * `NEXT_PUBLIC_SHOW_UNREADY` — but no cap and no `inMenu` filter: Starter and
- * Definition & checks are listed here and only here.
+ * Ready entries (or every entry with `NEXT_PUBLIC_SHOW_UNREADY`) without a
+ * menu cap. Starter and Definition & checks stay outside this catalog.
  */
 export function ExamplesIndex({ manifest }: { manifest: ExamplesManifest }) {
   // New manifest entries stay visible after the curated examples in their section.
@@ -93,15 +81,13 @@ export function ExamplesIndex({ manifest }: { manifest: ExamplesManifest }) {
     const index = CARD_ORDER.indexOf(id);
     return index === -1 ? CARD_ORDER.length : index;
   };
-  const entries = visibleExamples(manifest.entries).sort(
-    (a, b) => rank(a.id) - rank(b.id),
-  );
+  const entries = visibleExamples(manifest.entries)
+    .filter((entry) => entry.id !== "starter" && entry.id !== "definition")
+    .sort((a, b) => rank(a.id) - rank(b.id));
 
   return (
     <div className="min-h-svh">
       <NeutralHeader
-        title="Examples"
-        description="From your first form to complete applications."
         width="max-w-5xl"
         actions={
           <a
@@ -119,20 +105,19 @@ export function ExamplesIndex({ manifest }: { manifest: ExamplesManifest }) {
           {SECTIONS.map((section) => {
             const sectionEntries = entries.filter((entry) => sectionFor(entry) === section.id);
             if (!sectionEntries.length) return null;
-            const fullWidth = section.id === "start" || section.id === "tools";
 
             return (
               <section key={section.id} aria-labelledby={`examples-${section.id}`}>
-                <div className="mb-4 space-y-1">
+                <div className="mb-6 space-y-1">
                   <h2 id={`examples-${section.id}`} className="text-lg font-semibold">{section.title}</h2>
                   {"description" in section && (
                     <p className="text-muted-foreground text-sm">{section.description}</p>
                   )}
                 </div>
-                <ul className={`grid gap-4 ${fullWidth ? "" : "sm:grid-cols-2"}`}>
+                <ul className="grid gap-4 sm:grid-cols-2">
                   {sectionEntries.map((entry) => (
                     <li key={entry.id}>
-                      <ExampleCard entry={entry} compact={fullWidth} />
+                      <ExampleCard entry={entry} />
                     </li>
                   ))}
                 </ul>

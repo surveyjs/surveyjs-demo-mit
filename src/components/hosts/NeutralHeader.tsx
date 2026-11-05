@@ -1,13 +1,10 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { LayersIcon } from "lucide-react";
-import { DEMO_NAME } from "@/lib/site";
 import { mergeTailwindClasses } from "@/lib/utils";
 
 /**
  * The header of a page that pretends to be nobody's product: Starter,
- * Definition & checks and every "how it's built" page. The demo's own mark and
- * name, linking the root index, then the page's title and what it is for.
+ * Definition & checks and every "how it's built" page. The SurveyJS name links
+ * to the main website, followed by the page's title and what it is for.
  *
  * A server component. `width` is the page's own column, so the header lines up
  * with what is under it.
@@ -27,18 +24,12 @@ export function NeutralHeader({
     <header className="border-b">
       <div className={mergeTailwindClasses("mx-auto flex w-full flex-col gap-4 px-4 py-4 sm:px-6", width)}>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <Link
-            href="/"
-            className="hover:text-primary flex w-fit min-w-0 items-center gap-2 underline-offset-4 hover:underline"
+          <a
+            href="https://surveyjs.io/"
+            className="hover:text-primary flex w-fit min-w-0 items-center"
           >
-            <span
-              className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
-              aria-hidden
-            >
-              <LayersIcon className="size-4" />
-            </span>
-            <span className="truncate text-sm font-semibold">{DEMO_NAME}</span>
-          </Link>
+            <span className="truncate text-sm font-semibold">SurveyJS</span>
+          </a>
           {actions}
         </div>
         {title && (
