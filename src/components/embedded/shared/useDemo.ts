@@ -75,7 +75,7 @@ export interface Demo {
   readonly dockProps: {
     onPrefill: () => void;
     onReset: () => void;
-    onEditUser: () => void;
+    onEditUser: (id?: string) => void;
     /**
      * Downloads the form, with whatever has been answered, as a PDF. Undefined
      * when the edition provides no PDF export.
@@ -328,7 +328,14 @@ export function useDemo({
     dockProps: {
       onPrefill: prefill,
       onReset: restart,
-      onEditUser: () => setUserOpen((open) => !open),
+      onEditUser: (id) => {
+        if (id === undefined) {
+          setUserOpen((open) => !open);
+          return;
+        }
+        if (id !== activeRecord.id) selectUser(id);
+        setUserOpen(true);
+      },
       onExportPdf: exportPdf,
       configureHref: href,
       exampleId,
