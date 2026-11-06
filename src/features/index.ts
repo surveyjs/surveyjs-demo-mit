@@ -33,7 +33,7 @@ export const features: Features = {
   },
   designer: {
     label: "Configure Form JSON",
-    hint: "Open this form's JSON — the one page every form in the template is edited on",
+    hint: "Edit form JSON",
     icon: "json",
     readySelector: ".monaco-editor",
   },

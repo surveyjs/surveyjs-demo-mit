@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import {
   CalendarCheckIcon,
   CheckIcon,
@@ -10,10 +8,8 @@ import {
   HeartPulseIcon,
   LanguagesIcon,
   MapPinIcon,
-  MoonIcon,
   PhoneIcon,
   StethoscopeIcon,
-  SunIcon,
   TriangleAlertIcon,
   UserRoundIcon,
 } from "lucide-react";
@@ -50,37 +46,13 @@ import { RIDGELINE_BANNER, RIDGELINE_STRINGS } from "./ridgeline-strings";
 
 /* ── chrome ─────────────────────────────────────────────────────────────────── */
 
-/**
- * Light and dark, where a real site puts it: in its own utility bar.
- *
- * It is not a demo control — every visitor expects a site to have one — so it
- * belongs to the host page rather than to the reviewer's toolbar. The label only
- * appears once mounted, because the server has no way to know which scheme the
- * browser will resolve.
- */
-function SchemeToggle({ locale }: { locale: ClinicLocale }) {
-  const strings = RIDGELINE_STRINGS[locale];
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  const isDark = mounted && resolvedTheme === "dark";
-
-  return (
-    <button
-      type="button"
-      className="hover:text-foreground focus-visible:ring-ring/50 flex items-center gap-1.5 rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      aria-label={isDark ? strings.switchToLight : strings.switchToDark}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-    >
-      {isDark ? <MoonIcon className="size-3.5" /> : <SunIcon className="size-3.5" />}
-      {isDark ? strings.schemeDark : strings.schemeLight}
-    </button>
-  );
-}
-
-export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
+export function ClinicUtilityBar({
+  locale,
+  onLocaleChange,
+}: {
+  locale: ClinicLocale;
+  onLocaleChange: (next: ClinicLocale) => void;
+}) {
   const strings = RIDGELINE_STRINGS[locale];
 
   return (
@@ -92,11 +64,11 @@ export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
         <span className="flex items-center gap-1.5">
           <ClockIcon className="size-3.5" /> {strings.urgentCareHours}
         </span>
-        <span className="ml-auto flex items-center gap-x-5">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
           <span>{strings.payBill}</span>
           <span className="text-foreground font-medium">{strings.patientPortal}</span>
-          <SchemeToggle locale={locale} />
-        </span>
+          <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} className="shrink-0" />
+        </div>
       </div>
     </div>
   );
@@ -105,9 +77,9 @@ export function ClinicUtilityBar({ locale }: { locale: ClinicLocale }) {
 /**
  * The page's language, as a two-button segmented control.
  *
- * Present for every patient and at every width — the nav beside it is what hides
- * below `lg`, not this: a patient who was handed the wrong language must always
- * be able to fix it. Each button carries its own `lang` and the language's name
+ * Present in the utility bar for every patient and at every width: a patient
+ * who was handed the wrong language must always be able to fix it. Each button
+ * carries its own `lang` and the language's name
  * in full, so "ES" is announced as Spanish rather than spelled out in English.
  */
 export function LocaleSwitch({
@@ -160,13 +132,11 @@ export function ClinicHeader({
   onRequest,
   account,
   locale,
-  onLocaleChange,
 }: {
   onRequest: () => void;
   /** The patient whose portal record the form is rendered from. */
   account: Record<string, unknown>;
   locale: ClinicLocale;
-  onLocaleChange: (next: ClinicLocale) => void;
 }) {
   const strings = RIDGELINE_STRINGS[locale];
   const mrn = accountText(account, "mrn");
@@ -197,7 +167,6 @@ export function ClinicHeader({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} />
           <SignedInChip
             account={account}
             meta={mrn ? `${strings.mrn} ${mrn} · ${plan}` : undefined}
