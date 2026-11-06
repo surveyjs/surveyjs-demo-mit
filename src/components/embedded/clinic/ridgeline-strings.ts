@@ -27,6 +27,7 @@ export interface RidgelineStrings {
   readonly demoPlaceholder: string;
 
   /* header */
+  readonly navLabel: string;
   readonly nav: readonly string[];
   readonly requestAppointment: string;
   readonly mrn: string;
@@ -68,6 +69,7 @@ export const RIDGELINE_STRINGS: Record<ClinicLocale, RidgelineStrings> = {
     patientPortal: "Patient portal",
     demoPlaceholder: "Product demo. This feature is for illustration only.",
 
+    navLabel: "Clinic menu",
     nav: ["Services", "Providers", "Locations", "Patients", "Insurance & billing"],
     requestAppointment: "Request an appointment",
     mrn: "MRN",
@@ -109,6 +111,7 @@ export const RIDGELINE_STRINGS: Record<ClinicLocale, RidgelineStrings> = {
     patientPortal: "Portal del paciente",
     demoPlaceholder: "Demo del producto. Esta función es solo ilustrativa.",
 
+    navLabel: "Menú de la clínica",
     nav: ["Servicios", "Profesionales", "Consultorios", "Pacientes", "Seguros y facturación"],
     requestAppointment: "Solicitar una cita",
     mrn: "Expediente",

@@ -8,6 +8,7 @@ import {
   HeartPulseIcon,
   LanguagesIcon,
   MapPinIcon,
+  MenuIcon,
   PhoneIcon,
   StethoscopeIcon,
   TriangleAlertIcon,
@@ -21,6 +22,7 @@ import {
   type VisitSummary,
 } from "@/schemas";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DemoPlaceholder } from "../shared/DemoPlaceholder";
 import { SignedInChip } from "../shared/SignedInChip";
 import { accountText } from "../shared/demo-accounts";
@@ -165,7 +167,7 @@ export function ClinicHeader({
           </span>
         </div>
 
-        <nav className="text-muted-foreground hidden items-center gap-6 text-sm lg:flex">
+        <nav aria-label={strings.navLabel} className="text-muted-foreground hidden items-center gap-6 text-sm lg:flex">
           {strings.nav.map((item, index) => (
             <DemoPlaceholder key={item} message={strings.demoPlaceholder}>
               <button type="button" className={index === 0 ? "text-foreground font-medium" : undefined}>
@@ -188,6 +190,30 @@ export function ClinicHeader({
             <CalendarCheckIcon />
             <span className="hidden sm:inline">{strings.requestAppointment}</span>
           </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon-sm" className="lg:hidden" aria-label={strings.navLabel}>
+                <MenuIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              aria-label={strings.navLabel}
+              align="end"
+              sideOffset={8}
+              collisionPadding={12}
+              className="w-56 max-w-(--radix-popover-content-available-width) p-1 lg:hidden"
+            >
+              <nav className="flex flex-col" aria-label={strings.navLabel}>
+                {strings.nav.map((item) => (
+                  <DemoPlaceholder key={item} message={strings.demoPlaceholder}>
+                    <Button variant="ghost" size="sm" className="justify-start">
+                      {item}
+                    </Button>
+                  </DemoPlaceholder>
+                ))}
+              </nav>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </header>
