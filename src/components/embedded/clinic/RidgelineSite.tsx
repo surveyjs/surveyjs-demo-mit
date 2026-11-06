@@ -167,7 +167,7 @@ export function ClinicHeader({
           </span>
         </div>
 
-        <nav aria-label={strings.navLabel} className="text-muted-foreground hidden items-center gap-6 text-sm lg:flex">
+        <nav aria-label={strings.navLabel} className="text-muted-foreground hidden items-center gap-6 text-sm whitespace-nowrap lg:flex min-[66rem]:ml-2 xl:ml-4">
           {strings.nav.map((item, index) => (
             <DemoPlaceholder key={item} message={strings.demoPlaceholder}>
               <button type="button" className={index === 0 ? "text-foreground font-medium" : undefined}>
@@ -180,7 +180,7 @@ export function ClinicHeader({
         <div className="ml-auto flex items-center gap-2">
           <SignedInChip
             account={account}
-            meta={mrn ? `${strings.mrn} ${mrn} · ${plan}` : undefined}
+            details={mrn ? `${strings.mrn} ${mrn} · ${plan}` : undefined}
             signInLabel={strings.signIn}
             signInMessage={strings.demoPlaceholder}
           />
