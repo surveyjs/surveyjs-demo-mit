@@ -56,7 +56,8 @@ async function loginAs(page: Page, current: RegExp, next: RegExp) {
 }
 
 async function openUserDialog(page: Page) {
-  await dockOf(page).getByRole("button", { name: APPOINTMENT_COPY.dock.editLabel }).click();
+  await dockOf(page).getByRole("button", { name: `${APPOINTMENT_COPY.dock.usersLabel}: Maria Delgado`, exact: true }).click();
+  await page.getByRole("menuitem", { name: `${APPOINTMENT_COPY.dock.editLabel}: Maria Delgado`, exact: true }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.locator(".sd-root-modern")).toBeVisible();
   return dialog;

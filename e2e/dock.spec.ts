@@ -52,7 +52,8 @@ test.describe("More examples", () => {
     }
     await expect(menuTrigger(page)).toHaveText(findExample(await loadExamples(), "embeddedFeedback")!.name);
     // The menu has a heading; its landing-page link appears once, after the examples.
-    await expect(menu.getByText(`${DOCK_LABELS.examplesTitle} · ${features.brand.editionLabel}`, { exact: true })).toBeVisible();
+    await expect(menu.getByText(DOCK_LABELS.examplesTitle, { exact: true })).toBeVisible();
+    await expect(menu.locator('[data-slot="badge"]')).toHaveText(features.brand.editionLabel);
     const landing = menu.getByRole("link", { name: `${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}` });
     await expect(landing).toHaveCount(1);
     await expect(landing).toHaveAttribute("href", USE_CASES_URL);
@@ -241,17 +242,16 @@ test.describe("at 390×844", () => {
     await dock.getByRole("button", { name: DOCK_LABELS.overflow }).click();
     const menu = page.getByRole("menu");
     const expected = [
+      `Switch to ${titleCase(features.brand.otherEdition.label)}`,
       PAGE_ACTIONS.howBuilt,
       PAGE_ACTIONS.source,
-      `Switch to ${titleCase(features.brand.otherEdition.label)}`,
+      DOCK_LABELS.highlightSurvey,
+      /^Switch to (Dark|Light)$/,
+      DOCK_LABELS.prefill,
+      DOCK_LABELS.reset,
       ...(features.analyticsHref ? [DOCK_LABELS.analytics] : []),
       ...(features.exportPdf ? [DOCK_LABELS.savePdf] : []),
       features.designer.label,
-      DOCK_LABELS.highlightSurvey,
-      DOCK_LABELS.reset,
-      DOCK_LABELS.prefill,
-      DOCK_LABELS.editUser,
-      /^Switch to (Dark|Light)$/,
     ];
     const items = menu.locator('[role="menuitem"], [role="menuitemcheckbox"]');
     await expect(items).toHaveCount(expected.length);
@@ -259,9 +259,13 @@ test.describe("at 390×844", () => {
       await expect(items.nth(index)).toHaveText(typeof name === "string" ? new RegExp(`^${escapeRegExp(name)}`) : name);
     }
 
-    // And an item does what its button does.
-    await items.filter({ hasText: DOCK_LABELS.editUser }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await menu.press("Escape");
+    await expect(menu).toBeHidden();
+    await dock.getByRole("button", { name: /^Login as:/ }).click();
+    await page.getByRole("menuitem", { name: `${DOCK_LABELS.editUser}: Priya Shah`, exact: true }).click();
+    const editor = page.getByRole("dialog", { name: "The signed-in user" });
+    await expect(editor.locator('[data-name="user_firstName"] input')).toHaveValue("Priya");
+    await expect(dock.getByRole("button", { name: "Login as: Priya Shah" })).toBeVisible();
   });
 });
 

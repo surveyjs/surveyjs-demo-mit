@@ -232,9 +232,14 @@ for (const route of allRoutes) {
 /** Opens the toolbar's user popup and waits for the editor survey inside it. */
 async function openUserDialog(
   page: import("@playwright/test").Page,
-  label: string = DOCK_LABELS.editUser,
+  name = "Alex Rivera",
+  { usersLabel, editLabel }: { usersLabel: string; editLabel: string } = {
+    usersLabel: DOCK_LABELS.loginAs,
+    editLabel: DOCK_LABELS.editUser,
+  },
 ) {
-  await dockOf(page).getByRole("button", { name: label }).click();
+  await dockOf(page).getByRole("button", { name: new RegExp(`^${usersLabel}:`) }).click();
+  await page.getByRole("menuitem", { name: `${editLabel}: ${name}`, exact: true }).click();
   const dialog = page.getByRole("dialog");
   // The editor is a SurveyJS survey — same markup as the demo it drives.
   await expect(dialog.locator(".sd-root-modern")).toBeVisible();
@@ -471,7 +476,7 @@ test("/clinic opens in the chart's language and fills the request from it", asyn
 
   // And the popup is where that patient's record is edited, with the object the
   // survey receives shown underneath it.
-  const dialog = await openUserDialog(page, APPOINTMENT_COPY.dock.editLabel);
+  const dialog = await openUserDialog(page, "Priya Raman", APPOINTMENT_COPY.dock);
   await expect(dialog).toContainText(APPOINTMENT_COPY.dialog.title);
   await expect(dialog.locator("pre")).toContainText('"user_isNewPatient": true');
   await typeInEditor(dialog, "user_preferredName", "Pri");

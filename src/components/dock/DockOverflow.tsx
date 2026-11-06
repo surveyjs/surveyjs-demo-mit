@@ -31,8 +31,8 @@ export interface OverflowItem {
   readonly onSelect?: () => void;
   /** The same guard the bar's control honours. */
   readonly disabled?: boolean;
-  readonly separatorBefore?: boolean;
-  readonly separatorAfter?: boolean;
+  /** Add a divider after this item, optionally only below a narrower breakpoint. */
+  readonly separatorAfter?: boolean | "lg" | "sm";
   readonly checked?: boolean;
 }
 
@@ -85,9 +85,13 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
           const Icon = item.icon;
           const visibilityClassName = MENU_ONLY_BELOW[item.below];
           const className = mergeTailwindClasses("cursor-default", visibilityClassName);
+          const separatorClassName = mergeTailwindClasses(
+            "h-0 border-t border-border bg-transparent",
+            visibilityClassName,
+            typeof item.separatorAfter === "string" && MENU_ONLY_BELOW[item.separatorAfter],
+          );
           return (
             <Fragment key={item.key}>
-              {item.separatorBefore && <DropdownMenuSeparator className={visibilityClassName} />}
               {item.checked !== undefined ? (
                 <DropdownMenuCheckboxItem
                   indicatorSide="right"
@@ -117,8 +121,8 @@ export function DockOverflow({ items }: { items: readonly OverflowItem[] }) {
                   </a>
                 </DropdownMenuItem>
               )}
-              {item.separatorAfter && index < items.length - 1 && !items[index + 1].separatorBefore && (
-                <DropdownMenuSeparator className={visibilityClassName} />
+              {item.separatorAfter && index < items.length - 1 && (
+                <DropdownMenuSeparator className={separatorClassName} />
               )}
             </Fragment>
           );

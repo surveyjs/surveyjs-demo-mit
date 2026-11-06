@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -21,11 +21,12 @@ import {
   WandSparklesIcon,
   type LucideIcon,
 } from "lucide-react";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DockButton } from "./DockButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -90,8 +91,8 @@ export interface DemoDockProps {
    */
   usersLabel?: string;
   usersTitle?: string;
-  /** Opens the popup that edits the signed-in user. */
-  onEditUser?: () => void;
+  /** Opens the editor for the current user or for the selected row. */
+  onEditUser?: (id?: string) => void;
   editUserDisabled?: boolean;
   editLabel?: string;
   editTitle?: string;
@@ -157,6 +158,7 @@ export function DemoDock({
   const { resolvedTheme, setTheme } = useTheme();
   const outline = useSurveyOutlineControl();
   const [mounted, setMounted] = useState(false);
+  const pendingEditUserId = useRef<string | null>(null);
   useEffect(() => setMounted(true), []);
 
   const isDark = mounted && resolvedTheme === "dark";
@@ -174,38 +176,45 @@ export function DemoDock({
   const switchHref = otherEditionHref(baseUrl, pathname);
   const activeUser = users.find((option) => option.id === activeUserId) ?? users[0];
   const DesignerIcon = DESIGNER_ICONS[features.designer.icon];
+  const showUserPicker = users.length > 1 && activeUser && onSelectUser;
+  const editInPicker = showUserPicker ? onEditUser : undefined;
+  const standaloneEdit = editInPicker ? undefined : onEditUser;
+  const editToolsBelow = standaloneEdit ? "lg" : configureHref ? "sm" : undefined;
+  const hasExports = Boolean(analyticsHref || onExportPdf);
+  const answerSeparator = hasExports || (!standaloneEdit && configureHref ? "sm" : undefined);
 
-  // What "⋯" holds, in its own order: the page's links and exports below `xl`,
-  // then the form's controls below `lg` and editor below `sm`. The bar shows the same items from those
-  // breakpoints up, with the same guards.
+  // The bar shows these controls from their respective breakpoints up.
   const overflow: OverflowItem[] = [
-    { key: "how", label: `${PAGE_ACTIONS.howBuilt} ${NEW_TAB_MARK}`, icon: CircleHelpIcon, below: "xl", href: how },
+    { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "xl", href: switchHref, separatorAfter: true },
+    { key: "how", label: `${PAGE_ACTIONS.howBuilt} ${NEW_TAB_MARK}`, icon: CircleHelpIcon, below: "xl", href: how, separatorAfter: !source },
     ...(source
-      ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "xl", href: source, newTab: true } as const]
+      ? [{ key: "source", label: PAGE_ACTIONS.source, icon: GithubIcon, below: "xl", href: source, newTab: true, separatorAfter: true } as const]
       : []),
-    { key: "edition", label: switchLabel, icon: ArrowLeftRightIcon, below: "xl", href: switchHref, separatorBefore: true },
+    ...(outline.available
+      ? [{ key: "highlight", label: DOCK_LABELS.highlightSurvey, icon: ScanLineIcon, below: "lg", onSelect: outline.toggle, checked: outline.visible } as const]
+      : []),
+    {
+      key: "theme", label: themeActionLabel, icon: isDark ? SunIcon : MoonIcon, below: "xl", onSelect: toggleTheme,
+      separatorAfter: hasExports || (onPrefill || onReset ? "lg" : editToolsBelow),
+    },
+    ...(onPrefill
+      ? [{ key: "prefill", label: DOCK_LABELS.prefill, icon: WandSparklesIcon, below: "lg", onSelect: onPrefill, disabled: prefillDisabled, separatorAfter: !onReset && answerSeparator } as const]
+      : []),
+    ...(onReset
+      ? [{ key: "reset", label: resetLabel, icon: RotateCcwIcon, below: "lg", onSelect: onReset, disabled: resetDisabled, separatorAfter: answerSeparator } as const]
+      : []),
     ...(analyticsHref
-      ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "xl", href: analyticsHref } as const]
+      ? [{ key: "analytics", label: DOCK_LABELS.analytics, icon: ChartColumnIcon, below: "xl", href: analyticsHref, separatorAfter: onExportPdf ? undefined : editToolsBelow } as const]
       : []),
     ...(onExportPdf
-      ? [{ key: "pdf", label: DOCK_LABELS.savePdf, icon: FileDownIcon, below: "xl", onSelect: onExportPdf, disabled: exportPdfDisabled } as const]
+      ? [{ key: "pdf", label: DOCK_LABELS.savePdf, icon: FileDownIcon, below: "xl", onSelect: onExportPdf, disabled: exportPdfDisabled, separatorAfter: editToolsBelow } as const]
+      : []),
+    ...(standaloneEdit
+      ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "lg", onSelect: standaloneEdit, disabled: editUserDisabled, separatorAfter: configureHref ? "sm" : undefined } as const]
       : []),
     ...(configureHref
       ? [{ key: "designer", label: designerLabel, icon: DesignerIcon, below: "sm", href: configureHref } as const]
       : []),
-    ...(outline.available
-      ? [{ key: "highlight", label: DOCK_LABELS.highlightSurvey, icon: ScanLineIcon, below: "lg", onSelect: outline.toggle, checked: outline.visible, separatorBefore: true, separatorAfter: true } as const]
-      : []),
-    ...(onReset
-      ? [{ key: "reset", label: resetLabel, icon: RotateCcwIcon, below: "lg", onSelect: onReset, disabled: resetDisabled } as const]
-      : []),
-    ...(onPrefill
-      ? [{ key: "prefill", label: DOCK_LABELS.prefill, icon: WandSparklesIcon, below: "lg", onSelect: onPrefill, disabled: prefillDisabled } as const]
-      : []),
-    ...(onEditUser
-      ? [{ key: "editUser", label: editLabel, icon: UserPenIcon, below: "lg", onSelect: onEditUser, disabled: editUserDisabled } as const]
-      : []),
-    { key: "theme", label: themeActionLabel, icon: isDark ? SunIcon : MoonIcon, below: "xl", onSelect: toggleTheme, separatorBefore: true },
   ];
 
   const formTools = [
@@ -239,6 +248,7 @@ export function DemoDock({
         <span className={LABEL}>{resetLabel}</span>
       </DockButton>
     ),
+    (onPrefill || onReset) && (onExportPdf || analyticsHref) && divider("exports", "hidden xl:block"),
     onExportPdf && (
       <DockButton
         key="pdf"
@@ -271,7 +281,7 @@ export function DemoDock({
     // The picker, once the page may be rendered for more than one person.
     // `modal={false}`: a modal dropdown locks the page scroll, and taking the
     // scrollbar away shifts this centred, fixed toolbar sideways.
-    users.length > 1 && activeUser && onSelectUser && (
+    showUserPicker && (
       <DropdownMenu key="users" modal={false}>
         <DropdownMenuTrigger asChild>
           <DockButton
@@ -290,29 +300,68 @@ export function DemoDock({
           </DockButton>
         </DropdownMenuTrigger>
         {/* Above the toolbar itself (z-70), which is fixed over the page. */}
-        <DropdownMenuContent align="center" collisionPadding={12} lang="en" className="z-[80] w-72 max-w-[calc(100svw-24px)] cursor-default">
+        <DropdownMenuContent
+          align="center"
+          collisionPadding={12}
+          lang="en"
+          className="z-[80] w-72 max-w-[calc(100svw-24px)] cursor-default"
+          onCloseAutoFocus={(event) => {
+            const id = pendingEditUserId.current;
+            pendingEditUserId.current = null;
+            if (id !== null && editInPicker) {
+              event.preventDefault();
+              editInPicker(id);
+            }
+          }}
+        >
           <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">{usersLabel}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup value={activeUser.id} onValueChange={onSelectUser}>
             {users.map((option) => (
-              <DropdownMenuRadioItem
+              <div
                 key={option.id}
-                value={option.id}
-                className="group cursor-default pl-2 data-[state=checked]:bg-accent [&>span:first-child]:hidden"
+                data-active={option.id === activeUser.id}
+                className="flex items-stretch rounded-sm transition-colors hover:bg-accent focus-within:bg-accent data-[active=true]:bg-accent"
               >
-                <span className="flex flex-col">
-                  <span className="font-medium group-data-[state=checked]:text-primary">{option.name}</span>
-                  {option.description && (
-                    <span className="text-muted-foreground text-xs">{option.description}</span>
-                  )}
-                </span>
-              </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value={option.id}
+                  className="group min-w-0 flex-1 cursor-default pl-2 focus:bg-transparent [&>span:first-child]:hidden"
+                >
+                  <span className="flex flex-col">
+                    <span className="font-medium group-data-[state=checked]:text-primary">{option.name}</span>
+                    {option.description && (
+                      <span className="text-muted-foreground text-xs">{option.description}</span>
+                    )}
+                  </span>
+                </DropdownMenuRadioItem>
+                {editInPicker && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuItem
+                        aria-label={`${editLabel}: ${option.name}`}
+                        textValue={`${editLabel}: ${option.name}`}
+                        className="group relative w-10 shrink-0 justify-center focus:bg-transparent"
+                        disabled={editUserDisabled}
+                        onSelect={() => {
+                          pendingEditUserId.current = option.id;
+                        }}
+                      >
+                        <UserPenIcon className="text-muted-foreground transition-colors group-hover:text-foreground group-focus:text-foreground" />
+                        {edited && option.id === activeUser.id && (
+                          <span className="bg-primary absolute right-1.5 top-1.5 size-1.5 rounded-full opacity-70" aria-hidden />
+                        )}
+                      </DropdownMenuItem>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" lang="en" className="z-[90]">{editTitle}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
-    onEditUser && (
+    standaloneEdit && (
       <DockButton
         key="editUser"
         variant={userOpen ? "secondary" : "ghost"}
@@ -322,7 +371,7 @@ export function DemoDock({
         aria-label={editLabel}
         tooltip={editTitle}
         disabled={editUserDisabled}
-        onClick={onEditUser}
+        onClick={() => standaloneEdit()}
       >
         <UserPenIcon />
         <span className={LABEL}>{editLabel}</span>
@@ -351,6 +400,14 @@ export function DemoDock({
           >
             <ExamplesMenu currentId={exampleId} />
 
+            {/* Keep the current pathname when switching to the other edition. */}
+            <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
+              <a href={switchHref} aria-label={switchLabel}>
+                <ArrowLeftRightIcon />
+                <span className={LABEL}>{switchLabel}</span>
+              </a>
+            </DockButton>
+
             {/* The explainer, in this tab: everything this template says about
                 the page is written there, in `how/<route>.md`. */}
             <DockButton tooltip={PAGE_ACTIONS.howBuilt} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
@@ -373,6 +430,7 @@ export function DemoDock({
               </DockButton>
             )}
 
+            {source && outline.available && divider("display", "hidden xl:block")}
             {outline.available && (
               <DockButton
                 variant={outline.visible ? "secondary" : "ghost"}
@@ -388,21 +446,6 @@ export function DemoDock({
               </DockButton>
             )}
 
-            {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden lg:block" : "hidden xl:block")}
-            {formTools}
-
-            {userTools.length > 0 && divider("user", "hidden lg:block")}
-            {userTools}
-
-            {divider("site", "hidden xl:block")}
-            {/* The same pathname on the other edition's host, in this tab: the
-                routes are identical, a record's URL included. */}
-            <DockButton tooltip={switchLabel} variant="ghost" size="sm" className={mergeTailwindClasses(QUIET, SHOWN_FROM.xl)} asChild>
-              <a href={switchHref} aria-label={switchLabel}>
-                <ArrowLeftRightIcon />
-                <span className={LABEL}>{switchLabel}</span>
-              </a>
-            </DockButton>
             <DockButton
               variant="ghost"
               size="icon-sm"
@@ -413,6 +456,12 @@ export function DemoDock({
             >
               {isDark ? <MoonIcon /> : <SunIcon />}
             </DockButton>
+
+            {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden lg:block" : "hidden xl:block")}
+            {formTools}
+
+            {userTools.length > 0 && divider("user", "hidden lg:block")}
+            {userTools}
 
             <DockOverflow items={overflow} />
 
