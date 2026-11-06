@@ -163,7 +163,7 @@ export function ClinicHeader({
           </span>
           <span className="leading-tight">
             <span className="block text-[15px] font-semibold tracking-tight">Ridgeline</span>
-            <span className="text-muted-foreground block text-[11px]">Family Health</span>
+            <span className="text-muted-foreground block text-[11px]">Family&nbsp;Health</span>
           </span>
         </div>
 
