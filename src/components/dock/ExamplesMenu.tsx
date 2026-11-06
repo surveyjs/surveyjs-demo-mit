@@ -2,6 +2,7 @@
 
 import { ChevronDownIcon, MenuIcon } from "lucide-react";
 import { DockButton } from "./DockButton";
+import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useExamples } from "@/components/examples/ExamplesProvider";
 import { findExample, menuExamples, runLink } from "@/examples/entries";
@@ -66,9 +67,10 @@ export function ExamplesMenu({ currentId }: { currentId: NavId }) {
         aria-label={DOCK_LABELS.moreExamples}
         className="z-[80] cursor-default max-h-(--radix-popover-content-available-height) w-[min(24rem,calc(100svw-24px))] overflow-y-auto p-0"
       >
-        <p className="text-muted-foreground border-b px-3 py-2 text-xs font-normal">
-          {DOCK_LABELS.examplesTitle} · {features.brand.editionLabel}
-        </p>
+        <div className="text-muted-foreground flex items-center justify-between gap-2 border-b px-3 py-2 text-xs font-normal">
+          <span>{DOCK_LABELS.examplesTitle}</span>
+          <Badge variant="secondary">{features.brand.editionLabel}</Badge>
+        </div>
         <ul className="py-1">
           {entries.map((entry, index) => {
             const run = runLink(entry, features.edition);

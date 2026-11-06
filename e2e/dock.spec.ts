@@ -52,7 +52,8 @@ test.describe("More examples", () => {
     }
     await expect(menuTrigger(page)).toHaveText(findExample(await loadExamples(), "embeddedFeedback")!.name);
     // The menu has a heading; its landing-page link appears once, after the examples.
-    await expect(menu.getByText(`${DOCK_LABELS.examplesTitle} · ${features.brand.editionLabel}`, { exact: true })).toBeVisible();
+    await expect(menu.getByText(DOCK_LABELS.examplesTitle, { exact: true })).toBeVisible();
+    await expect(menu.locator('[data-slot="badge"]')).toHaveText(features.brand.editionLabel);
     const landing = menu.getByRole("link", { name: `${DOCK_LABELS.allUseCases} ${NEW_TAB_MARK}` });
     await expect(landing).toHaveCount(1);
     await expect(landing).toHaveAttribute("href", USE_CASES_URL);
