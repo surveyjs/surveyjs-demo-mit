@@ -21,6 +21,7 @@ import {
   type VisitSummary,
 } from "@/schemas";
 import { Button } from "@/components/ui/button";
+import { DemoPlaceholder } from "../shared/DemoPlaceholder";
 import { SignedInChip } from "../shared/SignedInChip";
 import { accountText } from "../shared/demo-accounts";
 import { mergeTailwindClasses } from "@/lib/utils";
@@ -65,8 +66,14 @@ export function ClinicUtilityBar({
           <ClockIcon className="size-3.5" /> {strings.urgentCareHours}
         </span>
         <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
-          <span>{strings.payBill}</span>
-          <span className="text-foreground font-medium">{strings.patientPortal}</span>
+          <DemoPlaceholder message={strings.demoPlaceholder}>
+            <button type="button">{strings.payBill}</button>
+          </DemoPlaceholder>
+          <DemoPlaceholder message={strings.demoPlaceholder}>
+            <button type="button" className="text-foreground font-medium">
+              {strings.patientPortal}
+            </button>
+          </DemoPlaceholder>
           <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} className="shrink-0" />
         </div>
       </div>
@@ -160,9 +167,11 @@ export function ClinicHeader({
 
         <nav className="text-muted-foreground hidden items-center gap-6 text-sm lg:flex">
           {strings.nav.map((item, index) => (
-            <span key={item} className={index === 0 ? "text-foreground font-medium" : undefined}>
-              {item}
-            </span>
+            <DemoPlaceholder key={item} message={strings.demoPlaceholder}>
+              <button type="button" className={index === 0 ? "text-foreground font-medium" : undefined}>
+                {item}
+              </button>
+            </DemoPlaceholder>
           ))}
         </nav>
 
@@ -171,6 +180,7 @@ export function ClinicHeader({
             account={account}
             meta={mrn ? `${strings.mrn} ${mrn} · ${plan}` : undefined}
             signInLabel={strings.signIn}
+            signInMessage={strings.demoPlaceholder}
           />
           {/* Its icon alone on a phone, where the full label pushed the page
               sideways. */}

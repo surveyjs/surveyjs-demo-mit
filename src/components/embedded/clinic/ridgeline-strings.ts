@@ -24,6 +24,7 @@ export interface RidgelineStrings {
   readonly urgentCareHours: string;
   readonly payBill: string;
   readonly patientPortal: string;
+  readonly demoPlaceholder: string;
 
   /* header */
   readonly nav: readonly string[];
@@ -65,6 +66,7 @@ export const RIDGELINE_STRINGS: Record<ClinicLocale, RidgelineStrings> = {
     urgentCareHours: "Urgent care until 8:00 pm daily",
     payBill: "Pay my bill",
     patientPortal: "Patient portal",
+    demoPlaceholder: "Product demo. This feature is for illustration only.",
 
     nav: ["Services", "Providers", "Locations", "Patients", "Insurance & billing"],
     requestAppointment: "Request an appointment",
@@ -105,6 +107,7 @@ export const RIDGELINE_STRINGS: Record<ClinicLocale, RidgelineStrings> = {
     urgentCareHours: "Atención urgente hasta las 8:00 p. m. todos los días",
     payBill: "Pagar mi factura",
     patientPortal: "Portal del paciente",
+    demoPlaceholder: "Demo del producto. Esta función es solo ilustrativa.",
 
     nav: ["Servicios", "Profesionales", "Consultorios", "Pacientes", "Seguros y facturación"],
     requestAppointment: "Solicitar una cita",

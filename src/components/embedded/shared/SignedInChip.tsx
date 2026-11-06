@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { DemoPlaceholder } from "./DemoPlaceholder";
 import { accountInitials, accountName } from "./demo-accounts";
 import { mergeTailwindClasses } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export function SignedInChip({
   account,
   meta,
   signInLabel = "Sign in",
+  signInMessage,
   className,
 }: {
   account: Record<string, unknown>;
@@ -27,15 +29,18 @@ export function SignedInChip({
    * demo but the clinic uses.
    */
   signInLabel?: string;
+  signInMessage?: string;
   className?: string;
 }) {
   const name = accountName(account);
 
   if (!name) {
     return (
-      <Button variant="outline" size="sm" className={className}>
-        {signInLabel}
-      </Button>
+      <DemoPlaceholder message={signInMessage}>
+        <Button variant="outline" size="sm" className={className}>
+          {signInLabel}
+        </Button>
+      </DemoPlaceholder>
     );
   }
 
