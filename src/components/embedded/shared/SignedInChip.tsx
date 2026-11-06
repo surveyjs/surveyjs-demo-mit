@@ -47,7 +47,7 @@ export function SignedInChip({
   return (
     <span
       className={mergeTailwindClasses(
-        "bg-background/60 flex items-center gap-2 rounded-full border py-1 pr-3 pl-1",
+        "bg-background/60 flex items-center gap-2 rounded-full border p-1 sm:pr-3",
         className,
       )}
     >
