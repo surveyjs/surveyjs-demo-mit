@@ -60,23 +60,23 @@ export function ClinicUtilityBar({
 
   return (
     <div className="bg-muted/50 border-b text-xs">
-      <div className="text-muted-foreground mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-6 py-2">
+      <div className="text-muted-foreground mx-auto flex w-full max-w-6xl flex-col items-start gap-2 px-6 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1 sm:py-2">
         <span className="text-foreground flex items-center gap-1.5 font-medium">
           <PhoneIcon className="size-3.5" /> (503) 555-0148
         </span>
-        <span className="flex items-center gap-1.5">
-          <ClockIcon className="size-3.5" /> {strings.urgentCareHours}
+        <span className="flex items-start gap-1.5 sm:items-center">
+          <ClockIcon className="mt-px size-3.5 shrink-0 sm:mt-0" /> {strings.urgentCareHours}
         </span>
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
+        <div className="flex w-full items-center gap-3 sm:ml-auto sm:w-auto sm:flex-wrap sm:justify-end sm:gap-x-5 sm:gap-y-1">
           <DemoPlaceholder message={strings.demoPlaceholder}>
-            <button type="button">{strings.payBill}</button>
+            <button type="button" className="min-h-9 text-left sm:min-h-0">{strings.payBill}</button>
           </DemoPlaceholder>
           <DemoPlaceholder message={strings.demoPlaceholder}>
-            <button type="button" className="text-foreground font-medium">
+            <button type="button" className="text-foreground min-h-9 text-left font-medium sm:min-h-0">
               {strings.patientPortal}
             </button>
           </DemoPlaceholder>
-          <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} className="shrink-0" />
+          <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} className="ml-auto shrink-0 sm:ml-0" />
         </div>
       </div>
     </div>
@@ -246,9 +246,9 @@ export function ChartLanguageBanner({
   return (
     <div
       role="note"
-      className="border-primary/40 bg-primary/5 mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border p-3 text-xs leading-relaxed"
+      className="border-primary/40 bg-primary/5 mb-6 grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-lg border p-3 text-xs leading-relaxed sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2"
     >
-      <LanguagesIcon className="text-primary size-4 shrink-0" />
+      <LanguagesIcon className="text-primary mt-0.5 size-4 shrink-0 sm:mt-0" />
       <div className="min-w-0 flex-1 space-y-0.5">
         {order.map((line) => (
           <p
@@ -260,7 +260,7 @@ export function ChartLanguageBanner({
           </p>
         ))}
       </div>
-      <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} />
+      <LocaleSwitch locale={locale} onLocaleChange={onLocaleChange} className="col-start-2 justify-self-start" />
     </div>
   );
 }
