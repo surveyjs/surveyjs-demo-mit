@@ -50,6 +50,6 @@ export const DOCK_LABELS = {
 
 /** Worded once, for the dock and the specs. */
 export const PAGE_ACTIONS = {
-  source: "Source of This Page",
-  howBuilt: "How This Page Is Built",
+  source: "View Source",
+  howBuilt: "How It's Built",
 } as const;
