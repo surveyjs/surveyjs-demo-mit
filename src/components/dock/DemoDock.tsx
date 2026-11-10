@@ -436,13 +436,14 @@ export function DemoDock({
 
             <DockButton
               variant="ghost"
-              size="icon-sm"
-              className={mergeTailwindClasses("shrink-0 rounded-full", SHOWN_FROM.xl)}
-              aria-label={themeLabel}
+              size="sm"
+              className={mergeTailwindClasses(QUIET, "w-8 px-0 has-[>svg]:px-0 2xl:w-auto 2xl:has-[>svg]:px-2.5", SHOWN_FROM.xl)}
+              aria-label={`Switch Theme. ${themeLabel}`}
               tooltip="Switch Theme"
               onClick={toggleTheme}
             >
               {isDark ? <MoonIcon /> : <SunIcon />}
+              <span className={LABEL}>Switch Theme</span>
             </DockButton>
 
             {formTools.length > 0 && divider("form", onPrefill || onReset ? "hidden lg:block" : "hidden xl:block")}

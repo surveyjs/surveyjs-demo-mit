@@ -50,5 +50,5 @@ export const DOCK_LABELS = {
 
 /** Worded once, for the dock and the specs. */
 export const PAGE_ACTIONS = {
-  source: "Source of This Page",
+  source: "View Source",
 } as const;
