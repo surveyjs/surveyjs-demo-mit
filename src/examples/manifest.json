@@ -2,6 +2,20 @@
   "version": 1,
   "entries": [
     {
+      "id": "starter",
+      "name": "Starter",
+      "problem": "Build your first form with a minimal integration",
+      "runUrl": {
+        "mit": "https://app-mit.demos.surveyjs.io/starter",
+        "full": "https://app.demos.surveyjs.io/starter"
+      },
+      "useCaseAnchor": "starter",
+      "ready": true,
+      "related": ["definition", "leads"],
+      "inMenu": false,
+      "link": null
+    },
+    {
       "id": "leads",
       "name": "Leads",
       "problem": "Manage sales opportunities in your app",
@@ -11,11 +25,12 @@
       },
       "useCaseAnchor": "leads",
       "ready": true,
-      "related": ["workOrders", "embeddedFeedback"]
+      "related": ["workOrders", "embeddedFeedback"],
+      "link": null
     },
     {
       "id": "workOrders",
-      "name": "Work orders",
+      "name": "Work Orders",
       "problem": "Digitize field service reports",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/work-orders",
@@ -23,7 +38,8 @@
       },
       "useCaseAnchor": "work-orders",
       "ready": true,
-      "related": ["leads", "embeddedChart"]
+      "related": ["leads", "embeddedChart"],
+      "link": null
     },
     {
       "id": "embeddedFeedback",
@@ -35,19 +51,8 @@
       },
       "useCaseAnchor": "feedback",
       "ready": true,
-      "related": ["embeddedClinic", "leads"]
-    },
-    {
-      "id": "embeddedChart",
-      "name": "Encounter note",
-      "problem": "Capture detailed clinical notes",
-      "runUrl": {
-        "mit": "https://app-mit.demos.surveyjs.io/chart",
-        "full": "https://app.demos.surveyjs.io/chart"
-      },
-      "useCaseAnchor": "chart",
-      "ready": true,
-      "related": ["embeddedClinic", "healthcare"]
+      "related": ["embeddedClinic", "leads"],
+      "link": null
     },
     {
       "id": "embeddedClinic",
@@ -59,25 +64,45 @@
       },
       "useCaseAnchor": "clinic",
       "ready": true,
-      "related": ["embeddedChart", "healthcare"]
+      "related": ["embeddedChart", "healthcare"],
+      "link": null
     },
     {
-      "id": "starter",
-      "name": "Starter",
-      "problem": "Build your first form with a minimal integration",
+      "id": "embeddedChart",
+      "name": "Encounter Note",
+      "problem": "Capture detailed clinical notes",
       "runUrl": {
-        "mit": "https://app-mit.demos.surveyjs.io/starter",
-        "full": "https://app.demos.surveyjs.io/starter"
+        "mit": "https://app-mit.demos.surveyjs.io/chart",
+        "full": "https://app.demos.surveyjs.io/chart"
       },
-      "useCaseAnchor": "starter",
+      "useCaseAnchor": "chart",
       "ready": true,
-      "related": ["definition", "leads"],
-      "inMenu": false
+      "related": ["embeddedClinic", "healthcare"],
+      "link": null
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare",
+      "problem": "Healthcare forms end to end",
+      "url": "https://healthcare.demos.surveyjs.io/login",
+      "useCaseAnchor": "healthcare",
+      "ready": true,
+      "related": ["embeddedChart", "embeddedClinic"],
+      "link": null
+    },
+    {
+      "id": "humanResources",
+      "name": "Human Resources",
+      "problem": "Manage employee records",
+      "url": "https://hr.demos.surveyjs.io/login",
+      "ready": true,
+      "related": [],
+      "link": null
     },
     {
       "id": "definition",
-      "name": "Definition & checks",
-      "problem": "Preview and validate your form definitions",
+      "name": "Definition & Checks",
+      "problem": "Edit and check form JSON",
       "runUrl": {
         "mit": "https://app-mit.demos.surveyjs.io/definition",
         "full": "https://app.demos.surveyjs.io/definition"
@@ -85,24 +110,8 @@
       "useCaseAnchor": "definition",
       "ready": true,
       "related": ["starter", "leads"],
-      "inMenu": false
-    },
-    {
-      "id": "healthcare",
-      "name": "Healthcare",
-      "problem": "Healthcare forms end to end",
-      "url": "https://healthcare.demos.surveyjs.io/",
-      "useCaseAnchor": "healthcare",
-      "ready": true,
-      "related": ["embeddedChart", "embeddedClinic"]
-    },
-    {
-      "id": "humanResources",
-      "name": "Human Resources",
-      "problem": "Manage employee records",
-      "url": "https://hr.demos.surveyjs.io/manage",
-      "ready": true,
-      "related": []
+      "inMenu": false,
+      "link": null
     }
   ]
 }

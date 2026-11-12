@@ -20,8 +20,6 @@
 import type { Metadata } from "next";
 import { features, type Edition } from "@/features";
 import { getNavItem, navPages, type NavId } from "@/schemas/navigation";
-import { getHowContent } from "@/lib/how-content";
-import { howHref } from "@/lib/routes";
 import { DEMO_NAME } from "@/lib/site";
 
 export const SITE_NAME = DEMO_NAME;
@@ -189,25 +187,6 @@ export const rootMetadata: Metadata = {
 /** An example page's metadata, canonical to its own path. */
 export function pageMetadata(id: NavId): Metadata {
   return buildMetadata(pageCopy(id), getNavItem(id).path, true);
-}
-
-/**
- * An example's "how it's built" page, canonical to `/x/how`.
- *
- * The description is the `summary` in the Markdown file's front matter — the
- * one sentence the page opens with and the index lists — so there is no second
- * copy of it here, and renaming the page renames its explainer.
- */
-export function howMetadata(id: NavId): Metadata {
-  const nav = getNavItem(id);
-  return buildMetadata(
-    {
-      title: `${nav.label} — how it's built`,
-      description: getHowContent(id).summary,
-    },
-    howHref(nav.path),
-    true,
-  );
 }
 
 /**

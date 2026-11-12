@@ -74,6 +74,8 @@ export interface RecordCollection {
   /** List order. Stable: ties keep insertion order. */
   readonly compare?: (a: RecordColumns, b: RecordColumns) => number;
   readonly seed: readonly SurveyResult[];
+  /** Sample answers for a new, unsaved form; omit fields assigned by `newRecord`. */
+  readonly prefill?: SurveyData;
   /**
    * Top-level arrays of the document whose items carry a stable `id`: the
    * dynamic panels and matrices. Storage fills a missing one on save, so a later
@@ -112,14 +114,14 @@ export const recordCollections: Record<string, RecordCollection> = {
 
 /**
  * Path segments a record id may not be, because a static route under a records
- * page already owns them: `/work-orders/how` is the explainer and
- * `/work-orders/from-document` the import panel, so a record called `how` would
- * be unreachable at its own URL and would shadow one of those pages instead.
+ * page already owns them: `/work-orders/from-document` is the import panel, so
+ * a record called `from-document` would be unreachable at its own URL and
+ * would shadow that page instead.
  *
  * No `newId` here can produce one, and `fromDocument.id` refuses one — a
  * document must not be able to name a record after a route.
  */
-export const RESERVED_RECORD_IDS: readonly string[] = ["how", "from-document"];
+export const RESERVED_RECORD_IDS: readonly string[] = ["from-document"];
 
 export function isReservedRecordId(id: unknown): boolean {
   return typeof id === "string" && RESERVED_RECORD_IDS.includes(id);

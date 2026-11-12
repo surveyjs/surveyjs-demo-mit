@@ -27,7 +27,7 @@ Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.co
 
 | Route | What it shows |
 | --- | --- |
-| `/` | The index of every example: what each one shows, how it is built, and where it runs. For the team and for developers, so it is not indexed; visitors arrive at an example from the site's [use-cases page](https://surveyjs.io/use-cases). |
+| `/` | The index of every example: what each one shows, and where it runs. For the team and for developers, so it is not indexed; visitors arrive at an example from the site's [use-cases page](https://surveyjs.io/use-cases). |
 | `/leads` | Larkspur CRM's opportunity record: contacts as a dynamic panel, line items and a security-review checklist as dynamic matrices, totals and a qualification score as expressions. One form views, edits and creates; saving writes both your columns and the full response. |
 | `/work-orders` | Tallis Mechanical's dispatch desk: field service job sheets. Add a PDF, a scan or a phone photo of a filled sheet and the extractor returns a draft record to check on screen, linked to the original it was read from. (The [full edition](https://app.demos.surveyjs.io) also prints a record back onto the company's own job sheet as a PDF.) |
 | `/feedback` | A satisfaction survey in the hero of a mock product site, rendered for the signed-in account: it greets them by name, arrives pre-answered where the account already knows something, and adds or drops whole pages by plan. |
@@ -38,7 +38,7 @@ Built with Next.js (App Router) and styled with [shadcn/ui](https://ui.shadcn.co
 | `/api/extract` | POST a document and a `formId`; answers come back keyed by question name, with anything that does not fit the form dropped and listed. Needs an LLM key — see [Environment](#environment). |
 | `/api/storage/*` | The storage routes the browser calls. Every one that writes checks first: a response against the definition it answers, a definition against the linter and the form's tests. A refusal is a 422 naming the first thing wrong, and nothing is stored. |
 
-There is no admin chrome and no sidebar. Every example is a standalone host — Larkspur CRM, Tallis Mechanical, Cadence, Ridgeline Chart, Ridgeline Family Health — each in its own brand, and each outlines what SurveyJS drew with a dashed ring so there is no argument about which part of the page is the library; Starter and Definition wear a plain header with the demo's name. Every example shares one dock at the bottom of the screen: *More examples* lists the others and links back to the use-cases page, *How this page is built* opens the page's explainer, and then the form's editor, Prefill, Reset, PDF and Analytics where the edition has them, *Login as* the preset users a page ships with, *Edit the user* (an editor that is itself a SurveyJS survey, so the library edits its own input), and the switch to the same page in the other edition. Each demo passes the account to survey-core as variables, one per field, so the definition reads `{user_firstName}` in titles, in `defaultValueExpression` and in `visibleIf`. Finish a form and a *See next* card suggests two related examples.
+There is no admin chrome and no sidebar. Every example is a standalone host — Larkspur CRM, Tallis Mechanical, Cadence, Ridgeline Chart, Ridgeline Family Health — each in its own brand, and each outlines what SurveyJS drew with a dashed ring so there is no argument about which part of the page is the library; Starter and Definition wear a plain header with the demo's name. Every example shares one dock at the bottom of the screen: *More examples* lists the others and links back to the use-cases page, then the form's editor, Prefill, Reset, PDF and Analytics where the edition has them, *Login as* the preset users a page ships with, *Edit the user* (an editor that is itself a SurveyJS survey, so the library edits its own input), and the switch to the same page in the other edition. Each demo passes the account to survey-core as variables, one per field, so the definition reads `{user_firstName}` in titles, in `defaultValueExpression` and in `visibleIf`. Finish a form and a *See next* card suggests two related examples.
 
 ## What to look at first
 
@@ -114,7 +114,6 @@ src/
     page.tsx                    The index of every example
     leads/  work-orders/  starter/  definition/
     feedback/  chart/  clinic/  The host sites
-    */how/                      One explainer per example, from how/<route>.md
     api/extract/                Document → answers
     api/storage/                The storage routes the browser calls: session, definitions, results, submissions, documents, reset
   schemas/
@@ -149,7 +148,7 @@ scripts/storage-gc.mjs          Removes idle visitors (npm run storage:gc)
   styles/                       App-local overrides on top of the SurveyJS adapter
 ```
 
-To add a form: drop a definition into `src/schemas/`, register it in [index.ts](src/schemas/index.ts) and [navigation.ts](src/schemas/navigation.ts), create a page that passes it to `SurveyForm` and renders the dock, add an entry to [src/examples/manifest.json](src/examples/manifest.json), and describe it in `how/<route>.md`.
+To add a form: drop a definition into `src/schemas/`, register it in [index.ts](src/schemas/index.ts) and [navigation.ts](src/schemas/navigation.ts), create a page that passes it to `SurveyForm` and renders the dock, and add an entry to [src/examples/manifest.json](src/examples/manifest.json). An entry's optional `link` is a second link on its card.
 
 ## Environment
 

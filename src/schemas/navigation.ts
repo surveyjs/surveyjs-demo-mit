@@ -2,9 +2,9 @@
  * The route registry: every example page in this application, by `NavId`.
  *
  * What a page is called, where it lives and which form it renders. The dock
- * finds a page's explainer and source file here, the metadata its fallback copy,
- * the explainers their `<h1>` and their order. Which examples the dock's menu and
- * the root index list is the examples manifest's business, `src/examples/`: an
+ * finds a page's source file here, and the metadata its fallback copy. Which
+ * examples the dock's menu and the root index list is the examples manifest's
+ * business, `src/examples/`: an
  * entry's `id` is the page's `NavId`.
  *
  * No React: Playwright imports this from `e2e/`.
@@ -41,13 +41,13 @@ export interface NavPage {
   readonly label: string;
   /** The page's own line: the header of Starter and Definition, and every page's fallback meta description. */
   readonly description: string;
-  /** The route. Its file is `src/app<path>/page.tsx`, and its explainer `<path>/how`. */
+  /** The route. Its file is `src/app<path>/page.tsx`. */
   readonly path: string;
   readonly schemaId?: string;
   readonly finish?: FinishMode;
 }
 
-/** Every page, in the manifest's order, which is also the explainers' previous / next. */
+/** Every page, in the manifest's order. */
 export const navPages: readonly NavPage[] = [
   {
     id: "leads",
@@ -59,7 +59,7 @@ export const navPages: readonly NavPage[] = [
   },
   {
     id: "workOrders",
-    label: "Work orders",
+    label: "Work Orders",
     path: "/work-orders",
     description: "Job sheets: a PDF, scan or photo into a record with AI.",
     schemaId: "work-order",
@@ -75,7 +75,7 @@ export const navPages: readonly NavPage[] = [
   },
   {
     id: "embeddedChart",
-    label: "Encounter note",
+    label: "Encounter Note",
     path: "/chart",
     description: "A clinician's workspace that is nothing but the form.",
     schemaId: "encounter-note",
@@ -99,7 +99,7 @@ export const navPages: readonly NavPage[] = [
   },
   {
     id: "definition",
-    label: "Definition & checks",
+    label: "Definition & Checks",
     path: "/definition",
     description: "Any form as JSON, with the linter.",
   },

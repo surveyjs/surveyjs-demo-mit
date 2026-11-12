@@ -1,13 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { NeutralHeader } from "@/components/hosts/NeutralHeader";
-import { runLink, visibleExamples } from "@/examples/entries";
+import { cardLink, runLink, visibleExamples } from "@/examples/entries";
 import type { ExampleEntry, ExamplesManifest } from "@/examples/types";
 import { features } from "@/features";
-import { HOW_BUILT_TEXT } from "@/lib/how-built";
-import { howHref } from "@/lib/routes";
 import { DOCK_LABELS, NEW_TAB_MARK, USE_CASES_URL } from "@/lib/site";
-import { navPages } from "@/schemas/navigation";
 
 const CARD_ORDER = [
   "leads", "workOrders", "embeddedFeedback", "embeddedClinic",
@@ -37,7 +34,7 @@ function sectionFor(entry: ExampleEntry): (typeof SECTIONS)[number]["id"] {
 
 function ExampleCard({ entry }: { entry: ExampleEntry }) {
   const run = runLink(entry, features.edition);
-  const page = navPages.find((item) => item.id === entry.id);
+  const extra = cardLink(entry);
 
   return (
     <Card
@@ -57,9 +54,14 @@ function ExampleCard({ entry }: { entry: ExampleEntry }) {
             Open
           </a>
         </Button>
-        {page && (
+        {extra && (
           <Button variant="outline" size="sm" asChild>
-            <a href={howHref(page.path)}>{HOW_BUILT_TEXT.howBuilt}</a>
+            <a
+              href={extra.href}
+              {...(extra.external ? { target: "_blank", rel: "noreferrer" } : {})}
+            >
+              {extra.label}
+            </a>
           </Button>
         )}
       </div>
@@ -73,7 +75,8 @@ function ExampleCard({ entry }: { entry: ExampleEntry }) {
  * with the dock, so this page is not indexed and not designed as a landing page.
  *
  * Ready entries (or every entry with `NEXT_PUBLIC_SHOW_UNREADY`) without a
- * menu cap. Starter and Definition & checks stay outside this catalog.
+ * menu cap. Starter and Definition & checks stay outside this catalog. A card's
+ * second link is the entry's `link`, rendered only when one is set.
  */
 export function ExamplesIndex({ manifest }: { manifest: ExamplesManifest }) {
   // New manifest entries stay visible after the curated examples in their section.
